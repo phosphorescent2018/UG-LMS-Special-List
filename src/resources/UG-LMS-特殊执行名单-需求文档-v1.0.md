@@ -62,7 +62,7 @@
 | tag_level | string | 是 | `user` / `account` |
 | pool_type | string | 是 | `no_adjust` / `increase_only` / `decrease_only` |
 | detail_group | string | 否 | 明细组：Staff组 / 白名单 / 风险触发组 / 回捞组 … |
-| source | string | 是 | `file` / `manual` / `rule` |
+| source | string | 是 | `file`（文件上传）/ `manual`（手工维护） |
 | batch_no | string | 是 | 所属批次 |
 | operator | string | 是 | 操作人 |
 | remark | string | 否 | 备注 |
@@ -215,3 +215,4 @@ LMS 逐条调额的现有执行顺序（`QuotaImportProcessServiceImpl.processLi
 | 一人多标签 | v1.0 一人一标签；后续是否需要（如既是 Staff 又在实验组） |
 | 扩展到贷前/催收 | v1.0 只服务调额 |
 | SQL / 文本导入 | 已从 v1.0 移除（业务决定不做）；如后续需要，建议只做 `INSERT VALUES` 文本解析 + 白名单校验，不执行任意 SQL |
+| 文件上传的「覆盖」范围 | 现有描述只写了"默认覆盖"。需明确：上传是覆盖**整张名单**（连手工新增的一起清掉），还是只覆盖**上一次文件上传的那批**、保留手工维护的记录？建议后者 |
