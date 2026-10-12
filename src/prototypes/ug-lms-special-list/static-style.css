@@ -12,6 +12,10 @@ table { border-collapse: separate; border-spacing: 0; }
 /* 输入框占位文案：原页面用的是正文字色 rgb(3,25,56)，不是浏览器默认灰 */
 input::placeholder { color: rgb(3, 25, 56); opacity: 1; }
 
+/* 输入框跟随外层宽度（antd 里这两个本来就是 width:100%，导出包按基准视口写死了宽度） */
+.ant-input-affix-wrapper { width: 100%; }
+input.ant-input { width: 100%; }
+
 /* ── 侧边菜单：可折叠（收起时不显示子菜单） ── */
 .ant-menu-submenu-inline > .ant-menu-sub { display: none; }
 .ant-menu-submenu-inline.ant-menu-submenu-open > .ant-menu-sub { display: block; }
@@ -266,8 +270,8 @@ input::placeholder { color: rgb(3, 25, 56); opacity: 1; }
 .-mr-3 { margin-right: -12px; }
 .-mt-3 { margin-top: -12px; }
 .absolute { position: absolute; }
-.basis-1\/12 { flex-basis: 8.333333%%; }
-.basis-1\/3 { flex-basis: 33.333333%%; }
+.basis-1\/12 { flex-basis: 8.333333%; }
+.basis-1\/3 { flex-basis: 33.333333%; }
 .block { display: block; }
 .border { border-width: 1px; border-style: solid; }
 .border-0 { border-width: 0px; }
