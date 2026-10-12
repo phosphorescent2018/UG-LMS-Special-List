@@ -8,6 +8,9 @@ import annotationSourceDocument from './annotation-source.json';
 import pageMarkup from './page.html?raw';
 import menuScript from './menu.js?raw';
 import langScript from './lang.js?raw';
+import logoUrl from './assets/logo-0.png';
+import avatarUrl from './assets/image-1.png';
+import noDataUrl from './assets/No-data-2.png';
 import './static-style.css';
 
 /**
@@ -57,12 +60,22 @@ export default function UgLmsSpecialList({ config }: PrototypeProps) {
         };
     }, [config]);
 
+    // 图片走 Vite 资源导入：构建后会被内联/重写为带 base 的地址，
+    // 避免静态部署（GitHub Pages 子路径）下相对路径 assets/ 404。
+    const pageHtml = useMemo(
+        () => pageMarkup
+            .split('assets/logo-0.png').join(logoUrl)
+            .split('assets/image-1.png').join(avatarUrl)
+            .split('assets/No-data-2.png').join(noDataUrl),
+        [],
+    );
+
     return (
         <>
             <div
                 ref={hostRef}
                 className="ug-lms-special-list-host"
-                dangerouslySetInnerHTML={{ __html: pageMarkup }}
+                dangerouslySetInnerHTML={{ __html: pageHtml }}
             />
             <AnnotationViewer
                 source={source}
