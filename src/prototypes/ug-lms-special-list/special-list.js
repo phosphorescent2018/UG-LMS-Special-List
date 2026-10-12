@@ -368,7 +368,8 @@
       rows.push({
         cid: (seed + seed + seed + seed).slice(0, 64),
         od: String(90000000 + i * 137),
-        level: spec[0], tag: spec[1], group: spec[2], source: spec[3],
+        level: spec[0], tag: spec[1], group: spec[2],
+        source: 'file', // 文件上传进来的记录，来源统一记 file
         updatedAt: nowText()
       });
     }
