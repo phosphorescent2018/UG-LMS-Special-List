@@ -62,6 +62,7 @@
   }
 
   window.__ugSetLang = setLang;
+  window.__ugApplyLang = apply;
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {

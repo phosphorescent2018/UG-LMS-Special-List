@@ -32,7 +32,9 @@ npm run dev          # 启动 vite(51720) + Axhub Make 管理端(53817)
 `interaction.js` 负责侧边菜单展开/收起与页面切换，`lang.js` 负责中英文切换（中文取自 LMS 官方多语言字典）。
 
 > **原型新增**：在「额度管理」下增加了二级菜单 **特殊执行名单**（`Special Execution List`），排在「额度 & 状态调整」之后。
-> 点击可进入该页面，目前是**空白占位**，等需求补充后再实现。
+> 点击进入后可维护名单：文件上传（覆盖）/ 单条新增 / SQL·文本导入 / 批次管理。页内数据为前端内存模拟。
+
+需求文档见 [`src/resources/UG-LMS-特殊执行名单-需求文档-v1.0.md`](src/resources/UG-LMS-特殊执行名单-需求文档-v1.0.md)。
 
 > 字典里缺失的 5 条文案（`Credit Management` / `Loan Management` / `Application ID` /
 > `Account holder Identity` / `Account FRI`），线上切中文同样显示英文；原型为可读性补了中文，

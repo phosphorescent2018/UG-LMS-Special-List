@@ -21,7 +21,9 @@ UG LMS 运营后台 `Credit Application` 页面的高保真还原，作为该需
 | 页面还原 | `src/prototypes/ug-lms-special-list/page.html` + `static-style.css` | 由 Axhub 导出包逐节点重建，视口基准 1209×824 |
 | 侧边菜单展开/收起 | `interaction.js` | 补全了导出时处于收起状态的 4 个二级菜单 |
 | 中英切换 | `lang.js` | 中文取自 LMS 官方多语言字典 `sys_mutil_language`（`system_code=lms`）的 zh_CN 词条 |
-| 特殊执行名单（新增菜单） | `interaction.js` | 挂在「额度管理」下、排在「额度 & 状态调整」之后；点击切页，**页面暂为空白占位**，需求待补 |
+| 特殊执行名单（新增菜单） | `interaction.js` | 挂在「额度管理」下、排在「额度 & 状态调整」之后；点击切页，选中态跟随 |
+| 名单维护页（原型新增） | `special-list.js` + `page.html` 内嵌结构 | 名单列表 + 批次管理两个 Tab；上传文件（覆盖）/ 单条新增 / SQL·文本导入 / 查询 / 移除。**全部为前端内存模拟** |
+| 需求文档 v1.0 | `src/resources/UG-LMS-特殊执行名单-需求文档-v1.0.md` | 含名单模型、维护方式、执行时匹配与拦截、异常兜底、验收要点 |
 
 ## 关键口径
 

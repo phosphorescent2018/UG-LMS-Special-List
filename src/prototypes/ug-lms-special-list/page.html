@@ -339,10 +339,215 @@
                 </div>
               </div>
             </div>
-            <div class="ug-special-page" style="width: 897px" id="page-special-list" data-ug-page="special-list" hidden>
-              <div class="style_28 warp___NIGsn flex static items-center font-normal leading-tight border-0 visible mt-0 mr-0 mb-6 ml-0 p-0 overflow-visible" style="width: 897px; height: 24px">
-                <div class="style_27 title___NF5WQ block static font-semibold leading-normal border-0 visible m-0 p-0 overflow-visible" style="height: 24px" data-en="Special Execution List" data-zh="特殊执行名单">Special Execution List</div>
-              </div>
+            <div class="ug-special-page" id="page-special-list" data-ug-page="special-list" hidden><div class="sl-page">
+  <div class="warp___NIGsn" style="margin-bottom:16px">
+    <div class="title___NF5WQ" data-en="Special Execution List" data-zh="特殊执行名单">特殊执行名单</div>
+  </div>
+
+  <div class="sl-tabs">
+    <button type="button" class="sl-tab sl-tab-active" data-sl-tab="list" data-en="List" data-zh="名单">名单</button>
+    <button type="button" class="sl-tab" data-sl-tab="batches" data-en="Batch Management" data-zh="批次管理">批次管理</button>
+  </div>
+
+  <!-- ── 名单 ── -->
+  <section class="sl-panel" data-sl-panel="list">
+    <div class="sl-card">
+      <div class="sl-toolbar">
+        <div class="sl-toolbar-left">
+          <button type="button" class="sl-btn sl-btn-primary" data-sl-action="upload">
+            <svg viewBox="0 0 1024 1024" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M512 128 320 320h128v256h128V320h128L512 128zM192 704h640v128H192z"/></svg>
+            <span data-en="Upload file (overwrite)" data-zh="上传文件（覆盖）">上传文件（覆盖）</span>
+          </button>
+          <button type="button" class="sl-btn" data-sl-action="single" data-en="Add one" data-zh="单条新增">单条新增</button>
+          <button type="button" class="sl-btn" data-sl-action="sql" data-en="SQL / text import" data-zh="SQL / 文本导入">SQL / 文本导入</button>
+        </div>
+        <div class="sl-toolbar-right">
+          <input type="text" class="sl-input" id="sl-keyword"
+                 data-en-placeholder="Search customer / account ID"
+                 data-zh-placeholder="请输入用户标识 / 账户标识">
+          <button type="button" class="sl-btn" data-sl-action="search" data-en="Search" data-zh="查询">查询</button>
+        </div>
+      </div>
+
+      <div class="sl-meta">
+        <span class="sl-meta-item"><span data-en="Active batch" data-zh="生效批次">生效批次</span>：<b id="sl-active-batch">—</b></span>
+        <span class="sl-meta-item"><span data-en="Records" data-zh="名单条数">名单条数</span>：<b id="sl-total">0</b></span>
+        <span class="sl-badge sl-badge-blue" data-en="Active" data-zh="生效中">生效中</span>
+      </div>
+
+      <div class="sl-table-wrap">
+        <table class="sl-table">
+          <thead>
+            <tr>
+              <th style="width:210px" data-en="Customer ID" data-zh="用户标识">用户标识</th>
+              <th style="width:110px" data-en="Account ID" data-zh="账户标识">账户标识</th>
+              <th style="width:96px" data-en="Level" data-zh="标签层级">标签层级</th>
+              <th style="width:126px" data-en="Execution tag" data-zh="执行标签">执行标签</th>
+              <th style="width:130px" data-en="Group" data-zh="明细组">明细组</th>
+              <th style="width:96px" data-en="Source" data-zh="来源">来源</th>
+              <th style="width:158px" data-en="Updated at" data-zh="更新时间">更新时间</th>
+              <th style="width:80px" data-en="Action" data-zh="操作">操作</th>
+            </tr>
+          </thead>
+          <tbody id="sl-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="sl-pager">
+        <span class="sl-pager-text" id="sl-page-info">—</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 批次管理 ── -->
+  <section class="sl-panel" data-sl-panel="batches" hidden>
+    <div class="sl-card">
+      <div class="sl-toolbar">
+        <div class="sl-toolbar-left">
+          <button type="button" class="sl-btn sl-btn-primary" data-sl-action="upload">
+            <svg viewBox="0 0 1024 1024" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M512 128 320 320h128v256h128V320h128L512 128zM192 704h640v128H192z"/></svg>
+            <span data-en="Upload file (overwrite)" data-zh="上传文件（覆盖）">上传文件（覆盖）</span>
+          </button>
+        </div>
+        <div class="sl-toolbar-right">
+          <span class="sl-hint" data-en="A new batch takes effect immediately; the previous batch is marked as overwritten."
+                data-zh="新批次上传即生效，上一批次自动标记为「已覆盖」。">新批次上传即生效，上一批次自动标记为「已覆盖」。</span>
+        </div>
+      </div>
+
+      <div class="sl-table-wrap">
+        <table class="sl-table">
+          <thead>
+            <tr>
+              <th style="width:190px" data-en="Batch No." data-zh="批次号">批次号</th>
+              <th style="width:96px" data-en="Source" data-zh="来源">来源</th>
+              <th style="width:88px" data-en="Records" data-zh="条数">条数</th>
+              <th style="width:110px" data-en="Status" data-zh="状态">状态</th>
+              <th style="width:100px" data-en="Operator" data-zh="操作人">操作人</th>
+              <th style="width:158px" data-en="Created at" data-zh="创建时间">创建时间</th>
+              <th style="width:120px" data-en="Action" data-zh="操作">操作</th>
+            </tr>
+          </thead>
+          <tbody id="sl-batch-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 弹窗：上传文件 ── -->
+  <div class="sl-modal" data-sl-modal="upload" hidden>
+    <div class="sl-modal-mask" data-sl-close></div>
+    <div class="sl-modal-box">
+      <div class="sl-modal-head">
+        <span data-en="Upload file (overwrite)" data-zh="上传文件（覆盖）">上传文件（覆盖）</span>
+        <button type="button" class="sl-modal-close" data-sl-close aria-label="close">×</button>
+      </div>
+      <div class="sl-modal-body">
+        <div class="sl-alert" data-en="Uploading creates a new batch and overwrites the current active list. Duplicate tags are validated (one tag per customer)."
+             data-zh="上传会生成新批次并覆盖当前生效名单；会校验「一人一标签」，重复将整批失败。">上传会生成新批次并覆盖当前生效名单；会校验「一人一标签」，重复将整批失败。</div>
+        <div class="sl-field">
+          <label class="sl-label" data-en="List file" data-zh="名单文件">名单文件</label>
+          <div class="sl-file">
+            <button type="button" class="sl-btn" id="sl-file-pick" data-en="Choose file" data-zh="选择文件">选择文件</button>
+            <span class="sl-file-name" id="sl-file-name" data-en="No file selected" data-zh="未选择文件">未选择文件</span>
+            <a class="sl-link" href="#" data-en="Download template" data-zh="下载模板">下载模板</a>
+          </div>
+        </div>
+        <div class="sl-preview" id="sl-upload-preview" hidden>
+          <div class="sl-preview-row"><span data-en="Parsed rows" data-zh="解析条数">解析条数</span><b id="sl-upload-parsed">0</b></div>
+          <div class="sl-preview-row"><span data-en="Validation passed" data-zh="校验通过">校验通过</span><b class="sl-ok" id="sl-upload-passed">0</b></div>
+          <div class="sl-preview-row"><span data-en="Duplicate / invalid" data-zh="重复 / 非法">重复 / 非法</span><b class="sl-warn" id="sl-upload-failed">0</b></div>
+        </div>
+      </div>
+      <div class="sl-modal-foot">
+        <button type="button" class="sl-btn" data-sl-close data-en="Cancel" data-zh="取消">取消</button>
+        <button type="button" class="sl-btn sl-btn-primary" id="sl-upload-confirm" disabled
+                data-en="Confirm import" data-zh="确认导入">确认导入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 弹窗：单条新增 ── -->
+  <div class="sl-modal" data-sl-modal="single" hidden>
+    <div class="sl-modal-mask" data-sl-close></div>
+    <div class="sl-modal-box">
+      <div class="sl-modal-head">
+        <span data-en="Add one record" data-zh="单条新增">单条新增</span>
+        <button type="button" class="sl-modal-close" data-sl-close aria-label="close">×</button>
+      </div>
+      <div class="sl-modal-body">
+        <div class="sl-field">
+          <label class="sl-label"><i class="sl-req">*</i><span data-en="Level" data-zh="标签层级">标签层级</span></label>
+          <select class="sl-input" id="sl-single-level">
+            <option value="user" data-en="User level (customer)" data-zh="用户级（绑客户）">用户级（绑客户）</option>
+            <option value="account" data-en="Account level (overdraft)" data-zh="账户级（绑账户）">账户级（绑账户）</option>
+          </select>
+        </div>
+        <div class="sl-field">
+          <label class="sl-label"><i class="sl-req">*</i><span data-en="Customer ID" data-zh="用户标识">用户标识</span></label>
+          <input type="text" class="sl-input" id="sl-single-customer" data-en-placeholder="third_customer_id" data-zh-placeholder="third_customer_id">
+        </div>
+        <div class="sl-field">
+          <label class="sl-label" data-en="Account ID" data-zh="账户标识">账户标识</label>
+          <input type="text" class="sl-input" id="sl-single-account" data-en-placeholder="overdraft_id (account level only)" data-zh-placeholder="overdraft_id（仅账户级需要）">
+        </div>
+        <div class="sl-field">
+          <label class="sl-label"><i class="sl-req">*</i><span data-en="Execution tag" data-zh="执行标签">执行标签</span></label>
+          <select class="sl-input" id="sl-single-tag">
+            <option value="no_adjust" data-en="No adjustment" data-zh="不参与调额">不参与调额</option>
+            <option value="increase_only" data-en="Increase only" data-zh="仅参与提额">仅参与提额</option>
+            <option value="decrease_only" data-en="Decrease only" data-zh="仅参与降额">仅参与降额</option>
+          </select>
+        </div>
+        <div class="sl-field">
+          <label class="sl-label" data-en="Group" data-zh="明细组">明细组</label>
+          <input type="text" class="sl-input" id="sl-single-group" data-en-placeholder="e.g. Staff / Whitelist" data-zh-placeholder="如：Staff组 / 白名单">
+        </div>
+        <div class="sl-field">
+          <label class="sl-label" data-en="Remark" data-zh="备注">备注</label>
+          <input type="text" class="sl-input" id="sl-single-remark" data-en-placeholder="optional" data-zh-placeholder="选填">
+        </div>
+        <div class="sl-error" id="sl-single-error" hidden></div>
+      </div>
+      <div class="sl-modal-foot">
+        <button type="button" class="sl-btn" data-sl-close data-en="Cancel" data-zh="取消">取消</button>
+        <button type="button" class="sl-btn sl-btn-primary" id="sl-single-confirm" data-en="Save" data-zh="保存">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 弹窗：SQL / 文本导入 ── -->
+  <div class="sl-modal" data-sl-modal="sql" hidden>
+    <div class="sl-modal-mask" data-sl-close></div>
+    <div class="sl-modal-box sl-modal-box-wide">
+      <div class="sl-modal-head">
+        <span data-en="SQL / text import" data-zh="SQL / 文本导入">SQL / 文本导入</span>
+        <button type="button" class="sl-modal-close" data-sl-close aria-label="close">×</button>
+      </div>
+      <div class="sl-modal-body">
+        <div class="sl-alert sl-alert-warn"
+             data-en="Paste INSERT VALUES fragments or plain rows (customer_id, account_id, tag). Statements are parsed and validated — arbitrary SQL is never executed."
+             data-zh="可粘贴 INSERT VALUES 片段，或纯文本行（客户标识, 账户标识, 执行标签）。系统只做解析与校验，不会真正执行任意 SQL。">可粘贴 INSERT VALUES 片段，或纯文本行（客户标识, 账户标识, 执行标签）。系统只做解析与校验，不会真正执行任意 SQL。</div>
+        <textarea class="sl-textarea" id="sl-sql-text" rows="8" spellcheck="false"></textarea>
+        <div class="sl-preview" id="sl-sql-preview" hidden>
+          <div class="sl-preview-row"><span data-en="Parsed rows" data-zh="解析条数">解析条数</span><b id="sl-sql-parsed">0</b></div>
+          <div class="sl-preview-row"><span data-en="Validation passed" data-zh="校验通过">校验通过</span><b class="sl-ok" id="sl-sql-passed">0</b></div>
+          <div class="sl-preview-row"><span data-en="Duplicate / invalid" data-zh="重复 / 非法">重复 / 非法</span><b class="sl-warn" id="sl-sql-failed">0</b></div>
+        </div>
+        <div class="sl-error" id="sl-sql-error" hidden></div>
+      </div>
+      <div class="sl-modal-foot">
+        <button type="button" class="sl-btn" data-sl-close data-en="Cancel" data-zh="取消">取消</button>
+        <button type="button" class="sl-btn" id="sl-sql-parse" data-en="Parse & validate" data-zh="解析校验">解析校验</button>
+        <button type="button" class="sl-btn sl-btn-primary" id="sl-sql-confirm" disabled
+                data-en="Confirm import" data-zh="确认导入">确认导入</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sl-toast" id="sl-toast" hidden></div>
+</div>
+
             </div>
           </div>
         </div>
