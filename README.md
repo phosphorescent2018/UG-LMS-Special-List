@@ -29,7 +29,10 @@ npm run dev          # 启动 vite(51720) + Axhub Make 管理端(53817)
 
 `src/prototypes/ug-lms-special-list/` 由 Axhub 导出包（`AI-Credit-Application-complete.zip`，
 精确 DOM + computedStyle）重建：`page.html` 为页面结构，`static-style.css` 为精确样式，
-`menu.js` 负责侧边菜单展开/收起，`lang.js` 负责中英文切换（中文取自 LMS 官方多语言字典）。
+`interaction.js` 负责侧边菜单展开/收起与页面切换，`lang.js` 负责中英文切换（中文取自 LMS 官方多语言字典）。
+
+> **原型新增**：在「额度管理」下增加了二级菜单 **特殊执行名单**（`Special Execution List`），排在「额度 & 状态调整」之后。
+> 点击可进入该页面，目前是**空白占位**，等需求补充后再实现。
 
 > 字典里缺失的 5 条文案（`Credit Management` / `Loan Management` / `Application ID` /
 > `Account holder Identity` / `Account FRI`），线上切中文同样显示英文；原型为可读性补了中文，

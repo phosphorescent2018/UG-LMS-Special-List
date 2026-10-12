@@ -6,7 +6,7 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { AnnotationViewer, type AnnotationSourceDocument } from '@axhub/annotation';
 import annotationSourceDocument from './annotation-source.json';
 import pageMarkup from './page.html?raw';
-import menuScript from './menu.js?raw';
+import interactionScript from './interaction.js?raw';
 import langScript from './lang.js?raw';
 import logoUrl from './assets/logo-0.png';
 import avatarUrl from './assets/image-1.png';
@@ -39,7 +39,7 @@ export default function UgLmsSpecialList({ config }: PrototypeProps) {
 
     // 侧边菜单展开/收起 + 中英切换：dangerouslySetInnerHTML 不会执行 <script>，这里手动注入
     useEffect(() => {
-        const scripts = [menuScript, langScript].map((code) => {
+        const scripts = [interactionScript, langScript].map((code) => {
             const script = document.createElement('script');
             script.textContent = code;
             document.body.appendChild(script);

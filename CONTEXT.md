@@ -19,8 +19,9 @@ UG LMS 运营后台 `Credit Application` 页面的高保真还原，作为该需
 | 模块 | 位置 | 说明 |
 | --- | --- | --- |
 | 页面还原 | `src/prototypes/ug-lms-special-list/page.html` + `static-style.css` | 由 Axhub 导出包逐节点重建，视口基准 1209×824 |
-| 侧边菜单展开/收起 | `menu.js` | 补全了导出时处于收起状态的 4 个二级菜单 |
+| 侧边菜单展开/收起 | `interaction.js` | 补全了导出时处于收起状态的 4 个二级菜单 |
 | 中英切换 | `lang.js` | 中文取自 LMS 官方多语言字典 `sys_mutil_language`（`system_code=lms`）的 zh_CN 词条 |
+| 特殊执行名单（新增菜单） | `interaction.js` | 挂在「额度管理」下、排在「额度 & 状态调整」之后；点击切页，**页面暂为空白占位**，需求待补 |
 
 ## 关键口径
 

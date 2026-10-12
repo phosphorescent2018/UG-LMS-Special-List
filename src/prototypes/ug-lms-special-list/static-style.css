@@ -3,6 +3,9 @@
 html, body { margin: 0; padding: 0; }
 body { font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
 
+/* hidden 属性优先级：本页大量元素带 display:block/flex 类，会盖掉 UA 的 [hidden] */
+[hidden] { display: none !important; }
+
 /* 表格：antd 使用 separate + 无间距；浏览器默认 spacing 会让表体整体偏移 2px */
 table { border-collapse: separate; border-spacing: 0; }
 
@@ -16,6 +19,27 @@ input::placeholder { color: rgb(3, 25, 56); opacity: 1; }
 /* ── 侧边菜单：选中项左侧蓝色竖条（来自 LMS layouts__index 样式） ── */
 /* 导出包未包含 vertical-align，按参考截图推断：头像与用户名垂直居中 */
 .user-msg___Sv0sk img { vertical-align: middle; }
+
+/* 选中态要能跟随切换：导出包把「授信申请」选中时的配色固化在 style_8 / style_6 里，
+   这里用更高优先级把选中 / 未选中两态都补回来 */
+.ant-menu-item-selected { position: relative; box-sizing: border-box; }
+.root-menu___eqv5V.ant-menu-item.ant-menu-item-selected,
+.ant-menu-sub .ant-menu-item.ant-menu-item-selected {
+  background: rgba(80, 149, 255, 0.1);
+  border-radius: 0 8px 8px 0;
+  color: #5095ff;
+}
+.root-menu___eqv5V.ant-menu-item.ant-menu-item-selected .ant-menu-title-content,
+.root-menu___eqv5V.ant-menu-item.ant-menu-item-selected .anticon,
+.ant-menu-sub .ant-menu-item.ant-menu-item-selected .ant-menu-title-content,
+.ant-menu-sub .ant-menu-item.ant-menu-item-selected .anticon {
+  color: #5095ff;
+}
+.root-menu___eqv5V.ant-menu-item:not(.ant-menu-item-selected) { background: #fff; color: rgb(3, 25, 56); }
+.root-menu___eqv5V.ant-menu-item:not(.ant-menu-item-selected) .ant-menu-title-content,
+.root-menu___eqv5V.ant-menu-item:not(.ant-menu-item-selected) .anticon { color: rgb(3, 25, 56); }
+.ant-menu-sub .ant-menu-item:not(.ant-menu-item-selected),
+.ant-menu-sub .ant-menu-item:not(.ant-menu-item-selected) .ant-menu-title-content { background: transparent; color: rgb(116, 121, 140); }
 
 .ant-menu-item-selected { position: relative; box-sizing: border-box; }
 .ant-menu-item-selected::before {
