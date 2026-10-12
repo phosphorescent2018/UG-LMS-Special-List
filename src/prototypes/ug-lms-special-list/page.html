@@ -393,7 +393,21 @@
       </div>
 
       <div class="sl-pager">
-        <span class="sl-pager-text" id="sl-page-info">—</span>
+        <span class="sl-pager-total" id="sl-pager-total">—</span>
+        <div class="sl-pager-right">
+          <select class="sl-pager-size" id="sl-pager-size" aria-label="page size">
+            <option value="10" data-en="10 / page" data-zh="10 条/页">10 条/页</option>
+            <option value="20" data-en="20 / page" data-zh="20 条/页">20 条/页</option>
+            <option value="50" data-en="50 / page" data-zh="50 条/页">50 条/页</option>
+            <option value="100" data-en="100 / page" data-zh="100 条/页">100 条/页</option>
+          </select>
+          <ul class="sl-pager-list" id="sl-pager-list"></ul>
+          <span class="sl-pager-jump">
+            <span data-en="Go to" data-zh="跳至">跳至</span>
+            <input type="text" class="sl-pager-input" id="sl-pager-jump" value="1" aria-label="jump to page">
+            <span data-en="page" data-zh="页">页</span>
+          </span>
+        </div>
       </div>
     </div>
   </section>

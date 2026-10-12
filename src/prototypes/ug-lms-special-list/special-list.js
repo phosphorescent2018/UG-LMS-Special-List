@@ -77,9 +77,32 @@
       { cid: 'DC52D79E99AF72BF2345D40B73B1F6DA5400BC73D811437E83FB806FFFB54CC6', od: '83861800', level: 'account', tag: 'no_adjust', group: '回捞组', source: 'rule', updatedAt: '2026-10-12 08:20:31' },
       { cid: 'DFAC323F3D4EDD481BAAC7FE9EEE80E3FC522310333C0265B12E2FA241E9E988', od: '58523826', level: 'account', tag: 'no_adjust', group: '模型切换实验组', source: 'rule', updatedAt: '2026-10-12 08:20:31' },
       { cid: 'E65CFDAA2A16BAD1CB2AD4476F4E6A29DB4288FC0C58CAA222D9B4BACAF64260', od: '76597516', level: 'account', tag: 'decrease_only', group: '风险触发组', source: 'rule', updatedAt: '2026-10-12 08:20:31' },
-      { cid: 'F3B2C16D88A9DA27786F2F5343117496F4247169E6F6719C7BA42BE0F8CA7F08', od: '73954831', level: 'user', tag: 'decrease_only', group: '人工降额名单', source: 'manual', updatedAt: '2026-10-12 08:20:31' }
+      { cid: 'F3B2C16D88A9DA27786F2F5343117496F4247169E6F6719C7BA42BE0F8CA7F08', od: '73954831', level: 'user', tag: 'decrease_only', group: '人工降额名单', source: 'manual', updatedAt: '2026-10-12 08:20:31' },
+      { cid: '73954831AA12BB34CC56DD78EE90FF11223344556677889900AABBCCDDEEFF01', od: '54204094', level: 'user', tag: 'increase_only', group: 'Staff组', source: 'manual', updatedAt: '2026-10-12 08:20:31' },
+      { cid: '83431854BB23CC45DD67EE89FF01AA22BB33CC44DD55EE66FF770088119922A3', od: '48371693', level: 'user', tag: 'increase_only', group: '白名单', source: 'manual', updatedAt: '2026-10-12 08:20:31' },
+      { cid: '76597516CC34DD56EE78FF90AA12BB34CC56DD78EE90FF112233445566778899', od: '72116019', level: 'account', tag: 'no_adjust', group: '回捞组', source: 'rule', updatedAt: '2026-10-12 08:20:31' },
+      { cid: '58523826DD45EE67FF89AA01BB23CC45DD67EE89FF01AA22BB33CC44DD55EE66', od: '52876038', level: 'account', tag: 'no_adjust', group: '激进提额组', source: 'rule', updatedAt: '2026-10-12 08:20:31' },
+      { cid: '84185089EE56FF78AA90BB12CC34DD56EE78FF90AA12BB34CC56DD78EE90FF11', od: '70704365', level: 'account', tag: 'no_adjust', group: '模型切换实验组', source: 'rule', updatedAt: '2026-10-12 08:20:31' },
+      { cid: '80111462FF67AA89BB01CC23DD45EE67FF89AA01BB23CC45DD67EE89FF01AA22', od: '52971861', level: 'account', tag: 'no_adjust', group: '降额实验组', source: 'rule', updatedAt: '2026-10-12 08:20:31' },
+      { cid: 'E65D090A0011BB22CC33DD44EE55FF66AA77BB88CC99DD00EE11FF22AA33BB44', od: '81207090', level: 'account', tag: 'no_adjust', group: '回捞组', source: 'rule', updatedAt: '2026-10-12 08:20:31' },
+      { cid: 'DFAC72F81122CC33DD44EE55FF66AA77BB88CC99DD00EE11FF22AA33BB44CC55', od: '57692526', level: 'account', tag: 'decrease_only', group: '风险触发组', source: 'rule', updatedAt: '2026-10-12 08:20:31' },
+      { cid: 'D8F1C0492233DD44EE55FF66AA77BB88CC99DD00EE11FF22AA33BB44CC55DD66', od: '74949145', level: 'account', tag: 'decrease_only', group: '风险触发组', source: 'rule', updatedAt: '2026-10-12 08:20:31' },
+      { cid: 'DC52D79E3344EE55FF66AA77BB88CC99DD00EE11FF22AA33BB44CC55DD66EE77', od: '78661193', level: 'user', tag: 'increase_only', group: 'Staff组', source: 'manual', updatedAt: '2026-10-12 08:20:31' },
+      { cid: 'DFAC323F4455FF66AA77BB88CC99DD00EE11FF22AA33BB44CC55DD66EE77FF88', od: '62227409', level: 'user', tag: 'increase_only', group: '白名单', source: 'manual', updatedAt: '2026-10-12 08:20:31' },
+      { cid: 'E65CFDAA5566AA77BB88CC99DD00EE11FF22AA33BB44CC55DD66EE77FF880099', od: '83257912', level: 'account', tag: 'no_adjust', group: '激进提额组', source: 'rule', updatedAt: '2026-10-12 08:20:31' },
+      { cid: 'F3B2C16D6677BB88CC99DD00EE11FF22AA33BB44CC55DD66EE77FF8800991122', od: '66903520', level: 'account', tag: 'no_adjust', group: '模型切换实验组', source: 'rule', updatedAt: '2026-10-12 08:20:31' },
+      { cid: '72349947AA7788CC99DD00EE11FF22AA33BB44CC55DD66EE77FF880099112233', od: '76015106', level: 'account', tag: 'decrease_only', group: '人工降额名单', source: 'manual', updatedAt: '2026-10-12 08:20:31' },
+      { cid: '83431854BB8899DD00EE11FF22AA33BB44CC55DD66EE77FF8800991122334455', od: '71621279', level: 'user', tag: 'decrease_only', group: '人工降额名单', source: 'manual', updatedAt: '2026-10-12 08:20:31' },
+      { cid: '84185089CC9900EE11FF22AA33BB44CC55DD66EE77FF88009911223344556677', od: '84015507', level: 'account', tag: 'no_adjust', group: '回捞组', source: 'rule', updatedAt: '2026-10-12 08:20:31' },
+      { cid: '80111462DD0011FF22AA33BB44CC55DD66EE77FF880099112233445566778899', od: '49302950', level: 'account', tag: 'no_adjust', group: '降额实验组', source: 'rule', updatedAt: '2026-10-12 08:20:31' },
+      { cid: 'E65D090AEE1122AA33BB44CC55DD66EE77FF88009911223344556677889900AA', od: '48899380', level: 'account', tag: 'no_adjust', group: '激进提额组', source: 'rule', updatedAt: '2026-10-12 08:20:31' },
+      { cid: 'DFAC72F8FF2233BB44CC55DD66EE77FF88009911223344556677889900AABB11', od: '58665806', level: 'user', tag: 'increase_only', group: '白名单', source: 'manual', updatedAt: '2026-10-12 08:20:31' },
+      { cid: 'D8F1C049003344CC55DD66EE77FF88009911223344556677889900AABB11CC22', od: '78253455', level: 'account', tag: 'decrease_only', group: '风险触发组', source: 'rule', updatedAt: '2026-10-12 08:20:31' },
+      { cid: 'DC52D79E114455DD66EE77FF88009911223344556677889900AABB11CC22DD33', od: '77684883', level: 'account', tag: 'no_adjust', group: '模型切换实验组', source: 'rule', updatedAt: '2026-10-12 08:20:31' }
     ],
-    filter: ''
+    filter: '',
+    page: 1,
+    pageSize: 10
   };
 
   var el = {
@@ -89,7 +112,10 @@
     batchTbody: root.querySelector('#sl-batch-tbody'),
     activeBatch: root.querySelector('#sl-active-batch'),
     total: root.querySelector('#sl-total'),
-    pageInfo: root.querySelector('#sl-page-info'),
+    pagerTotal: root.querySelector('#sl-pager-total'),
+    pagerList: root.querySelector('#sl-pager-list'),
+    pagerSize: root.querySelector('#sl-pager-size'),
+    pagerJump: root.querySelector('#sl-pager-jump'),
     keyword: root.querySelector('#sl-keyword'),
     toast: root.querySelector('#sl-toast')
   };
@@ -106,7 +132,14 @@
   function renderList() {
     var rows = visibleRows();
     el.tbody.innerHTML = '';
-    if (!rows.length) {
+
+    var pageCount = Math.max(1, Math.ceil(rows.length / state.pageSize));
+    if (state.page > pageCount) state.page = pageCount;
+    if (state.page < 1) state.page = 1;
+    var start = (state.page - 1) * state.pageSize;
+    var pageRows = rows.slice(start, start + state.pageSize);
+
+    if (!pageRows.length) {
       var tr = document.createElement('tr');
       var td = document.createElement('td');
       td.colSpan = 8;
@@ -115,7 +148,7 @@
       tr.appendChild(td);
       el.tbody.appendChild(tr);
     }
-    rows.forEach(function (row, index) {
+    pageRows.forEach(function (row, index) {
       var tr = document.createElement('tr');
 
       var tdCid = document.createElement('td');
@@ -163,7 +196,7 @@
       btn.style.background = 'transparent';
       btn.style.cursor = 'pointer';
       btn.style.padding = '0';
-      btn.dataset.slRemove = String(index);
+      btn.dataset.slRemove = String(start + index);
       btn.dataset.slCid = row.cid;
       attr(btn, 'Remove', '移除');
       tdAction.appendChild(btn);
@@ -174,8 +207,52 @@
 
     el.activeBatch.textContent = state.activeBatch;
     el.total.textContent = String(state.rows.length);
-    attr(el.pageInfo, 'Total ' + state.rows.length + ' records', '共 ' + state.rows.length + ' 条');
+    renderPager(rows.length, pageCount);
     if (window.__ugApplyLang) window.__ugApplyLang();
+  }
+
+  // ── 分页 ──
+  function pageNumbers(current, total) {
+    // 首页、末页、当前页 ±1，其余折叠成省略号
+    var pages = [];
+    for (var p = 1; p <= total; p += 1) {
+      if (p === 1 || p === total || Math.abs(p - current) <= 1) pages.push(p);
+      else if (pages[pages.length - 1] !== '...') pages.push('...');
+    }
+    return pages;
+  }
+
+  function makePageItem(text, options) {
+    var opts = options || {};
+    var node = document.createElement(opts.dots ? 'span' : 'button');
+    if (opts.dots) {
+      node.className = 'sl-page-dots';
+      node.textContent = text;
+      return node;
+    }
+    node.type = 'button';
+    node.className = 'sl-page-item' + (opts.active ? ' sl-page-active' : '');
+    node.textContent = text;
+    if (opts.page) node.dataset.slPage = String(opts.page);
+    if (opts.disabled) node.disabled = true;
+    return node;
+  }
+
+  function renderPager(total, pageCount) {
+    attr(el.pagerTotal, 'Total ' + total + ' records', '共 ' + total + ' 条');
+    el.pagerList.innerHTML = '';
+    el.pagerList.appendChild(
+      makePageItem('‹', { page: state.page - 1, disabled: state.page <= 1 }),
+    );
+    pageNumbers(state.page, pageCount).forEach(function (p) {
+      if (p === '...') el.pagerList.appendChild(makePageItem('•••', { dots: true }));
+      else el.pagerList.appendChild(makePageItem(String(p), { page: p, active: p === state.page }));
+    });
+    el.pagerList.appendChild(
+      makePageItem('›', { page: state.page + 1, disabled: state.page >= pageCount }),
+    );
+    el.pagerJump.value = String(state.page);
+    el.pagerJump.max = String(pageCount);
   }
 
   function renderBatches() {
@@ -271,6 +348,33 @@
     return { parsed: parsed, passed: parsed - failed, failed: failed, fileName: fileName };
   }
 
+  var SAMPLE_GROUPS = [
+    ['user', 'increase_only', 'Staff组', 'manual'],
+    ['user', 'increase_only', '白名单', 'manual'],
+    ['account', 'no_adjust', '回捞组', 'rule'],
+    ['account', 'no_adjust', '激进提额组', 'rule'],
+    ['account', 'no_adjust', '降额实验组', 'rule'],
+    ['account', 'no_adjust', '模型切换实验组', 'rule'],
+    ['account', 'decrease_only', '风险触发组', 'rule'],
+    ['user', 'decrease_only', '人工降额名单', 'manual'],
+  ];
+
+  // 模拟"上传文件的第 N 条数据"（原型不解析真实文件内容）
+  function mockRowsFromFile(count) {
+    var rows = [];
+    for (var i = 0; i < count; i += 1) {
+      var spec = SAMPLE_GROUPS[i % SAMPLE_GROUPS.length];
+      var seed = (Date.now() + i).toString(16).toUpperCase();
+      rows.push({
+        cid: (seed + seed + seed + seed).slice(0, 64),
+        od: String(90000000 + i * 137),
+        level: spec[0], tag: spec[1], group: spec[2], source: spec[3],
+        updatedAt: nowText()
+      });
+    }
+    return rows;
+  }
+
   // ── 事件绑定 ──
   function bind() {
     // Tab
@@ -300,12 +404,40 @@
           openModal('single');
         } else if (action === 'search') {
           state.filter = el.keyword.value;
+          state.page = 1;
           renderList();
         }
       });
     });
     el.keyword.addEventListener('input', function () {
       state.filter = el.keyword.value;
+      state.page = 1;
+      renderList();
+    });
+
+    // 分页
+    el.pagerList.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-sl-page]');
+      if (!btn || btn.disabled) return;
+      var page = parseInt(btn.getAttribute('data-sl-page'), 10);
+      if (!page || page === state.page) return;
+      state.page = page;
+      renderList();
+    });
+    el.pagerSize.addEventListener('change', function () {
+      state.pageSize = parseInt(el.pagerSize.value, 10) || 10;
+      state.page = 1;
+      renderList();
+    });
+    el.pagerJump.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      var page = parseInt(el.pagerJump.value, 10);
+      var pageCount = Math.max(1, Math.ceil(visibleRows().length / state.pageSize));
+      if (!page || page < 1 || page > pageCount) {
+        el.pagerJump.value = String(state.page);
+        return;
+      }
+      state.page = page;
       renderList();
     });
 
@@ -365,6 +497,9 @@
         operator: 'baksun', createdAt: nowText()
       });
       state.activeBatch = no;
+      // 覆盖语义：名单内容整体替换为本次文件的数据（原型用示例行代替真实文件内容）
+      state.rows = mockRowsFromFile(12);
+      state.page = 1;
       renderBatches();
       renderList();
       closeModal();

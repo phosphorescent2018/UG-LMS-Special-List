@@ -196,7 +196,34 @@ input.ant-input { width: 100%; }
 .sl-badge-red { background: rgba(255, 77, 79, 0.1); color: #ff4d4f; }
 
 /* Pager */
-.sl-pager { padding: 12px 24px; color: rgb(116, 121, 140); font-size: 13px; }
+.sl-pager {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 24px; border-top: 1px solid rgb(240, 240, 240);
+  color: rgb(116, 121, 140); font-size: 13px;
+}
+.sl-pager-right { display: flex; align-items: center; gap: 8px; }
+.sl-pager-size {
+  height: 28px; padding: 0 8px; border: 1px solid rgb(229, 231, 237); border-radius: 4px;
+  background: #fff; color: rgb(3, 25, 56); font-size: 13px; font-family: inherit; outline: none;
+}
+.sl-pager-size:focus { border-color: #5095ff; }
+.sl-pager-list { display: flex; align-items: center; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.sl-page-item {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 28px; height: 28px; padding: 0 6px; border: 1px solid rgb(229, 231, 237);
+  border-radius: 4px; background: #fff; color: rgb(3, 25, 56);
+  font-size: 13px; font-family: inherit; cursor: pointer; box-sizing: border-box;
+}
+.sl-page-item:hover:not(:disabled):not(.sl-page-active) { border-color: #5095ff; color: #5095ff; }
+.sl-page-item:disabled { color: rgb(196, 201, 212); cursor: not-allowed; }
+.sl-page-active { border-color: #5095ff; background: #5095ff; color: #fff; cursor: default; }
+.sl-page-dots { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 28px; color: rgb(152, 161, 184); }
+.sl-pager-jump { display: inline-flex; align-items: center; gap: 4px; }
+.sl-pager-input {
+  width: 44px; height: 28px; padding: 0 6px; border: 1px solid rgb(229, 231, 237); border-radius: 4px;
+  text-align: center; font-size: 13px; font-family: inherit; color: rgb(3, 25, 56); outline: none; box-sizing: border-box;
+}
+.sl-pager-input:focus { border-color: #5095ff; }
 
 /* Modals */
 .sl-modal { position: fixed; inset: 0; z-index: 900; display: flex; align-items: flex-start; justify-content: center; padding-top: 80px; }
