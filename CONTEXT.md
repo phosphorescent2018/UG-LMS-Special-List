@@ -26,8 +26,9 @@ UG LMS 运营后台 `Credit Application` 页面的高保真还原，作为该需
 
 - 还原产物以导出包的 `screenshot.png` 为视觉真值；同视口逐像素比对，平均绝对差 1.49/765、差异像素 1.00%
   （其中约 0.85% 来自 macOS overlay 横向滚动条，0.08% 来自新增的语言切换控件）。
-- 字典里没有中文的词条在中文态下保持英文（`Credit Management` / `Loan Management` /
-  `Application ID` / `Account holder Identity` / `Account FRI`），与线上表现一致。
+- 字典里没有中文的 5 条词条（`Credit Management` / `Loan Management` / `Application ID` /
+  `Account holder Identity` / `Account FRI`），线上切中文同样显示英文；原型为了可读性补了中文，
+  属于**原型补充**，不是官方译文，详见 `.spec/spec.html` 的「中文词条来源说明」。
 - 页面按固定宽度还原，窄屏出现横向滚动；平板/手机断点未还原（导出包只有单视口计算样式）。
 
 ## 数据来源

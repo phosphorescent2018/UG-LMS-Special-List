@@ -31,6 +31,10 @@ npm run dev          # 启动 vite(51720) + Axhub Make 管理端(53817)
 精确 DOM + computedStyle）重建：`page.html` 为页面结构，`static-style.css` 为精确样式，
 `menu.js` 负责侧边菜单展开/收起，`lang.js` 负责中英文切换（中文取自 LMS 官方多语言字典）。
 
+> 字典里缺失的 5 条文案（`Credit Management` / `Loan Management` / `Application ID` /
+> `Account holder Identity` / `Account FRI`），线上切中文同样显示英文；原型为可读性补了中文，
+> 属于原型补充，详见 `.spec/spec.html` 的「中文词条来源说明」。
+
 主规格见 `.spec/spec.html`（含还原方法、交互说明、已知限制）。
 
 已知限制：

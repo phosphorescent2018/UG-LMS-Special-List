@@ -102,7 +102,7 @@
       <tr>
         <td>中 / 英语言切换</td>
         <td>✅ 已还原</td>
-        <td>右上角语言下拉可切换 English / 中文。中文文案取自 LMS 官方多语言字典 <code>sys_mutil_language</code>(<code>system_code=lms</code>) 的 <code>zh_CN</code> 词条；字典里没有中文的文案（Credit Management、Loan Management、Application ID、Account holder Identity、Account FRI）在中文态下保持英文，与线上表现一致。</td>
+        <td>右上角语言下拉可切换 English / 中文。中文文案取自 LMS 官方多语言字典 <code>sys_mutil_language</code>(<code>system_code=lms</code>) 的 <code>zh_CN</code> 词条；字典里缺失的 5 条见下方「中文词条来源说明」。</td>
       </tr>
       <tr>
         <td>菜单悬停态</td>
@@ -115,6 +115,20 @@
         <td>静态原型，无后端与路由。</td>
       </tr>
     </table>
+
+    <h3>中文词条来源说明</h3>
+    <p>中文文案取自 LMS 官方多语言字典 <code>sys_mutil_language</code>（<code>system_code = 'lms'</code>）的 <code>zh_CN</code> 词条，
+    共提取到 1638 组 en ↔ zh 对照。以下 5 条在字典里<b>没有</b>中文词条（菜单 <code>name</code> 本身是英文、<code>i18n_key</code> 查不到翻译），
+    线上切中文时同样显示英文；原型为了可读性补了中文，<b>属于原型补充，不是官方译文</b>：</p>
+    <table>
+      <tr><th>英文</th><th>原型中文</th><th>依据</th></tr>
+      <tr><td>Credit Management</td><td>额度管理</td><td>操作手册「3 授信与额度」下，该菜单管理的是额度查询 / 额度&amp;状态调整 / 额度更新记录</td></tr>
+      <tr><td>Loan Management</td><td>贷款管理</td><td>位于「订单管理」下，与「异常交易管理」「账单管理」并列</td></tr>
+      <tr><td>Application ID</td><td>申请编号</td><td>与同列的申请日期 / 申请结果对应</td></tr>
+      <tr><td>Account holder Identity</td><td>证件号码</td><td>字典中 <code>certNo</code> = 证件号码</td></tr>
+      <tr><td>Account FRI</td><td>账户 FRI</td><td>FRI 为内部账户标识（Customer Care 页面写作 Account ID(FRI)），保留不译</td></tr>
+    </table>
+    <p>若要让线上也显示中文，需在「System Management → Language → 语言维护」为对应 <code>i18n_key</code> 补 <code>zh_CN</code> 词条。</p>
 
     <h2>附录：技术实现说明</h2>
     <h3>文件结构</h3>
