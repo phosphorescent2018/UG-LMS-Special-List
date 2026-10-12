@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# 提交后自动推送：commit 成功后 push 到 origin 的当前分支。
+# 若推送失败，提交仍保留在本地，请手动 git push。
+set -u
+
+branch="$(git branch --show-current 2>/dev/null || true)"
+if [ -z "$branch" ]; then
+  echo "post-commit: 未处于有效分支，跳过自动推送"
+  exit 0
+fi
+
+echo "post-commit: 正在自动推送 ${branch} → origin ..."
+if git push origin "HEAD:${branch}"; then
+  echo "post-commit: 推送成功，GitHub Actions 将自动更新演示站 ✅"
+else
+  echo "post-commit: 自动推送失败（提交已保留在本地），请手动执行 git push" >&2
+  exit 1
+fi

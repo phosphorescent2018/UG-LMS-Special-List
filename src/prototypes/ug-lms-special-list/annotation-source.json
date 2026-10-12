@@ -1,0 +1,31 @@
+{
+  "documentVersion": 1,
+  "format": "axhub-annotation-source",
+  "data": {
+    "version": 2,
+    "prototypeName": "ug-lms-special-list",
+    "pageId": "ug-lms-credit-application",
+    "nodes": [],
+    "updatedAt": 0
+  },
+  "markdownMap": {},
+  "assetMap": {},
+  "directory": {
+    "nodes": [
+      {
+        "type": "folder",
+        "id": "directory-pages",
+        "title": "页面",
+        "defaultExpanded": true,
+        "children": [
+          {
+            "type": "route",
+            "id": "route-ug-lms-credit-application",
+            "title": "Credit Application",
+            "route": "ug-lms-credit-application"
+          }
+        ]
+      }
+    ]
+  }
+}

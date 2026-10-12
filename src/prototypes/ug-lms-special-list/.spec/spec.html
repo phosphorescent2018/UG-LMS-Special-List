@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UG-LMS 特殊执行名单 — 主规格</title>
+  <style>
+    :root {
+      --ink: #222832;
+      --muted: #6f7888;
+      --line: #dfe4ee;
+      --brand: #5095ff;
+      --surface: #ffffff;
+      font-family: ui-sans-serif, system-ui, -apple-system, "PingFang SC", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: #f5f7fb;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px 20px 64px; }
+    main { width: min(920px, 100%); margin: 0 auto; }
+    h1 { margin: 0 0 6px; font-size: 24px; }
+    h2 { margin: 32px 0 12px; font-size: 17px; border-left: 3px solid var(--brand); padding-left: 10px; }
+    h3 { margin: 20px 0 8px; font-size: 14px; color: #1f2b3d; }
+    p, li, td, th { font-size: 13.5px; line-height: 1.75; }
+    .sub { margin: 0 0 8px; color: var(--muted); font-size: 13px; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; }
+    table { width: 100%; border-collapse: collapse; margin: 8px 0 4px; }
+    th, td { border: 1px solid var(--line); padding: 7px 10px; text-align: left; vertical-align: top; }
+    th { background: #f7f9fc; font-weight: 600; }
+    code { background: #f0f3f8; border-radius: 4px; padding: 1px 5px; font-size: 12.5px; }
+    ul { margin: 6px 0; padding-left: 22px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>UG-LMS 特殊执行名单</h1>
+  <p class="sub">Credit Application 页面高保真还原 · 数据来源：https://mtn-uganda-lms-web-test.mindigitaltech.com/credit-application</p>
+
+  <div class="card">
+    <h2>一、目标与范围</h2>
+    <p>把一个真实线上页面（UG LMS 运营后台的 Credit Application）完整还原成可在 Axhub Make 里预览、批注、迭代的原型，作为「UG-LMS 特殊执行名单」需求的原型承载页。</p>
+    <ul>
+      <li>还原对象：<b>页面本体</b>（侧边菜单 + 顶栏 + 查询表单 + 列表卡片）。</li>
+      <li>不包含：真实数据、查询/导出等后端逻辑、路由跳转。</li>
+      <li>视口基准：<b>1209 × 824</b>（导出包采集时的浏览器视口）。</li>
+    </ul>
+
+    <h2>二、数据来源与还原方法</h2>
+    <p>输入是 Axhub 导出包 <code>AI-Credit-Application-complete.zip</code>（mode: full，187 个节点 / 102 套样式 / 3 档响应式截图）。按包内 README 的「精细还原（高保真）」指引执行：</p>
+    <table>
+      <tr><th>数据源</th><th>用途</th></tr>
+      <tr><td><code>screenshot.png</code></td><td>视觉真相，所有偏差以它为准</td></tr>
+      <tr><td><code>structure/doms.json</code></td><td>DOM 层级、文本、内联 SVG、元素尺寸</td></tr>
+      <tr><td><code>structure/styles.json</code></td><td>每个节点的精确 computedStyle + Tailwind 类名</td></tr>
+      <tr><td><code>theme.json</code></td><td>logo / 头像 / 空状态插图（内嵌 base64）</td></tr>
+      <tr><td><code>topology/</code>、<code>sections/</code></td><td>页面分区与固定层信息</td></tr>
+    </table>
+    <p>还原脚本按 DOM 树逐节点重建 HTML，并把 computedStyle 原样落到 CSS；导出包缺失的部分用下列方式补齐：</p>
+    <ul>
+      <li><b>图标 sprite</b>：导出包只保留了 <code>&lt;use xlink:href="#icon-xxx"&gt;</code>，符号定义取自本地 LMS 前端仓库 <code>src/assets/iconfont/iconfont.js</code>，内联进页面。</li>
+      <li><b>表格列宽</b>：导出丢失 <code>&lt;col&gt;</code>，按表头实测宽度补回。</li>
+      <li><b>空状态跨列</b>：导出丢失 <code>colspan</code>，按「单单元格行」规则补回。</li>
+      <li><b>边框</b>：导出的 <code>border</code> 是浏览器序列化简写（形如 <code>0px 0px 1px none none solid rgb(...) rgb(...) rgb(...)</code>），浏览器不认，已按四边拆解重写。</li>
+      <li><b>样式优先级</b>：导出器给的 Tailwind 类是近似值（如 <code>pl-7</code>=28px，实际 30px），因此精确 computedStyle 放在工具类之后，保证覆盖。</li>
+    </ul>
+
+    <h2>三、交付文件</h2>
+    <table>
+      <tr><th>文件</th><th>说明</th></tr>
+      <tr><td><code>index.tsx</code></td><td>原型入口，把 <code>page.html</code> 注入宿主 div，并挂载批注查看器</td></tr>
+      <tr><td><code>page.html</code></td><td>还原后的页面 DOM（含内联 SVG sprite）</td></tr>
+      <tr><td><code>static-style.css</code></td><td>精确 computedStyle + 补齐的工具类 + 少量 antd 行为样式</td></tr>
+      <tr><td><code>assets/</code></td><td>logo、用户头像、空状态插图（由导出包 base64 还原成 PNG）</td></tr>
+      <tr><td><code>annotation-source.json</code></td><td>批注目录结构</td></tr>
+    </table>
+
+    <h2>四、验收</h2>
+    <p>还原结果与原始截图做逐像素比对（同视口 1209×824）：</p>
+    <ul>
+      <li>平均绝对像素差 <b>1.5 / 765</b>；差异超过阈值的像素占比 <b>0.92%</b>。</li>
+      <li>残留差异几乎全部来自<b>横向滚动条</b>（macOS overlay 滚动条只在滚动时显现，截图里恰好被采集到），其余为文字抗锯齿。</li>
+      <li>标题、表头、表单、侧边菜单、图标、头像等关键区块的位置与配色均已逐项比对一致。</li>
+    </ul>
+
+    <h2>五、已知限制</h2>
+    <ul>
+      <li>导出包只采了<b>单一视口</b>（1209×824），computedStyle 与元素尺寸都按该视口固化，因此平板/手机断点的重排<b>未还原</b>。</li>
+      <li>页面按还原目标保持固定宽度，窄屏会出现横向滚动。</li>
+      <li>表格横向滚动条为浏览器 overlay 行为，静态截图不一定可见。</li>
+      <li>查询、导出、分页、真实数据未接入。</li>
+      <li>字体依赖本机字体（-apple-system / PingFang SC），跨平台渲染会有细微差异。</li>
+    </ul>
+
+    <h2>六、交互还原</h2>
+    <table>
+      <tr><th>交互</th><th>状态</th><th>说明</th></tr>
+      <tr>
+        <td>侧边菜单展开 / 收起</td>
+        <td>✅ 已还原</td>
+        <td>导出时 Credit Management、Order Inquiry、Financial Products、System Management 处于收起状态、子项不在 DOM 中；已按导出包 <code>content.md</code> 的菜单结构补全，并用 <code>menu.js</code> 切换 <code>ant-menu-submenu-open</code>，视觉沿用原 antd 行为。</td>
+      </tr>
+      <tr>
+        <td>中 / 英语言切换</td>
+        <td>✅ 已还原</td>
+        <td>右上角语言下拉可切换 English / 中文。中文文案取自 LMS 官方多语言字典 <code>sys_mutil_language</code>(<code>system_code=lms</code>) 的 <code>zh_CN</code> 词条；字典里没有中文的文案（Credit Management、Loan Management、Application ID、Account holder Identity、Account FRI）在中文态下保持英文，与线上表现一致。</td>
+      </tr>
+      <tr>
+        <td>菜单悬停态</td>
+        <td>⚠️ 部分</td>
+        <td>文字/图标变蓝等 hover 规则未还原（导出包不含交互态样式）。</td>
+      </tr>
+      <tr>
+        <td>查询 / 导出 / 分页 / 路由跳转</td>
+        <td>❌ 未接入</td>
+        <td>静态原型，无后端与路由。</td>
+      </tr>
+    </table>
+
+    <h2>附录：技术实现说明</h2>
+    <h3>文件结构</h3>
+    <p><code>src/prototypes/ug-lms-special-list/</code>：<code>index.tsx</code>、<code>page.html</code>、<code>static-style.css</code>、<code>assets/</code>、<code>annotation-source.json</code>、<code>.spec/spec.html</code>。</p>
+    <h3>实现要点</h3>
+    <ul>
+      <li><code>page.html</code> 由导出包的 DOM 树逐节点生成，保留原始 class / id / 内联尺寸，宿主为 <code>#root-master</code>。</li>
+      <li>图标 sprite 内联在 <code>page.html</code> 顶部（隐藏 svg），保证离线可用。</li>
+      <li>折叠子菜单的 <code>&lt;li&gt;/&lt;ul&gt;</code> 不写死高度，由展开状态决定；<code>menu.js</code> 负责点击切换，<code>index.tsx</code> 以脚本注入方式加载它（innerHTML 不执行 script）。</li>
+      <li>可翻译文案在 DOM 上带 <code>data-en</code> / <code>data-zh</code>（输入框为 <code>data-en-placeholder</code> / <code>data-zh-placeholder</code>），<code>lang.js</code> 负责切换并记住选择。</li>
+      <li><code>static-style.css</code> 顺序为：全局重置 → 补齐的 Tailwind 工具类 → 精确 computedStyle → antd 子菜单箭头与选中态样式；后两者覆盖前两者。</li>
+      <li>生成脚本：<code>&lt;UG工作区&gt;/credit-application-clone/work/build.py</code>（还原）与 <code>export_make.py</code>（导出到本原型）。</li>
+    </ul>
+    <h3>已知限制</h3>
+    <p>同「五、已知限制」；其中响应式断点缺失源于导出包只包含单视口的计算样式。</p>
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,2640 @@
+/* 由 structure/styles.json 生成的样式表 */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+
+/* 表格：antd 使用 separate + 无间距；浏览器默认 spacing 会让表体整体偏移 2px */
+table { border-collapse: separate; border-spacing: 0; }
+
+/* 输入框占位文案：原页面用的是正文字色 rgb(3,25,56)，不是浏览器默认灰 */
+input::placeholder { color: rgb(3, 25, 56); opacity: 1; }
+
+/* ── 侧边菜单：可折叠（收起时不显示子菜单） ── */
+.ant-menu-submenu-inline > .ant-menu-sub { display: none; }
+.ant-menu-submenu-inline.ant-menu-submenu-open > .ant-menu-sub { display: block; }
+
+/* ── 侧边菜单：选中项左侧蓝色竖条（来自 LMS layouts__index 样式） ── */
+/* 导出包未包含 vertical-align，按参考截图推断：头像与用户名垂直居中 */
+.user-msg___Sv0sk img { vertical-align: middle; }
+
+.ant-menu-item-selected { position: relative; box-sizing: border-box; }
+.ant-menu-item-selected::before {
+  position: absolute; top: 0; left: 0; display: block;
+  height: 100%; border-left: 3px solid #5095ff; content: " ";
+}
+
+/* ── 侧边菜单：子菜单折叠箭头（antd 5.19 menuArrowSize=10px / offset=2.5px） ── */
+.ant-menu-submenu-arrow {
+  position: absolute;
+  top: 50%;
+  inset-inline-end: 16px;
+  width: 10px;
+  color: currentColor;
+  transform: translateY(-50%);
+  transition: transform 0.3s cubic-bezier(0.645, 0.045, 0.355, 1), opacity 0.3s;
+}
+.ant-menu-submenu-arrow::before,
+.ant-menu-submenu-arrow::after {
+  position: absolute;
+  width: 6px;
+  height: 1.5px;
+  background-color: currentColor;
+  border-radius: 4px;
+  transition: background 0.3s cubic-bezier(0.645, 0.045, 0.355, 1),
+    transform 0.3s cubic-bezier(0.645, 0.045, 0.355, 1), color 0.3s;
+  content: "";
+}
+.ant-menu-inline .ant-menu-submenu-arrow::before { transform: rotate(-45deg) translateX(2.5px); }
+.ant-menu-inline .ant-menu-submenu-arrow::after { transform: rotate(45deg) translateX(-2.5px); }
+.ant-menu-submenu-open.ant-menu-submenu-inline > .ant-menu-submenu-title > .ant-menu-submenu-arrow {
+  transform: translateY(calc(-50% - 2px));
+}
+.ant-menu-submenu-open.ant-menu-submenu-inline > .ant-menu-submenu-title > .ant-menu-submenu-arrow::before {
+  transform: rotate(45deg) translateX(2.5px);
+}
+.ant-menu-submenu-open.ant-menu-submenu-inline > .ant-menu-submenu-title > .ant-menu-submenu-arrow::after {
+  transform: rotate(-45deg) translateX(-2.5px);
+}
+
+
+/* ── 语言切换（对应线上被注释掉的 SelectLang；有官方中文的词条用官方翻译） ── */
+.ug-lang { position: fixed; top: 12px; right: 120px; z-index: 50; font-size: 14px; }
+.ug-lang-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 32px; padding: 0 12px;
+  border: 1px solid rgb(229, 231, 237); border-radius: 4px;
+  background: #fff; color: rgb(3, 25, 56); cursor: pointer;
+  font-family: inherit; font-size: 14px;
+}
+.ug-lang-btn:hover { border-color: #5095ff; color: #5095ff; }
+.ug-lang-caret { transition: transform 0.3s; }
+.ug-lang-open .ug-lang-caret { transform: rotate(180deg); }
+.ug-lang-menu {
+  position: absolute; top: 38px; right: 0; min-width: 160px; margin: 0; padding: 4px;
+  list-style: none; background: #fff; border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12);
+}
+.ug-lang-menu li { padding: 6px 12px; border-radius: 6px; cursor: pointer; color: rgb(3, 25, 56); }
+.ug-lang-menu li:hover { background: rgba(80, 149, 255, 0.1); }
+.ug-lang-menu li[aria-selected="true"] { background: rgba(80, 149, 255, 0.1); color: #5095ff; }
+
+
+/* Tailwind 子集（补齐 display / flex 等未导出的计算样式） */
+.-mb-3 { margin-bottom: -12px; }
+.-ml-2 { margin-left: -8px; }
+.-ml-3 { margin-left: -12px; }
+.-mr-2 { margin-right: -8px; }
+.-mr-3 { margin-right: -12px; }
+.-mt-3 { margin-top: -12px; }
+.absolute { position: absolute; }
+.basis-1\/12 { flex-basis: 8.333333%%; }
+.basis-1\/3 { flex-basis: 33.333333%%; }
+.block { display: block; }
+.border { border-width: 1px; border-style: solid; }
+.border-0 { border-width: 0px; }
+.cursor-default { cursor: default; }
+.cursor-pointer { cursor: pointer; }
+.cursor-text { cursor: text; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.font-medium { font-weight: 500; }
+.font-normal { font-weight: 400; }
+.font-semibold { font-weight: 600; }
+.gap-2 { gap: 8px; }
+.gap-4 { gap: 16px; }
+.gap-x-2 { column-gap: 8px; }
+.gap-x-4 { column-gap: 16px; }
+.gap-y-0 { row-gap: 0px; }
+.gap-y-2 { row-gap: 8px; }
+.gap-y-4 { row-gap: 16px; }
+.grow { flex-grow: 1; }
+.inline { display: inline; }
+.inline-flex { display: inline-flex; }
+.italic { font-style: italic; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
+.leading-10 { line-height: 40px; }
+.leading-3 { line-height: 12px; }
+.leading-none { line-height: 1; }
+.leading-normal { line-height: 1.5; }
+.leading-snug { line-height: 1.375; }
+.leading-tight { line-height: 1.25; }
+.m-0 { margin: 0px; }
+.max-w-0 { max-width: 0px; }
+.max-w-full { max-width: 100%; }
+.mb-0 { margin-bottom: 0px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-6 { margin-bottom: 24px; }
+.ml-0 { margin-left: 0px; }
+.ml-1 { margin-left: 4px; }
+.ml-1\.5 { margin-left: 6px; }
+.ml-2 { margin-left: 8px; }
+.ml-2\.5 { margin-left: 10px; }
+.ml-6 { margin-left: 24px; }
+.mr-0 { margin-right: 0px; }
+.mr-2 { margin-right: 8px; }
+.mr-3 { margin-right: 12px; }
+.mr-6 { margin-right: 24px; }
+.mt-0 { margin-top: 0px; }
+.overflow-hidden { overflow: hidden; }
+.overflow-visible { overflow: visible; }
+.overflow-y-hidden { overflow-y: hidden; }
+.p-0 { padding: 0px; }
+.p-2 { padding: 8px; }
+.p-4 { padding: 16px; }
+.pb-0 { padding-bottom: 0px; }
+.pb-1 { padding-bottom: 4px; }
+.pb-1\.5 { padding-bottom: 6px; }
+.pb-2 { padding-bottom: 8px; }
+.pb-3 { padding-bottom: 12px; }
+.pb-3\.5 { padding-bottom: 14px; }
+.pb-4 { padding-bottom: 16px; }
+.pb-5 { padding-bottom: 20px; }
+.pl-0 { padding-left: 0px; }
+.pl-0\.5 { padding-left: 2px; }
+.pl-2 { padding-left: 8px; }
+.pl-2\.5 { padding-left: 10px; }
+.pl-3 { padding-left: 12px; }
+.pl-3\.5 { padding-left: 14px; }
+.pl-6 { padding-left: 24px; }
+.pl-7 { padding-left: 28px; }
+.pr-0 { padding-right: 0px; }
+.pr-0\.5 { padding-right: 2px; }
+.pr-2 { padding-right: 8px; }
+.pr-2\.5 { padding-right: 10px; }
+.pr-3 { padding-right: 12px; }
+.pr-3\.5 { padding-right: 14px; }
+.pr-4 { padding-right: 16px; }
+.pr-6 { padding-right: 24px; }
+.pr-7 { padding-right: 28px; }
+.pt-0 { padding-top: 0px; }
+.pt-1 { padding-top: 4px; }
+.pt-1\.5 { padding-top: 6px; }
+.pt-3 { padding-top: 12px; }
+.pt-3\.5 { padding-top: 14px; }
+.pt-5 { padding-top: 20px; }
+.pt-7 { padding-top: 28px; }
+.relative { position: relative; }
+.shrink-0 { flex-shrink: 0; }
+.static { position: static; }
+.sticky { position: sticky; }
+.text-center { text-align: center; }
+.visible { visibility: visible; }
+.whitespace-nowrap { white-space: nowrap; }
+.z-0 { z-index: 0; }
+
+/* 精确计算样式（来自导出包，优先级高于工具类） */
+.style_1 {
+  color: rgb(0, 0, 0);
+  font-family: sans-serif;
+  font-size: 16px;
+  min-height: 0px;
+  min-width: 0px;
+  overflow: clip;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(0, 0, 0);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(0, 0, 0);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(0, 0, 0);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(0, 0, 0);
+}
+.style_2 {
+  color: rgb(0, 0, 0);
+  font-family: sans-serif;
+  font-size: 16px;
+  padding: 30px 30px 21px;
+  padding-block-end: 21px;
+  padding-block-start: 30px;
+  padding-inline-end: 30px;
+  padding-inline-start: 30px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(0, 0, 0);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(0, 0, 0);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(0, 0, 0);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(0, 0, 0);
+}
+.style_3 {
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 24px;
+  min-width: 14px;
+  text-overflow: clip;
+  transition: font-size 0.2s cubic-bezier(0.215, 0.61, 0.355, 1), margin 0.3s cubic-bezier(0.645, 0.045, 0.355, 1), color 0.3s;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_4 {
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  margin: 0px 0px 0px 10px;
+  margin-inline-start: 10px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: ellipsis;
+  transition: opacity 0.3s cubic-bezier(0.645, 0.045, 0.355, 1), margin 0.3s, color 0.3s;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_5 {
+  background: rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box;
+  background-color: rgb(255, 255, 255);
+  border-radius: 4px;
+  bottom: 0px;
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  min-height: 0px;
+  min-width: 0px;
+  padding: 0px 16px 0px 24px;
+  padding-inline-end: 16px;
+  padding-inline-start: 24px;
+  right: 0px;
+  text-align: start;
+  text-overflow: ellipsis;
+  top: 0px;
+  transition: border-color 0.3s, background 0.3s, padding 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_6 {
+  color: rgb(80, 149, 255);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 24px;
+  min-width: 14px;
+  text-overflow: clip;
+  transition: font-size 0.2s cubic-bezier(0.215, 0.61, 0.355, 1), margin 0.3s cubic-bezier(0.645, 0.045, 0.355, 1), color 0.3s;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(80, 149, 255);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(80, 149, 255);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(80, 149, 255);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(80, 149, 255);
+}
+.style_7 {
+  color: rgb(80, 149, 255);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  margin: 0px 0px 0px 10px;
+  margin-inline-start: 10px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: ellipsis;
+  transition: opacity 0.3s cubic-bezier(0.645, 0.045, 0.355, 1), margin 0.3s, color 0.3s;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(80, 149, 255);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(80, 149, 255);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(80, 149, 255);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(80, 149, 255);
+}
+.style_8 {
+  background: rgba(80, 149, 255, 0.1) none repeat scroll 0% 0% / auto padding-box border-box;
+  background-color: rgba(80, 149, 255, 0.1);
+  border-bottom-right-radius: 8px;
+  border-radius: 0px 8px 8px 0px;
+  border-top-right-radius: 8px;
+  bottom: 0px;
+  color: rgb(80, 149, 255);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  min-height: 0px;
+  min-width: 0px;
+  padding: 0px 16px 0px 24px;
+  padding-inline-end: 16px;
+  padding-inline-start: 24px;
+  right: 0px;
+  text-align: start;
+  text-overflow: ellipsis;
+  top: 0px;
+  transition: border-color 0.3s, background 0.3s, padding 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(80, 149, 255);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(80, 149, 255);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(80, 149, 255);
+}
+.style_9 {
+  bottom: 25px;
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  inset-block-end: 25px;
+  inset-block-start: 25px;
+  inset-inline-end: 16px;
+  inset-inline-start: 222px;
+  left: 222px;
+  min-height: 0px;
+  min-width: 0px;
+  right: 16px;
+  text-align: start;
+  text-overflow: clip;
+  top: 25px;
+  transform: matrix(1, 0, 0, 1, 0, 0);
+  transition: transform 0.3s cubic-bezier(0.645, 0.045, 0.355, 1), opacity 0.3s;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_10 {
+  border-radius: 4px;
+  bottom: 0px;
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  min-height: 0px;
+  min-width: 0px;
+  padding: 0px 0px 0px 24px;
+  padding-inline-start: 24px;
+  right: 0px;
+  text-align: start;
+  text-overflow: ellipsis;
+  top: 0px;
+  transition: border-color 0.3s, background 0.3s, padding 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_11 {
+  background: rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box;
+  background-color: rgb(255, 255, 255);
+  border-radius: 4px;
+  color: rgb(3, 25, 56);
+  display: list-item;
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: clip;
+  transition: border-color 0.3s cubic-bezier(0.645, 0.045, 0.355, 1), background 0.3s cubic-bezier(0.645, 0.045, 0.355, 1), padding 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_12 {
+  bottom: 25px;
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  inset-block-end: 25px;
+  inset-block-start: 25px;
+  inset-inline-end: 16px;
+  inset-inline-start: 222px;
+  left: 222px;
+  min-height: 0px;
+  min-width: 0px;
+  right: 16px;
+  text-align: start;
+  text-overflow: clip;
+  top: 25px;
+  transform: matrix(1, 0, 0, 1, 0, -2);
+  transition: transform 0.3s cubic-bezier(0.645, 0.045, 0.355, 1), opacity 0.3s;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_13 {
+  color: rgb(116, 121, 140);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 24px;
+  min-width: 14px;
+  text-overflow: clip;
+  transition: font-size 0.2s cubic-bezier(0.215, 0.61, 0.355, 1), margin 0.3s cubic-bezier(0.645, 0.045, 0.355, 1), color 0.3s;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(116, 121, 140);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(116, 121, 140);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(116, 121, 140);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(116, 121, 140);
+}
+.style_14 {
+  color: rgb(116, 121, 140);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  margin: 0px 0px 0px 10px;
+  margin-inline-start: 10px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: ellipsis;
+  transition: opacity 0.3s cubic-bezier(0.645, 0.045, 0.355, 1), margin 0.3s, color 0.3s;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(116, 121, 140);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(116, 121, 140);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(116, 121, 140);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(116, 121, 140);
+}
+.style_15 {
+  border-radius: 4px;
+  bottom: 0px;
+  color: rgb(116, 121, 140);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  min-height: 0px;
+  min-width: 0px;
+  padding: 0px 2px 0px 24px;
+  padding-inline-end: 2px;
+  padding-inline-start: 24px;
+  right: 0px;
+  text-align: start;
+  text-overflow: ellipsis;
+  top: 0px;
+  transition: border-color 0.3s, background 0.3s, padding 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(116, 121, 140);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(116, 121, 140);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(116, 121, 140);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(116, 121, 140);
+}
+.style_16 {
+  background: rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box;
+  background-color: rgb(255, 255, 255);
+  color: rgb(179, 192, 231);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: clip;
+  transition: background 0.3s cubic-bezier(0.645, 0.045, 0.355, 1), padding 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(179, 192, 231);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(179, 192, 231);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(179, 192, 231);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(179, 192, 231);
+}
+.style_17 {
+  background: rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box;
+  background-color: rgb(255, 255, 255);
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  padding: 0px 2px;
+  padding-inline-end: 2px;
+  padding-inline-start: 2px;
+  text-align: start;
+  text-overflow: clip;
+  transition: width 0.3s cubic-bezier(0.2, 0, 0, 1);
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_18 {
+  color: rgb(0, 0, 0);
+  font-family: sans-serif;
+  font-size: 16px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(0, 0, 0);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(0, 0, 0);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(0, 0, 0);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(0, 0, 0);
+}
+.style_19 {
+  bottom: 0px;
+  box-shadow: rgba(151, 160, 195, 0.1) 4px 0px 4px 0px;
+  color: rgb(0, 0, 0);
+  font-family: sans-serif;
+  font-size: 16px;
+  left: 0px;
+  min-height: 0px;
+  min-width: 0px;
+  right: 0px;
+  text-align: start;
+  text-overflow: clip;
+  top: 0px;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(0, 0, 0);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(0, 0, 0);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(0, 0, 0);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(0, 0, 0);
+}
+.style_20 {
+  background: rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box;
+  background-color: rgb(255, 255, 255);
+  color: rgb(0, 0, 0);
+  font-family: sans-serif;
+  font-size: 16px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(0, 0, 0);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(0, 0, 0);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(0, 0, 0);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(0, 0, 0);
+}
+.style_21 {
+  color: rgb(0, 0, 0);
+  font-family: sans-serif;
+  font-size: 16px;
+  margin: 0px 8px 0px 0px;
+  margin-inline-end: 8px;
+  min-height: 0px;
+  min-width: 0px;
+  overflow: clip;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(0, 0, 0);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(0, 0, 0);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(0, 0, 0);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(0, 0, 0);
+}
+.style_22 {
+  color: rgb(143, 149, 178);
+  font-family: sans-serif;
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(143, 149, 178);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(143, 149, 178);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(143, 149, 178);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(143, 149, 178);
+}
+.style_23 {
+  color: rgb(0, 0, 0);
+  font-family: sans-serif;
+  font-size: 16px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(0, 0, 0);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(0, 0, 0);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(0, 0, 0);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(0, 0, 0);
+}
+.style_24 {
+  color: rgb(0, 0, 0);
+  font-family: sans-serif;
+  font-size: 16px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(0, 0, 0);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(0, 0, 0);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(0, 0, 0);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(0, 0, 0);
+}
+.style_25 {
+  color: rgb(0, 0, 0);
+  font-family: sans-serif;
+  font-size: 16px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(0, 0, 0);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(0, 0, 0);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(0, 0, 0);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(0, 0, 0);
+}
+.style_26 {
+  background: rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box;
+  background-color: rgb(255, 255, 255);
+  color: rgb(0, 0, 0);
+  font-family: sans-serif;
+  font-size: 16px;
+  padding: 0px 24px 0px 0px;
+  padding-inline-end: 24px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(0, 0, 0);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(0, 0, 0);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: rgb(230, 232, 240);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(0, 0, 0);
+}
+.style_27 {
+  color: rgb(37, 40, 50);
+  font-family: PingFangSC-Semibold, "PingFang SC", sans-serif;
+  font-size: 24px;
+  text-align: start;
+  text-overflow: clip;
+  line-height: 24px;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(37, 40, 50);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(37, 40, 50);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(37, 40, 50);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(37, 40, 50);
+}
+.style_28 {
+  color: rgb(0, 0, 0);
+  font-family: sans-serif;
+  font-size: 16px;
+  margin: 0px 0px 24px;
+  margin-block-end: 24px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(0, 0, 0);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(0, 0, 0);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(0, 0, 0);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(0, 0, 0);
+}
+.style_29 {
+  bottom: 0px;
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  min-height: 0px;
+  min-width: 0px;
+  right: 0px;
+  text-align: start;
+  text-overflow: clip;
+  top: 0px;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_30 {
+  bottom: 0px;
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  min-height: 1px;
+  padding: 0px 0px 8px;
+  padding-block-end: 8px;
+  right: 0px;
+  text-align: start;
+  text-overflow: clip;
+  top: 0px;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_31 {
+  bottom: 0px;
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  min-width: 0px;
+  overflow: clip;
+  right: 0px;
+  text-align: start;
+  text-overflow: ellipsis;
+  top: 0px;
+  transition: 0.2s;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_32 {
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  margin: 0px 0px 0px 4px;
+  margin-inline-start: 4px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_33 {
+  background: rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box;
+  background-color: rgb(255, 255, 255);
+  border-radius: 4px;
+  bottom: 0px;
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  min-height: 0px;
+  min-width: 0px;
+  padding: 4px 11px;
+  padding-block-end: 4px;
+  padding-block-start: 4px;
+  padding-inline-end: 11px;
+  padding-inline-start: 11px;
+  right: 0px;
+  text-align: start;
+  text-overflow: clip;
+  top: 0px;
+  transition: 0.2s;
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-top-color: rgb(229, 231, 237);
+  border-right-width: 1px;
+  border-right-style: solid;
+  border-right-color: rgb(229, 231, 237);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: rgb(229, 231, 237);
+  border-left-width: 1px;
+  border-left-style: solid;
+  border-left-color: rgb(229, 231, 237);
+}
+.style_34 {
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_35 {
+  bottom: 0px;
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  min-height: 32px;
+  min-width: 0px;
+  right: 0px;
+  text-align: start;
+  text-overflow: clip;
+  top: 0px;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_36 {
+  bottom: 0px;
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  min-height: 1px;
+  right: 0px;
+  text-align: start;
+  text-overflow: clip;
+  top: 0px;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_37 {
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_38 {
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  padding: 0px 0px 18px;
+  padding-block-end: 18px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_39 {
+  bottom: 0px;
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  max-width: 33.3333%;
+  min-height: 1px;
+  padding: 0px 12px;
+  padding-inline-end: 12px;
+  padding-inline-start: 12px;
+  right: 0px;
+  text-align: start;
+  text-overflow: clip;
+  top: 0px;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_40 {
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_41 {
+  background: rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box;
+  background-color: rgb(255, 255, 255);
+  border-radius: 4px;
+  bottom: 0px;
+  box-shadow: rgba(0, 0, 0, 0.02) 0px 2px 0px 0px;
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  padding: 4px 15px;
+  padding-block-end: 4px;
+  padding-block-start: 4px;
+  padding-inline-end: 15px;
+  padding-inline-start: 15px;
+  right: 0px;
+  text-overflow: clip;
+  top: 0px;
+  transition: 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-top-color: rgb(229, 231, 237);
+  border-right-width: 1px;
+  border-right-style: solid;
+  border-right-color: rgb(229, 231, 237);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: rgb(229, 231, 237);
+  border-left-width: 1px;
+  border-left-style: solid;
+  border-left-color: rgb(229, 231, 237);
+}
+.style_42 {
+  color: rgb(255, 255, 255);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(255, 255, 255);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(255, 255, 255);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(255, 255, 255);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(255, 255, 255);
+}
+.style_43 {
+  background: rgb(80, 149, 255) none repeat scroll 0% 0% / auto padding-box border-box;
+  background-color: rgb(80, 149, 255);
+  border-radius: 4px;
+  bottom: 0px;
+  box-shadow: rgba(5, 138, 255, 0.06) 0px 2px 0px 0px;
+  color: rgb(255, 255, 255);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  padding: 4px 15px;
+  padding-block-end: 4px;
+  padding-block-start: 4px;
+  padding-inline-end: 15px;
+  padding-inline-start: 15px;
+  right: 0px;
+  text-overflow: clip;
+  top: 0px;
+  transition: 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-top-color: rgba(0, 0, 0, 0);
+  border-right-width: 1px;
+  border-right-style: solid;
+  border-right-color: rgba(0, 0, 0, 0);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: rgba(0, 0, 0, 0);
+  border-left-width: 1px;
+  border-left-style: solid;
+  border-left-color: rgba(0, 0, 0, 0);
+}
+.style_44 {
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: end;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_45 {
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  text-align: end;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_46 {
+  color: rgb(80, 149, 255);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  margin: 0px 0px 0px 7px;
+  margin-inline-start: 7px;
+  text-overflow: clip;
+  transform: matrix(1, 0, 0, 1, 0, 0);
+  transition: 0.3s;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(80, 149, 255);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(80, 149, 255);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(80, 149, 255);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(80, 149, 255);
+}
+.style_47 {
+  color: rgb(80, 149, 255);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: end;
+  text-overflow: clip;
+  transition: color 0.3s;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(80, 149, 255);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(80, 149, 255);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(80, 149, 255);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(80, 149, 255);
+}
+.style_48 {
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: end;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_49 {
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  text-align: end;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_50 {
+  bottom: 0px;
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  min-height: 32px;
+  right: 0px;
+  text-align: end;
+  text-overflow: clip;
+  top: 0px;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_51 {
+  bottom: 0px;
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  min-height: 1px;
+  right: 0px;
+  text-align: end;
+  text-overflow: clip;
+  top: 0px;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_52 {
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: end;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_53 {
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  padding: 0px 0px 18px;
+  padding-block-end: 18px;
+  text-align: end;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_54 {
+  bottom: 0px;
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  max-width: 33.3333%;
+  min-height: 1px;
+  padding: 0px 12px;
+  padding-inline-end: 12px;
+  padding-inline-start: 12px;
+  right: 0px;
+  text-align: end;
+  text-overflow: clip;
+  top: 0px;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_55 {
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  gap: 0px normal;
+  margin: 0px -12px;
+  margin-inline-end: -12px;
+  margin-inline-start: -12px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_56 {
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  padding: 0px 24px 6px;
+  padding-block-end: 6px;
+  padding-inline-end: 24px;
+  padding-inline-start: 24px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_57 {
+  color: rgb(3, 25, 56);
+  font-family: sans-serif;
+  font-size: 14px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_58 {
+  background: rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box;
+  background-color: rgb(255, 255, 255);
+  border-radius: 8px;
+  bottom: 0px;
+  color: rgb(3, 25, 56);
+  font-family: sans-serif;
+  font-size: 14px;
+  left: 0px;
+  min-height: 0px;
+  min-width: 0px;
+  right: 0px;
+  text-align: start;
+  text-overflow: clip;
+  top: 0px;
+  transition: 0.3s;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_59 {
+  color: rgb(255, 255, 255);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(255, 255, 255);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(255, 255, 255);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(255, 255, 255);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(255, 255, 255);
+}
+.style_60 {
+  color: rgb(255, 255, 255);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(255, 255, 255);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(255, 255, 255);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(255, 255, 255);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(255, 255, 255);
+}
+.style_61 {
+  background: rgb(80, 149, 255) none repeat scroll 0% 0% / auto padding-box border-box;
+  background-color: rgb(80, 149, 255);
+  border-radius: 4px;
+  bottom: 0px;
+  box-shadow: rgba(5, 138, 255, 0.06) 0px 2px 0px 0px;
+  color: rgb(255, 255, 255);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  margin: 0px 12px 0px 0px;
+  margin-inline-end: 12px;
+  padding: 4px 15px;
+  padding-block-end: 4px;
+  padding-block-start: 4px;
+  padding-inline-end: 15px;
+  padding-inline-start: 15px;
+  right: 0px;
+  text-overflow: clip;
+  top: 0px;
+  transition: 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-top-color: rgba(0, 0, 0, 0);
+  border-right-width: 1px;
+  border-right-style: solid;
+  border-right-color: rgba(0, 0, 0, 0);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: rgba(0, 0, 0, 0);
+  border-left-width: 1px;
+  border-left-style: solid;
+  border-left-color: rgba(0, 0, 0, 0);
+}
+.style_62 {
+  color: rgb(3, 25, 56);
+  font-family: sans-serif;
+  font-size: 16px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_63 {
+  color: rgb(3, 25, 56);
+  font-family: sans-serif;
+  font-size: 14px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_64 {
+  color: rgb(116, 121, 140);
+  font-family: sans-serif;
+  font-size: 16px;
+  min-height: 0px;
+  min-width: 0px;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(116, 121, 140);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(116, 121, 140);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(116, 121, 140);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(116, 121, 140);
+}
+.style_65 {
+  color: rgb(116, 121, 140);
+  font-family: sans-serif;
+  font-size: 16px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(116, 121, 140);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(116, 121, 140);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(116, 121, 140);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(116, 121, 140);
+}
+.style_66 {
+  border-radius: 4px;
+  color: rgb(116, 121, 140);
+  font-family: sans-serif;
+  font-size: 16px;
+  padding-block-end: 8px;
+  padding-block-start: 8px;
+  padding-inline-end: 8px;
+  padding-inline-start: 8px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-top-color: rgba(203, 208, 219, 0.5);
+  border-right-width: 1px;
+  border-right-style: solid;
+  border-right-color: rgba(203, 208, 219, 0.5);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: rgba(203, 208, 219, 0.5);
+  border-left-width: 1px;
+  border-left-style: solid;
+  border-left-color: rgba(203, 208, 219, 0.5);
+}
+.style_67 {
+  color: rgb(116, 121, 140);
+  font-family: sans-serif;
+  font-size: 16px;
+  min-height: 0px;
+  min-width: 0px;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(116, 121, 140);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(116, 121, 140);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(116, 121, 140);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(116, 121, 140);
+}
+.style_68 {
+  color: rgb(3, 25, 56);
+  font-family: sans-serif;
+  font-size: 14px;
+  line-height: 32px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_69 {
+  color: rgb(3, 25, 56);
+  font-family: sans-serif;
+  font-size: 14px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_70 {
+  color: rgb(3, 25, 56);
+  font-family: sans-serif;
+  font-size: 14px;
+  margin: 0px 24px;
+  margin-inline-end: 24px;
+  margin-inline-start: 24px;
+  min-height: 0px;
+  min-width: 0px;
+  padding: 14px 0px;
+  padding-block-end: 14px;
+  padding-block-start: 14px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_71 {
+  color: rgb(3, 25, 56);
+  font-family: sans-serif;
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_72 {
+  color: rgb(3, 25, 56);
+  display: table-column-group;
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_73 {
+  background: rgb(250, 250, 250) none repeat scroll 0% 0% / auto padding-box border-box;
+  background-color: rgb(250, 250, 250);
+  bottom: 0px;
+  color: rgb(3, 25, 56);
+  display: table-cell;
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  min-height: 0px;
+  min-width: 0px;
+  overflow-wrap: break-word;
+  padding: 12px 8px 12px 24px;
+  padding-block-end: 12px;
+  padding-block-start: 12px;
+  padding-inline-end: 8px;
+  padding-inline-start: 24px;
+  right: 0px;
+  text-align: start;
+  text-overflow: clip;
+  top: 0px;
+  transition: background 0.2s;
+  word-wrap: break-word;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: rgb(240, 240, 240);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_74 {
+  background: rgb(250, 250, 250) none repeat scroll 0% 0% / auto padding-box border-box;
+  background-color: rgb(250, 250, 250);
+  bottom: 0px;
+  color: rgb(3, 25, 56);
+  display: table-cell;
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  min-height: 0px;
+  min-width: 0px;
+  overflow-wrap: break-word;
+  padding: 12px 8px;
+  padding-block-end: 12px;
+  padding-block-start: 12px;
+  padding-inline-end: 8px;
+  padding-inline-start: 8px;
+  right: 0px;
+  text-align: start;
+  text-overflow: clip;
+  top: 0px;
+  transition: background 0.2s;
+  word-wrap: break-word;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: rgb(240, 240, 240);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_75 {
+  background: rgb(250, 250, 250) none repeat scroll 0% 0% / auto padding-box border-box;
+  background-color: rgb(250, 250, 250);
+  bottom: 0px;
+  color: rgb(3, 25, 56);
+  display: table-cell;
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  min-height: 0px;
+  min-width: 0px;
+  overflow-wrap: break-word;
+  padding: 12px 24px 12px 8px;
+  padding-block-end: 12px;
+  padding-block-start: 12px;
+  padding-inline-end: 24px;
+  padding-inline-start: 8px;
+  right: 0px;
+  text-align: start;
+  text-overflow: clip;
+  top: 0px;
+  transition: background 0.2s;
+  word-wrap: break-word;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: rgb(240, 240, 240);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_76 {
+  color: rgb(3, 25, 56);
+  display: table-row;
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_77 {
+  color: rgb(3, 25, 56);
+  display: table-header-group;
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_78 {
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 0px;
+  min-height: 0px;
+  min-width: 0px;
+  overflow-wrap: break-word;
+  text-align: start;
+  text-overflow: clip;
+  word-wrap: break-word;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_79 {
+  bottom: 0px;
+  color: rgb(3, 25, 56);
+  display: table-cell;
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 0px;
+  left: 0px;
+  min-height: 0px;
+  min-width: 0px;
+  overflow-wrap: break-word;
+  right: 0px;
+  text-align: start;
+  text-overflow: clip;
+  top: 0px;
+  transition: background 0.2s, border-color 0.2s;
+  word-wrap: break-word;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_80 {
+  color: rgb(3, 25, 56);
+  display: table-row;
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 0px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_81 {
+  color: rgb(116, 121, 140);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  overflow: clip;
+  overflow-wrap: break-word;
+  text-overflow: clip;
+  word-wrap: break-word;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(116, 121, 140);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(116, 121, 140);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(116, 121, 140);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(116, 121, 140);
+}
+.style_82 {
+  color: rgb(116, 121, 140);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  margin: 0px 0px 8px;
+  margin-block-end: 8px;
+  min-height: 0px;
+  min-width: 0px;
+  overflow-wrap: break-word;
+  text-overflow: clip;
+  word-wrap: break-word;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(116, 121, 140);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(116, 121, 140);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(116, 121, 140);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(116, 121, 140);
+}
+.style_83 {
+  color: rgb(152, 161, 184);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  overflow-wrap: break-word;
+  text-overflow: clip;
+  word-wrap: break-word;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(152, 161, 184);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(152, 161, 184);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(152, 161, 184);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(152, 161, 184);
+}
+.style_84 {
+  color: rgb(116, 121, 140);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  margin: 0px 8px;
+  margin-inline-end: 8px;
+  margin-inline-start: 8px;
+  min-height: 0px;
+  min-width: 0px;
+  overflow-wrap: break-word;
+  text-overflow: clip;
+  word-wrap: break-word;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(116, 121, 140);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(116, 121, 140);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(116, 121, 140);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(116, 121, 140);
+}
+.style_85 {
+  color: rgb(116, 121, 140);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  line-height: 32px;
+  margin: -12px -8px;
+  margin-block-end: -12px;
+  margin-block-start: -12px;
+  margin-inline-end: -8px;
+  margin-inline-start: -8px;
+  min-height: 0px;
+  min-width: 0px;
+  overflow-wrap: break-word;
+  padding-block-end: 16px;
+  padding-block-start: 16px;
+  padding-inline-end: 16px;
+  padding-inline-start: 16px;
+  text-overflow: clip;
+  word-wrap: break-word;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(116, 121, 140);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(116, 121, 140);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(116, 121, 140);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(116, 121, 140);
+}
+.style_86 {
+  bottom: 0px;
+  color: rgb(116, 121, 140);
+  display: table-cell;
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  line-height: 32px;
+  min-height: 0px;
+  min-width: 0px;
+  overflow-wrap: break-word;
+  padding: 7px 8px;
+  padding-block-end: 7px;
+  padding-block-start: 7px;
+  padding-inline-end: 8px;
+  padding-inline-start: 8px;
+  right: 0px;
+  text-overflow: clip;
+  top: 0px;
+  transition: background 0.2s, border-color 0.2s;
+  word-wrap: break-word;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(116, 121, 140);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(116, 121, 140);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: rgb(240, 240, 240);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(116, 121, 140);
+}
+.style_87 {
+  background: rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box;
+  background-color: rgb(255, 255, 255);
+  color: rgb(3, 25, 56);
+  display: table-row;
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_88 {
+  color: rgb(3, 25, 56);
+  display: table-row-group;
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_89 {
+  color: rgb(3, 25, 56);
+  display: table;
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 100%;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_90 {
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  overflow: auto hidden;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_91 {
+  bottom: 0px;
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  min-height: 0px;
+  min-width: 0px;
+  right: 0px;
+  text-align: start;
+  text-overflow: clip;
+  top: 0px;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_92 {
+  background: rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box;
+  background-color: rgb(255, 255, 255);
+  border-radius: 4px 4px 0px 0px;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_93 {
+  bottom: 0px;
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  left: 0px;
+  min-height: 0px;
+  min-width: 0px;
+  right: 0px;
+  text-align: start;
+  text-overflow: clip;
+  top: 0px;
+  transition: opacity 0.3s;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_94 {
+  clear: both;
+  color: rgb(3, 25, 56);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(3, 25, 56);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(3, 25, 56);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(3, 25, 56);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(3, 25, 56);
+}
+.style_95 {
+  background: rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box;
+  background-color: rgb(255, 255, 255);
+  border-radius: 8px;
+  bottom: 0px;
+  color: rgb(3, 25, 56);
+  font-family: sans-serif;
+  font-size: 14px;
+  left: 0px;
+  min-height: 0px;
+  min-width: 0px;
+  right: 0px;
+  text-align: start;
+  text-overflow: clip;
+  top: 0px;
+  transition: 0.3s;
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-top-color: rgba(203, 208, 219, 0.5);
+  border-right-width: 1px;
+  border-right-style: solid;
+  border-right-color: rgba(203, 208, 219, 0.5);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: rgba(203, 208, 219, 0.5);
+  border-left-width: 1px;
+  border-left-style: solid;
+  border-left-color: rgba(203, 208, 219, 0.5);
+}
+.style_96 {
+  color: rgb(0, 0, 0);
+  font-family: sans-serif;
+  font-size: 16px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(0, 0, 0);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(0, 0, 0);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(0, 0, 0);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(0, 0, 0);
+}
+.style_97 {
+  color: rgb(0, 0, 0);
+  font-family: sans-serif;
+  font-size: 16px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(0, 0, 0);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(0, 0, 0);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(0, 0, 0);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(0, 0, 0);
+}
+.style_98 {
+  color: rgb(0, 0, 0);
+  font-family: sans-serif;
+  font-size: 16px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(0, 0, 0);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(0, 0, 0);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(0, 0, 0);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(0, 0, 0);
+}
+.style_99 {
+  background: rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box;
+  background-color: rgb(255, 255, 255);
+  bottom: 0px;
+  color: rgb(0, 0, 0);
+  font-family: sans-serif;
+  font-size: 16px;
+  left: 0px;
+  padding: 20px 30px;
+  padding-block-end: 20px;
+  padding-block-start: 20px;
+  padding-inline-end: 30px;
+  padding-inline-start: 30px;
+  right: 0px;
+  text-align: start;
+  text-overflow: clip;
+  top: 0px;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(0, 0, 0);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(0, 0, 0);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(0, 0, 0);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(0, 0, 0);
+}
+.style_100 {
+  color: rgb(0, 0, 0);
+  font-family: sans-serif;
+  font-size: 16px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(0, 0, 0);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(0, 0, 0);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(0, 0, 0);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(0, 0, 0);
+}
+.style_101 {
+  background: rgb(245, 246, 250) none repeat scroll 0% 0% / auto padding-box border-box;
+  background-color: rgb(245, 246, 250);
+  color: rgb(0, 0, 0);
+  font-family: sans-serif;
+  font-size: 16px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(0, 0, 0);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(0, 0, 0);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(0, 0, 0);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(0, 0, 0);
+}
+.style_102 {
+  color: rgb(0, 0, 0);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue";
+  font-size: 14px;
+  min-height: 0px;
+  min-width: 0px;
+  text-align: start;
+  text-overflow: clip;
+  border-top-width: 0px;
+  border-top-style: none;
+  border-top-color: rgb(0, 0, 0);
+  border-right-width: 0px;
+  border-right-style: none;
+  border-right-color: rgb(0, 0, 0);
+  border-bottom-width: 0px;
+  border-bottom-style: none;
+  border-bottom-color: rgb(0, 0, 0);
+  border-left-width: 0px;
+  border-left-style: none;
+  border-left-color: rgb(0, 0, 0);
+}

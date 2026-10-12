@@ -1,0 +1,38 @@
+{
+  "name": "@axhub/make-client",
+  "version": "0.1.18",
+  "private": true,
+  "description": "UG-LMS 特殊执行名单原型（Axhub Make 项目静态演示）",
+  "type": "module",
+  "packageManager": "pnpm@10.20.0",
+  "scripts": {
+    "vendor:sync": "node scripts/sync-vendor-if-present.mjs",
+    "dev": "node scripts/sync-vendor-if-present.mjs && vite",
+    "start": "npm run dev",
+    "metadata:sync": "node scripts/sync-project-metadata.mjs",
+    "build": "node scripts/sync-vendor-if-present.mjs && node scripts/scan-entries.js && node scripts/build-all.js",
+    "preview": "vite preview",
+    "typecheck": "node scripts/sync-vendor-if-present.mjs && tsc --noEmit -p tsconfig.typecheck.json",
+    "check-ready": "node scripts/check-app-ready.mjs",
+    "capture:theme": "node scripts/capture-theme-homepage.mjs",
+    "capture:theme-source": "node scripts/capture-theme-source.mjs"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.18",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "extract-zip": "^2.0.1",
+    "iconv-lite": "^0.7.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5.9.3",
+    "vite": "5.4.21",
+    "ws": "^8.18.3"
+  },
+  "dependencies": {
+    "@axhub/annotation": "^1.0.18",
+    "lucide-react": "0.562.0"
+  }
+}
