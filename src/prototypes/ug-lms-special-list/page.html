@@ -359,7 +359,6 @@
             <span data-en="Upload file (overwrite)" data-zh="上传文件（覆盖）">上传文件（覆盖）</span>
           </button>
           <button type="button" class="sl-btn" data-sl-action="single" data-en="Add one" data-zh="单条新增">单条新增</button>
-          <button type="button" class="sl-btn" data-sl-action="sql" data-en="SQL / text import" data-zh="SQL / 文本导入">SQL / 文本导入</button>
         </div>
         <div class="sl-toolbar-right">
           <input type="text" class="sl-input" id="sl-keyword"
@@ -512,35 +511,6 @@
       <div class="sl-modal-foot">
         <button type="button" class="sl-btn" data-sl-close data-en="Cancel" data-zh="取消">取消</button>
         <button type="button" class="sl-btn sl-btn-primary" id="sl-single-confirm" data-en="Save" data-zh="保存">保存</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── 弹窗：SQL / 文本导入 ── -->
-  <div class="sl-modal" data-sl-modal="sql" hidden>
-    <div class="sl-modal-mask" data-sl-close></div>
-    <div class="sl-modal-box sl-modal-box-wide">
-      <div class="sl-modal-head">
-        <span data-en="SQL / text import" data-zh="SQL / 文本导入">SQL / 文本导入</span>
-        <button type="button" class="sl-modal-close" data-sl-close aria-label="close">×</button>
-      </div>
-      <div class="sl-modal-body">
-        <div class="sl-alert sl-alert-warn"
-             data-en="Paste INSERT VALUES fragments or plain rows (customer_id, account_id, tag). Statements are parsed and validated — arbitrary SQL is never executed."
-             data-zh="可粘贴 INSERT VALUES 片段，或纯文本行（客户标识, 账户标识, 执行标签）。系统只做解析与校验，不会真正执行任意 SQL。">可粘贴 INSERT VALUES 片段，或纯文本行（客户标识, 账户标识, 执行标签）。系统只做解析与校验，不会真正执行任意 SQL。</div>
-        <textarea class="sl-textarea" id="sl-sql-text" rows="8" spellcheck="false"></textarea>
-        <div class="sl-preview" id="sl-sql-preview" hidden>
-          <div class="sl-preview-row"><span data-en="Parsed rows" data-zh="解析条数">解析条数</span><b id="sl-sql-parsed">0</b></div>
-          <div class="sl-preview-row"><span data-en="Validation passed" data-zh="校验通过">校验通过</span><b class="sl-ok" id="sl-sql-passed">0</b></div>
-          <div class="sl-preview-row"><span data-en="Duplicate / invalid" data-zh="重复 / 非法">重复 / 非法</span><b class="sl-warn" id="sl-sql-failed">0</b></div>
-        </div>
-        <div class="sl-error" id="sl-sql-error" hidden></div>
-      </div>
-      <div class="sl-modal-foot">
-        <button type="button" class="sl-btn" data-sl-close data-en="Cancel" data-zh="取消">取消</button>
-        <button type="button" class="sl-btn" id="sl-sql-parse" data-en="Parse & validate" data-zh="解析校验">解析校验</button>
-        <button type="button" class="sl-btn sl-btn-primary" id="sl-sql-confirm" disabled
-                data-en="Confirm import" data-zh="确认导入">确认导入</button>
       </div>
     </div>
   </div>

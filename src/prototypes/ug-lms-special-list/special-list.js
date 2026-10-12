@@ -1,7 +1,7 @@
 /* 特殊执行名单页交互（原型）
  *
  * 说明：这是**前端原型的模拟实现**，数据都在内存里。
- * 真实系统里：上传解析、一人一标签校验、批次落库、SQL 解析都在后端完成。
+ * 真实系统里：文件解析、一人一标签校验、批次落库都在后端完成。
  */
 (function () {
   var root = document.querySelector('.sl-page');
@@ -20,7 +20,6 @@
   var SOURCES = {
     file: { en: 'File', zh: '文件上传' },
     manual: { en: 'Manual', zh: '手工维护' },
-    sql: { en: 'SQL', zh: 'SQL 导入' },
     rule: { en: 'Auto rule', zh: '自动规则' }
   };
   var BATCH_STATUS = {
@@ -28,13 +27,6 @@
     overwritten: { en: 'Overwritten', zh: '已覆盖', badge: 'sl-badge-gray' },
     closed: { en: 'Closed', zh: '已作废', badge: 'sl-badge-gray' }
   };
-
-  var SQL_SAMPLE = [
-    '-- 支持 INSERT VALUES 片段，或每行：客户标识, 账户标识, 执行标签',
-    'INSERT INTO special_pool_list (third_customer_id, overdraft_id, pool_type) VALUES',
-    "('A1B2C3D4E5F60718293A4B5C6D7E8F9012345678', '90010001', 'increase_only'),",
-    "('B2C3D4E5F60718293A4B5C6D7E8F90123456789A', '90010002', 'decrease_only');"
-  ].join('\n');
 
   function t(dict, key) {
     var item = dict[key];
@@ -279,63 +271,6 @@
     return { parsed: parsed, passed: parsed - failed, failed: failed, fileName: fileName };
   }
 
-  // ── SQL / 文本解析 ──
-  function parseSql(text) {
-    var rows = [];
-    var errors = [];
-    var trimmed = text.trim();
-    if (!trimmed) return { rows: rows, errors: errors };
-
-    // 先去掉注释行，避免注释里的 "values" 干扰语句截取
-    var cleaned = trimmed
-      .split(/\r?\n/)
-      .filter(function (line) { return !/^\s*--/.test(line); })
-      .join('\n')
-      .trim();
-
-    if (/insert\s+into/i.test(cleaned)) {
-      var valuesIndex = cleaned.search(/\bvalues\b/i);
-      if (valuesIndex < 0) {
-        errors.push({ line: 1, reason: '未找到 VALUES 子句' });
-        return { rows: rows, errors: errors };
-      }
-      var valuePart = cleaned.slice(valuesIndex + 6);
-      var tupleRe = /\(([^)]*)\)/g;
-      var m;
-      while ((m = tupleRe.exec(valuePart)) !== null) {
-        var parts = m[1].split(',').map(function (s) {
-          return s.trim().replace(/^['"]|['"]$/g, '');
-        });
-        if (parts.length >= 1 && parts[0]) {
-          rows.push({ cid: parts[0], od: parts[1] || '', tag: parts[2] || 'no_adjust' });
-        }
-      }
-      return { rows: rows, errors: errors };
-    }
-
-    cleaned.split(/\r?\n/).forEach(function (line, i) {
-      var l = line.trim().replace(/;$/, '');
-      if (!l || l.indexOf('--') === 0) return;
-      var parts = l.split(/[\t,;|]+/).map(function (s) { return s.trim(); });
-      if (!parts[0]) return;
-      if (parts.length < 3) {
-        errors.push({ line: i + 1, reason: '至少需要 3 列：客户标识, 账户标识, 执行标签' });
-        return;
-      }
-      rows.push({ cid: parts[0], od: parts[1], tag: parts[2] });
-    });
-    return { rows: rows, errors: errors };
-  }
-
-  function normalizeTag(raw) {
-    var key = String(raw || '').toLowerCase();
-    if (TAGS[key]) return key;
-    if (raw === '不参与调额') return 'no_adjust';
-    if (raw === '仅参与提额') return 'increase_only';
-    if (raw === '仅参与降额') return 'decrease_only';
-    return null;
-  }
-
   // ── 事件绑定 ──
   function bind() {
     // Tab
@@ -363,12 +298,6 @@
         } else if (action === 'single') {
           el.singleError.hidden = true;
           openModal('single');
-        } else if (action === 'sql') {
-          el.sqlText.value = SQL_SAMPLE;
-          el.sqlPreview.hidden = true;
-          el.sqlConfirm.disabled = true;
-          el.sqlError.hidden = true;
-          openModal('sql');
         } else if (action === 'search') {
           state.filter = el.keyword.value;
           renderList();
@@ -480,45 +409,6 @@
       toast('Record added', '已新增 1 条记录', 'ok');
     });
 
-    // SQL / 文本导入
-    el.sqlParse.addEventListener('click', function () {
-      var parsed = parseSql(el.sqlText.value);
-      var valid = [];
-      var failed = parsed.errors.length;
-      parsed.rows.forEach(function (row) {
-        var tag = normalizeTag(row.tag);
-        if (!tag || !row.cid || findDuplicate(row.cid, null)) {
-          failed += 1;
-          return;
-        }
-        valid.push({ cid: row.cid, od: row.od, tag: tag });
-      });
-      el.sqlResult = valid;
-      el.sqlPreview.hidden = false;
-      el.sqlParsed.textContent = String(parsed.rows.length + parsed.errors.length);
-      el.sqlPassed.textContent = String(valid.length);
-      el.sqlFailed.textContent = String(failed);
-      el.sqlConfirm.disabled = valid.length === 0;
-      el.sqlError.hidden = true;
-    });
-    el.sqlConfirm.addEventListener('click', function () {
-      var rows = el.sqlResult || [];
-      if (!rows.length) return;
-      rows.forEach(function (row) {
-        state.rows.push({
-          cid: row.cid, od: row.od, level: row.od ? 'account' : 'user',
-          tag: row.tag, group: 'SQL 导入', source: 'sql', updatedAt: nowText()
-        });
-      });
-      var batch = state.batches.find(function (b) { return b.no === state.activeBatch; });
-      if (batch) batch.count = state.rows.length;
-      renderList();
-      renderBatches();
-      closeModal();
-      toast('Imported ' + rows.length + ' records', '已导入 ' + rows.length + ' 条记录', 'ok');
-    });
-
-    el.sqlText.value = SQL_SAMPLE;
   }
 
   // 缓存常用节点
@@ -545,15 +435,6 @@
   el.singleRemark = root.querySelector('#sl-single-remark');
   el.singleError = root.querySelector('#sl-single-error');
   el.singleConfirm = root.querySelector('#sl-single-confirm');
-  el.sqlText = root.querySelector('#sl-sql-text');
-  el.sqlPreview = root.querySelector('#sl-sql-preview');
-  el.sqlParsed = root.querySelector('#sl-sql-parsed');
-  el.sqlPassed = root.querySelector('#sl-sql-passed');
-  el.sqlFailed = root.querySelector('#sl-sql-failed');
-  el.sqlError = root.querySelector('#sl-sql-error');
-  el.sqlParse = root.querySelector('#sl-sql-parse');
-  el.sqlConfirm = root.querySelector('#sl-sql-confirm');
-
   bind();
   renderList();
   renderBatches();
