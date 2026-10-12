@@ -5,7 +5,7 @@
   "templateUrl": "https://github.com/lintendo/Axhub-Make/releases/download/make-client-template-v0.1.18/axhub-make-client-template.zip",
   "templateVersion": "0.1.18",
   "project": {
-    "id": "make-project-20260730",
-    "name": "产品原型绘制"
+    "id": "ug-lms-special-list",
+    "name": "UG-LMS 特殊执行名单"
   }
 }
