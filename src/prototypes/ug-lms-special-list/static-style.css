@@ -282,6 +282,22 @@ input.ant-input { width: 100%; }
 .sl-toast-ok { border-color: rgba(82, 196, 26, 0.35); }
 .sl-toast-err { border-color: rgba(255, 77, 79, 0.35); }
 
+/* Confirm modal */
+.sl-modal-box-sm { width: 420px; }
+.sl-confirm-text { font-size: 14px; line-height: 1.7; color: rgb(3, 25, 56); word-break: break-all; }
+.sl-btn-danger { background: #ff4d4f; border-color: #ff4d4f; color: #fff; }
+.sl-btn-danger:hover:not(:disabled) { background: #ff7875; border-color: #ff7875; color: #fff; }
+.sl-muted { color: rgb(152, 161, 184); }
+
+/* Upload failure details */
+.sl-detail {
+  margin-top: 10px; border: 1px solid rgba(255, 77, 79, 0.22); border-radius: 4px;
+  background: rgba(255, 77, 79, 0.04); padding: 10px 12px;
+}
+.sl-detail-title { font-size: 13px; color: rgb(116, 121, 140); margin-bottom: 4px; }
+.sl-detail-list { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.9; color: rgb(3, 25, 56); }
+.sl-detail-list li { word-break: break-all; }
+
 
 /* Tailwind 子集（补齐 display / flex 等未导出的计算样式） */
 .-mb-3 { margin-bottom: -12px; }

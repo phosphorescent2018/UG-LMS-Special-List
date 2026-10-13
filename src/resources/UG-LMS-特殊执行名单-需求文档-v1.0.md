@@ -83,6 +83,7 @@
 
 - 上传 Excel/CSV，**解析成功后生成新批次，新批次立即生效，上一生效批次自动标记为「已覆盖」**
 - 上传前展示解析结果预览（解析条数 / 校验通过 / 重复或非法）
+- 提供导入模板下载（CSV，列：third_customer_id / overdraft_id / tag_level / pool_type / detail_group / remark）
 - **校验不通过则整批不导入**，不产生新批次
 - 字段校验：`third_customer_id` 必填；`tag_level=account` 时 `overdraft_id` 必填；`pool_type` 必须在枚举内
 - **一人一标签**：同一 `third_customer_id` 在本批次内或与现网数据冲突时报错，整批失败并给出重复明细

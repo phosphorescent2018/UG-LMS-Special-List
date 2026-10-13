@@ -463,13 +463,18 @@
           <div class="sl-file">
             <button type="button" class="sl-btn" id="sl-file-pick" data-en="Choose file" data-zh="选择文件">选择文件</button>
             <span class="sl-file-name" id="sl-file-name" data-en="No file selected" data-zh="未选择文件">未选择文件</span>
-            <a class="sl-link" href="#" data-en="Download template" data-zh="下载模板">下载模板</a>
+            <a class="sl-link" id="sl-template-link" href="#" data-en="Download template" data-zh="下载模板">下载模板</a>
           </div>
         </div>
         <div class="sl-preview" id="sl-upload-preview" hidden>
           <div class="sl-preview-row"><span data-en="Parsed rows" data-zh="解析条数">解析条数</span><b id="sl-upload-parsed">0</b></div>
           <div class="sl-preview-row"><span data-en="Validation passed" data-zh="校验通过">校验通过</span><b class="sl-ok" id="sl-upload-passed">0</b></div>
           <div class="sl-preview-row"><span data-en="Duplicate / invalid" data-zh="重复 / 非法">重复 / 非法</span><b class="sl-warn" id="sl-upload-failed">0</b></div>
+        </div>
+        <div class="sl-alert sl-alert-warn" id="sl-upload-error" hidden></div>
+        <div class="sl-detail" id="sl-upload-detail" hidden>
+          <div class="sl-detail-title" data-en="Duplicate / invalid details" data-zh="重复 / 非法明细">重复 / 非法明细</div>
+          <ul class="sl-detail-list" id="sl-upload-detail-list"></ul>
         </div>
       </div>
       <div class="sl-modal-foot">
@@ -501,7 +506,7 @@
           <input type="text" class="sl-input" id="sl-single-customer" data-en-placeholder="third_customer_id" data-zh-placeholder="third_customer_id">
         </div>
         <div class="sl-field">
-          <label class="sl-label" data-en="Account ID" data-zh="账户标识">账户标识</label>
+          <label class="sl-label"><i class="sl-req" id="sl-single-account-req" hidden>*</i><span data-en="Account ID" data-zh="账户标识">账户标识</span></label>
           <input type="text" class="sl-input" id="sl-single-account" data-en-placeholder="overdraft_id (account level only)" data-zh-placeholder="overdraft_id（仅账户级需要）">
         </div>
         <div class="sl-field">
@@ -525,6 +530,24 @@
       <div class="sl-modal-foot">
         <button type="button" class="sl-btn" data-sl-close data-en="Cancel" data-zh="取消">取消</button>
         <button type="button" class="sl-btn sl-btn-primary" id="sl-single-confirm" data-en="Save" data-zh="保存">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 弹窗：确认 ── -->
+  <div class="sl-modal" data-sl-modal="confirm" hidden>
+    <div class="sl-modal-mask" data-sl-close></div>
+    <div class="sl-modal-box sl-modal-box-sm">
+      <div class="sl-modal-head">
+        <span id="sl-confirm-title" data-en="Confirm" data-zh="确认">确认</span>
+        <button type="button" class="sl-modal-close" data-sl-close aria-label="close">×</button>
+      </div>
+      <div class="sl-modal-body">
+        <div class="sl-confirm-text" id="sl-confirm-text"></div>
+      </div>
+      <div class="sl-modal-foot">
+        <button type="button" class="sl-btn" data-sl-close data-en="Cancel" data-zh="取消">取消</button>
+        <button type="button" class="sl-btn sl-btn-primary" id="sl-confirm-ok" data-en="Confirm" data-zh="确认">确认</button>
       </div>
     </div>
   </div>

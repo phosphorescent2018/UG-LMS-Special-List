@@ -1,13 +1,15 @@
 /* 特殊执行名单页交互（原型）
  *
- * 说明：这是**前端原型的模拟实现**，数据都在内存里。
- * 真实系统里：文件解析、一人一标签校验、批次落库都在后端完成。
+ * 这是**前端原型的模拟实现**：名单数据、文件解析结果、批次状态全部在内存里。
+ * 真实系统里：文件解析与校验、一人一标签校验、批次落库、执行时名单校验都在后端完成。
+ *
+ * 演示数据口径：预览「解析条数 / 通过 / 重复非法」与导入后的名单条数、批次条数三者一致。
  */
 (function () {
   var root = document.querySelector('.sl-page');
   if (!root) return;
 
-  // ── 执行标签字典（与后端 pool_type 对应）──
+  // ── 字典 ──────────────────────────────────────────────
   var TAGS = {
     no_adjust: { en: 'No adjustment', zh: '不参与调额', badge: 'sl-badge-gray' },
     increase_only: { en: 'Increase only', zh: '仅参与提额', badge: 'sl-badge-green' },
@@ -19,7 +21,7 @@
   };
   var SOURCES = {
     file: { en: 'File', zh: '文件上传' },
-    manual: { en: 'Manual', zh: '手工维护' },
+    manual: { en: 'Manual', zh: '手工维护' }
   };
   var BATCH_STATUS = {
     active: { en: 'Active', zh: '生效中', badge: 'sl-badge-blue' },
@@ -27,17 +29,19 @@
     closed: { en: 'Closed', zh: '已作废', badge: 'sl-badge-gray' }
   };
 
-  function t(dict, key) {
-    var item = dict[key];
-    if (!item) return key;
-    return document.documentElement.getAttribute('data-lang') === 'zh' ? item.zh : item.en;
+  function isZh() {
+    return document.documentElement.getAttribute('data-lang') === 'zh';
   }
 
   function attr(el, en, zh) {
     el.setAttribute('data-en', en);
     el.setAttribute('data-zh', zh);
-    el.textContent = document.documentElement.getAttribute('data-lang') === 'zh' ? zh : en;
+    el.textContent = isZh() ? zh : en;
     return el;
+  }
+
+  function fmt(n) {
+    return Number(n).toLocaleString('en-US');
   }
 
   function shortId(id) {
@@ -60,49 +64,78 @@
       String(batchSeq).padStart(3, '0');
   }
 
-  // ── 模拟数据 ──
+  // ── 演示数据：确定性生成（同一批次每次生成结果一致）──────
+  function hashStr(s) {
+    var h = 2166136261;
+    for (var i = 0; i < s.length; i += 1) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+
+  function mulberry32(a) {
+    return function () {
+      a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function hexId(rnd) {
+    var out = '';
+    while (out.length < 64) {
+      out += Math.floor(rnd() * 4294967296).toString(16).padStart(8, '0');
+    }
+    return out.slice(0, 64).toUpperCase();
+  }
+
+  var MANUAL_POOL = [
+    ['user', 'increase_only', 'Staff组', 'manual'],
+    ['user', 'increase_only', '白名单', 'manual'],
+    ['user', 'decrease_only', '人工降额名单', 'manual']
+  ];
+  var FILE_POOL = [
+    ['account', 'no_adjust', '回捞组', 'file'],
+    ['account', 'no_adjust', '激进提额组', 'file'],
+    ['account', 'no_adjust', '降额实验组', 'file'],
+    ['account', 'no_adjust', '模型切换实验组', 'file'],
+    ['account', 'decrease_only', '风险触发组', 'file']
+  ];
+
+  function buildRows(batchNo, count, createdAt) {
+    var rnd = mulberry32(hashStr(batchNo));
+    var rows = [];
+    for (var i = 0; i < count; i += 1) {
+      var manual = rnd() < 0.12;
+      var pool = manual ? MANUAL_POOL : FILE_POOL;
+      var spec = pool[Math.floor(rnd() * pool.length)];
+      rows.push({
+        cid: hexId(rnd),
+        od: String(10000000 + Math.floor(rnd() * 89999999)),
+        level: spec[0], tag: spec[1], group: spec[2], source: spec[3],
+        updatedAt: createdAt
+      });
+    }
+    return rows;
+  }
+
+  // ── 状态 ──────────────────────────────────────────────
+  var INITIAL_BATCH = 'SL20261012-003';
   var state = {
-    activeBatch: 'SL20261012-003',
+    activeBatch: INITIAL_BATCH,
     batches: [
-      { no: 'SL20261012-003', source: 'manual', count: 8, status: 'active', operator: 'baksun', createdAt: '2026-10-12 08:20:31' },
-      { no: 'SL20261012-002', source: 'file', count: 186432, status: 'overwritten', operator: 'baksun', createdAt: '2026-10-12 07:55:02' },
-      { no: 'SL20261011-001', source: 'file', count: 184905, status: 'overwritten', operator: 'jolie', createdAt: '2026-10-11 19:03:44' }
+      { no: INITIAL_BATCH, source: 'file', count: 1240, status: 'active', operator: 'baksun', createdAt: '2026-10-12 08:20:31' },
+      { no: 'SL20261012-002', source: 'file', count: 1842, status: 'overwritten', operator: 'baksun', createdAt: '2026-10-12 07:55:02' },
+      { no: 'SL20261011-001', source: 'file', count: 1795, status: 'overwritten', operator: 'jolie', createdAt: '2026-10-11 19:03:44' }
     ],
-    rows: [
-      { cid: 'F3B2F35A27F065672D506E99E76DF57F6988818498F860B80DDA84B13A985C14', od: '72349947', level: 'user', tag: 'increase_only', group: 'Staff组', source: 'manual', updatedAt: '2026-10-12 08:20:31' },
-      { cid: 'E65D090AC8584311AB682C7F2E1E5848F2FA5A0E74B3E8D8DB59FB74284A58CC', od: '83431854', level: 'user', tag: 'increase_only', group: '白名单', source: 'manual', updatedAt: '2026-10-12 08:20:31' },
-      { cid: 'DFAC72F8DEF3BBD12ABD0A081428C1CDA6AC4E7824CEC788618A61F600DBDBE9', od: '80111462', level: 'account', tag: 'no_adjust', group: '激进提额组', source: 'file', updatedAt: '2026-10-12 08:20:31' },
-      { cid: 'D8F1C0491CCC8AB909869978813D5036D8E3364D79004F626E89C71E1DBB6481', od: '84185089', level: 'account', tag: 'no_adjust', group: '降额实验组', source: 'file', updatedAt: '2026-10-12 08:20:31' },
-      { cid: 'DC52D79E99AF72BF2345D40B73B1F6DA5400BC73D811437E83FB806FFFB54CC6', od: '83861800', level: 'account', tag: 'no_adjust', group: '回捞组', source: 'file', updatedAt: '2026-10-12 08:20:31' },
-      { cid: 'DFAC323F3D4EDD481BAAC7FE9EEE80E3FC522310333C0265B12E2FA241E9E988', od: '58523826', level: 'account', tag: 'no_adjust', group: '模型切换实验组', source: 'file', updatedAt: '2026-10-12 08:20:31' },
-      { cid: 'E65CFDAA2A16BAD1CB2AD4476F4E6A29DB4288FC0C58CAA222D9B4BACAF64260', od: '76597516', level: 'account', tag: 'decrease_only', group: '风险触发组', source: 'file', updatedAt: '2026-10-12 08:20:31' },
-      { cid: 'F3B2C16D88A9DA27786F2F5343117496F4247169E6F6719C7BA42BE0F8CA7F08', od: '73954831', level: 'user', tag: 'decrease_only', group: '人工降额名单', source: 'manual', updatedAt: '2026-10-12 08:20:31' },
-      { cid: '73954831AA12BB34CC56DD78EE90FF11223344556677889900AABBCCDDEEFF01', od: '54204094', level: 'user', tag: 'increase_only', group: 'Staff组', source: 'manual', updatedAt: '2026-10-12 08:20:31' },
-      { cid: '83431854BB23CC45DD67EE89FF01AA22BB33CC44DD55EE66FF770088119922A3', od: '48371693', level: 'user', tag: 'increase_only', group: '白名单', source: 'manual', updatedAt: '2026-10-12 08:20:31' },
-      { cid: '76597516CC34DD56EE78FF90AA12BB34CC56DD78EE90FF112233445566778899', od: '72116019', level: 'account', tag: 'no_adjust', group: '回捞组', source: 'file', updatedAt: '2026-10-12 08:20:31' },
-      { cid: '58523826DD45EE67FF89AA01BB23CC45DD67EE89FF01AA22BB33CC44DD55EE66', od: '52876038', level: 'account', tag: 'no_adjust', group: '激进提额组', source: 'file', updatedAt: '2026-10-12 08:20:31' },
-      { cid: '84185089EE56FF78AA90BB12CC34DD56EE78FF90AA12BB34CC56DD78EE90FF11', od: '70704365', level: 'account', tag: 'no_adjust', group: '模型切换实验组', source: 'file', updatedAt: '2026-10-12 08:20:31' },
-      { cid: '80111462FF67AA89BB01CC23DD45EE67FF89AA01BB23CC45DD67EE89FF01AA22', od: '52971861', level: 'account', tag: 'no_adjust', group: '降额实验组', source: 'file', updatedAt: '2026-10-12 08:20:31' },
-      { cid: 'E65D090A0011BB22CC33DD44EE55FF66AA77BB88CC99DD00EE11FF22AA33BB44', od: '81207090', level: 'account', tag: 'no_adjust', group: '回捞组', source: 'file', updatedAt: '2026-10-12 08:20:31' },
-      { cid: 'DFAC72F81122CC33DD44EE55FF66AA77BB88CC99DD00EE11FF22AA33BB44CC55', od: '57692526', level: 'account', tag: 'decrease_only', group: '风险触发组', source: 'file', updatedAt: '2026-10-12 08:20:31' },
-      { cid: 'D8F1C0492233DD44EE55FF66AA77BB88CC99DD00EE11FF22AA33BB44CC55DD66', od: '74949145', level: 'account', tag: 'decrease_only', group: '风险触发组', source: 'file', updatedAt: '2026-10-12 08:20:31' },
-      { cid: 'DC52D79E3344EE55FF66AA77BB88CC99DD00EE11FF22AA33BB44CC55DD66EE77', od: '78661193', level: 'user', tag: 'increase_only', group: 'Staff组', source: 'manual', updatedAt: '2026-10-12 08:20:31' },
-      { cid: 'DFAC323F4455FF66AA77BB88CC99DD00EE11FF22AA33BB44CC55DD66EE77FF88', od: '62227409', level: 'user', tag: 'increase_only', group: '白名单', source: 'manual', updatedAt: '2026-10-12 08:20:31' },
-      { cid: 'E65CFDAA5566AA77BB88CC99DD00EE11FF22AA33BB44CC55DD66EE77FF880099', od: '83257912', level: 'account', tag: 'no_adjust', group: '激进提额组', source: 'file', updatedAt: '2026-10-12 08:20:31' },
-      { cid: 'F3B2C16D6677BB88CC99DD00EE11FF22AA33BB44CC55DD66EE77FF8800991122', od: '66903520', level: 'account', tag: 'no_adjust', group: '模型切换实验组', source: 'file', updatedAt: '2026-10-12 08:20:31' },
-      { cid: '72349947AA7788CC99DD00EE11FF22AA33BB44CC55DD66EE77FF880099112233', od: '76015106', level: 'account', tag: 'decrease_only', group: '人工降额名单', source: 'manual', updatedAt: '2026-10-12 08:20:31' },
-      { cid: '83431854BB8899DD00EE11FF22AA33BB44CC55DD66EE77FF8800991122334455', od: '71621279', level: 'user', tag: 'decrease_only', group: '人工降额名单', source: 'manual', updatedAt: '2026-10-12 08:20:31' },
-      { cid: '84185089CC9900EE11FF22AA33BB44CC55DD66EE77FF88009911223344556677', od: '84015507', level: 'account', tag: 'no_adjust', group: '回捞组', source: 'file', updatedAt: '2026-10-12 08:20:31' },
-      { cid: '80111462DD0011FF22AA33BB44CC55DD66EE77FF880099112233445566778899', od: '49302950', level: 'account', tag: 'no_adjust', group: '降额实验组', source: 'file', updatedAt: '2026-10-12 08:20:31' },
-      { cid: 'E65D090AEE1122AA33BB44CC55DD66EE77FF88009911223344556677889900AA', od: '48899380', level: 'account', tag: 'no_adjust', group: '激进提额组', source: 'file', updatedAt: '2026-10-12 08:20:31' },
-      { cid: 'DFAC72F8FF2233BB44CC55DD66EE77FF88009911223344556677889900AABB11', od: '58665806', level: 'user', tag: 'increase_only', group: '白名单', source: 'manual', updatedAt: '2026-10-12 08:20:31' },
-      { cid: 'D8F1C049003344CC55DD66EE77FF88009911223344556677889900AABB11CC22', od: '78253455', level: 'account', tag: 'decrease_only', group: '风险触发组', source: 'file', updatedAt: '2026-10-12 08:20:31' },
-      { cid: 'DC52D79E114455DD66EE77FF88009911223344556677889900AABB11CC22DD33', od: '77684883', level: 'account', tag: 'no_adjust', group: '模型切换实验组', source: 'file', updatedAt: '2026-10-12 08:20:31' }
-    ],
+    rows: [],
     filter: '',
     page: 1,
     pageSize: 10
   };
+  state.rows = buildRows(INITIAL_BATCH, 1240, state.batches[0].createdAt);
 
   var el = {
     tabs: root.querySelectorAll('[data-sl-tab]'),
@@ -116,10 +149,25 @@
     pagerSize: root.querySelector('#sl-pager-size'),
     pagerJump: root.querySelector('#sl-pager-jump'),
     keyword: root.querySelector('#sl-keyword'),
-    toast: root.querySelector('#sl-toast')
+    toast: root.querySelector('#sl-toast'),
+    confirmTitle: root.querySelector('#sl-confirm-title'),
+    confirmText: root.querySelector('#sl-confirm-text'),
+    confirmOk: root.querySelector('#sl-confirm-ok'),
+    uploadError: root.querySelector('#sl-upload-error'),
+    uploadDetail: root.querySelector('#sl-upload-detail'),
+    uploadDetailList: root.querySelector('#sl-upload-detail-list'),
+    templateLink: root.querySelector('#sl-template-link'),
+    singleAccountReq: root.querySelector('#sl-single-account-req')
   };
 
-  // ── 渲染 ──
+  function activeBatchObj() {
+    for (var i = 0; i < state.batches.length; i += 1) {
+      if (state.batches[i].no === state.activeBatch) return state.batches[i];
+    }
+    return null;
+  }
+
+  // ── 渲染：名单 ────────────────────────────────────────
   function visibleRows() {
     var kw = state.filter.trim().toLowerCase();
     if (!kw) return state.rows;
@@ -147,7 +195,7 @@
       tr.appendChild(td);
       el.tbody.appendChild(tr);
     }
-    pageRows.forEach(function (row, index) {
+    pageRows.forEach(function (row) {
       var tr = document.createElement('tr');
 
       var tdCid = document.createElement('td');
@@ -195,8 +243,7 @@
       btn.style.background = 'transparent';
       btn.style.cursor = 'pointer';
       btn.style.padding = '0';
-      btn.dataset.slRemove = String(start + index);
-      btn.dataset.slCid = row.cid;
+      btn.dataset.slRemove = row.cid;
       attr(btn, 'Remove', '移除');
       tdAction.appendChild(btn);
       tr.appendChild(tdAction);
@@ -205,14 +252,13 @@
     });
 
     el.activeBatch.textContent = state.activeBatch;
-    el.total.textContent = String(state.rows.length);
+    el.total.textContent = fmt(state.rows.length);
     renderPager(rows.length, pageCount);
     if (window.__ugApplyLang) window.__ugApplyLang();
   }
 
-  // ── 分页 ──
+  // ── 分页 ──────────────────────────────────────────────
   function pageNumbers(current, total) {
-    // 首页、末页、当前页 ±1，其余折叠成省略号
     var pages = [];
     for (var p = 1; p <= total; p += 1) {
       if (p === 1 || p === total || Math.abs(p - current) <= 1) pages.push(p);
@@ -223,12 +269,13 @@
 
   function makePageItem(text, options) {
     var opts = options || {};
-    var node = document.createElement(opts.dots ? 'span' : 'button');
     if (opts.dots) {
-      node.className = 'sl-page-dots';
-      node.textContent = text;
-      return node;
+      var span = document.createElement('span');
+      span.className = 'sl-page-dots';
+      span.textContent = text;
+      return span;
     }
+    var node = document.createElement('button');
     node.type = 'button';
     node.className = 'sl-page-item' + (opts.active ? ' sl-page-active' : '');
     node.textContent = text;
@@ -238,22 +285,22 @@
   }
 
   function renderPager(total, pageCount) {
-    attr(el.pagerTotal, 'Total ' + total + ' records', '共 ' + total + ' 条');
+    attr(el.pagerTotal, 'Total ' + fmt(total) + ' records', '共 ' + fmt(total) + ' 条');
     el.pagerList.innerHTML = '';
     el.pagerList.appendChild(
-      makePageItem('‹', { page: state.page - 1, disabled: state.page <= 1 }),
+      makePageItem('‹', { page: state.page - 1, disabled: state.page <= 1 })
     );
     pageNumbers(state.page, pageCount).forEach(function (p) {
       if (p === '...') el.pagerList.appendChild(makePageItem('•••', { dots: true }));
-      else el.pagerList.appendChild(makePageItem(String(p), { page: p, active: p === state.page }));
+      else el.pagerList.appendChild(makePageItem(fmt(p), { page: p, active: p === state.page }));
     });
     el.pagerList.appendChild(
-      makePageItem('›', { page: state.page + 1, disabled: state.page >= pageCount }),
+      makePageItem('›', { page: state.page + 1, disabled: state.page >= pageCount })
     );
     el.pagerJump.value = String(state.page);
-    el.pagerJump.max = String(pageCount);
   }
 
+  // ── 渲染：批次 ────────────────────────────────────────
   function renderBatches() {
     el.batchTbody.innerHTML = '';
     state.batches.forEach(function (batch) {
@@ -269,7 +316,7 @@
       tr.appendChild(tdSource);
 
       var tdCount = document.createElement('td');
-      tdCount.textContent = batch.count.toLocaleString('en-US');
+      tdCount.textContent = fmt(batch.count);
       tr.appendChild(tdCount);
 
       var tdStatus = document.createElement('td');
@@ -291,6 +338,7 @@
       var tdAction = document.createElement('td');
       if (batch.status === 'active') {
         attr(tdAction, 'In use', '使用中');
+        tdAction.className = 'sl-muted';
       } else {
         var btn = document.createElement('button');
         btn.type = 'button';
@@ -310,7 +358,7 @@
     if (window.__ugApplyLang) window.__ugApplyLang();
   }
 
-  // ── 提示 ──
+  // ── 提示 / 弹窗 / 确认 ────────────────────────────────
   var toastTimer = null;
   function toast(en, zh, kind) {
     el.toast.hidden = false;
@@ -321,7 +369,6 @@
     toastTimer = setTimeout(function () { el.toast.hidden = true; }, 2600);
   }
 
-  // ── 弹窗 ──
   function openModal(name) {
     root.querySelectorAll('[data-sl-modal]').forEach(function (m) {
       if (m.getAttribute('data-sl-modal') === name) m.removeAttribute('hidden');
@@ -329,53 +376,70 @@
     });
   }
   function closeModal() {
-    root.querySelectorAll('[data-sl-modal]').forEach(function (m) { m.setAttribute('hidden', 'hidden'); });
+    root.querySelectorAll('[data-sl-modal]').forEach(function (m) {
+      m.setAttribute('hidden', 'hidden');
+    });
   }
 
-  // ── 一人一标签校验 ──
-  function findDuplicate(cid, exceptCid) {
+  var confirmHandler = null;
+  function openConfirm(opts) {
+    attr(el.confirmTitle, opts.titleEn, opts.titleZh);
+    attr(el.confirmText, opts.textEn, opts.textZh);
+    el.confirmOk.className = 'sl-btn sl-btn-primary' + (opts.danger ? ' sl-btn-danger' : '');
+    confirmHandler = opts.onOk || null;
+    openModal('confirm');
+    if (window.__ugApplyLang) window.__ugApplyLang();
+  }
+  el.confirmOk.addEventListener('click', function () {
+    var fn = confirmHandler;
+    confirmHandler = null;
+    closeModal();
+    if (fn) fn();
+  });
+
+  // ── 一人一标签校验 ────────────────────────────────────
+  function findDuplicate(cid) {
     for (var i = 0; i < state.rows.length; i += 1) {
-      if (state.rows[i].cid === cid && state.rows[i].cid !== exceptCid) return state.rows[i];
+      if (state.rows[i].cid === cid) return state.rows[i];
     }
     return null;
   }
 
-  // ── 上传（覆盖）──
+  // ── 文件解析（模拟）────────────────────────────────────
   function mockParseFile(fileName) {
-    var parsed = 186432 + Math.floor(Math.random() * 900);
-    var failed = 12 + Math.floor(Math.random() * 40);
-    return { parsed: parsed, passed: parsed - failed, failed: failed, fileName: fileName };
-  }
-
-  var SAMPLE_GROUPS = [
-    ['user', 'increase_only', 'Staff组', 'manual'],
-    ['user', 'increase_only', '白名单', 'manual'],
-    ['account', 'no_adjust', '回捞组', 'file'],
-    ['account', 'no_adjust', '激进提额组', 'file'],
-    ['account', 'no_adjust', '降额实验组', 'file'],
-    ['account', 'no_adjust', '模型切换实验组', 'file'],
-    ['account', 'decrease_only', '风险触发组', 'file'],
-    ['user', 'decrease_only', '人工降额名单', 'manual'],
-  ];
-
-  // 模拟"上传文件的第 N 条数据"（原型不解析真实文件内容）
-  function mockRowsFromFile(count) {
-    var rows = [];
-    for (var i = 0; i < count; i += 1) {
-      var spec = SAMPLE_GROUPS[i % SAMPLE_GROUPS.length];
-      var seed = (Date.now() + i).toString(16).toUpperCase();
-      rows.push({
-        cid: (seed + seed + seed + seed).slice(0, 64),
-        od: String(90000000 + i * 137),
-        level: spec[0], tag: spec[1], group: spec[2],
-        source: 'file', // 文件上传进来的记录，来源统一记 file
-        updatedAt: nowText()
-      });
+    var lower = String(fileName || '').toLowerCase();
+    var failing = /(dup|repeat|重复|非法|invalid|fail|error)/.test(lower);
+    var parsed = 1240 + (hashStr(lower) % 420);
+    if (!failing) {
+      return { fileName: fileName, parsed: parsed, passed: parsed, failed: 0, details: [] };
     }
-    return rows;
+    var failed = 6 + (hashStr(lower + 'x') % 36);
+    var detailRows = [7, 12, 23, 41, 58].slice(0, Math.min(5, failed));
+    var details = detailRows.map(function (rowNo, i) {
+      if (i % 3 === 1) {
+        return { row: rowNo, en: 'pool_type value is not in the enum', zh: 'pool_type 值不在枚举内' };
+      }
+      if (i % 3 === 2) {
+        return { row: rowNo, en: 'account level row without overdraft_id', zh: '账户级记录缺少 overdraft_id' };
+      }
+      return { row: rowNo, en: 'third_customer_id duplicated (same as row ' + Math.max(1, rowNo - 5) + ')', zh: 'third_customer_id 重复（与第 ' + Math.max(1, rowNo - 5) + ' 行相同）' };
+    });
+    return { fileName: fileName, parsed: parsed, passed: parsed - failed, failed: failed, details: details };
   }
 
-  // ── 事件绑定 ──
+  function resetUploadModal() {
+    el.fileName.textContent = '';
+    attr(el.fileName, 'No file selected', '未选择文件');
+    el.uploadPreview.hidden = true;
+    el.uploadError.hidden = true;
+    el.uploadDetail.hidden = true;
+    el.uploadDetailList.innerHTML = '';
+    el.uploadConfirm.disabled = true;
+    el.parseResult = null;
+    if (el.fileInput) el.fileInput.value = '';
+  }
+
+  // ── 事件绑定 ──────────────────────────────────────────
   function bind() {
     // Tab
     el.tabs.forEach(function (tab) {
@@ -394,10 +458,7 @@
       btn.addEventListener('click', function () {
         var action = btn.getAttribute('data-sl-action');
         if (action === 'upload') {
-          el.fileName.textContent = '';
-          attr(el.fileName, 'No file selected', '未选择文件');
-          el.uploadPreview.hidden = true;
-          el.uploadConfirm.disabled = true;
+          resetUploadModal();
           openModal('upload');
         } else if (action === 'single') {
           el.singleError.hidden = true;
@@ -446,33 +507,60 @@
       node.addEventListener('click', closeModal);
     });
 
-    // 移除单条 / 恢复批次
+    // 名单：移除（带确认）
     el.tbody.addEventListener('click', function (e) {
       var btn = e.target.closest('[data-sl-remove]');
       if (!btn) return;
-      var cid = btn.getAttribute('data-sl-cid');
-      state.rows = state.rows.filter(function (r) { return r.cid !== cid; });
-      var batch = state.batches.find(function (b) { return b.no === state.activeBatch; });
-      if (batch) batch.count = state.rows.length;
-      renderList();
-      renderBatches();
-      toast('Record removed', '已移除该条记录', 'ok');
+      var cid = btn.getAttribute('data-sl-remove');
+      openConfirm({
+        titleEn: 'Remove record',
+        titleZh: '移除记录',
+        textEn: 'Remove ' + shortId(cid) + ' from the active list? This takes effect immediately in limit adjustment.',
+        textZh: '确认把 ' + shortId(cid) + ' 从当前生效名单中移除？移除后立即按常规逻辑参与调额。',
+        danger: true,
+        onOk: function () {
+          state.rows = state.rows.filter(function (r) { return r.cid !== cid; });
+          var batch = activeBatchObj();
+          if (batch) batch.count = state.rows.length;
+          renderList();
+          renderBatches();
+          toast('Record removed', '已移除该条记录', 'ok');
+        }
+      });
     });
+
+    // 批次：恢复为生效（带确认）
     el.batchTbody.addEventListener('click', function (e) {
       var btn = e.target.closest('[data-sl-activate]');
       if (!btn) return;
       var no = btn.getAttribute('data-sl-activate');
-      state.batches.forEach(function (b) {
-        b.status = b.no === no ? 'active' : 'overwritten';
+      var target = null;
+      state.batches.forEach(function (b) { if (b.no === no) target = b; });
+      if (!target) return;
+      openConfirm({
+        titleEn: 'Restore batch',
+        titleZh: '恢复为生效批次',
+        textEn: 'Restore ' + no + ' (' + fmt(target.count) + ' records) as the active batch? The current active batch will be marked as overwritten.',
+        textZh: '确认把批次 ' + no + '（' + fmt(target.count) + ' 条）恢复为生效？当前生效批次将被标记为「已覆盖」。',
+        onOk: function () {
+          state.batches.forEach(function (b) {
+            b.status = (b.no === no) ? 'active' : (b.status === 'closed' ? 'closed' : 'overwritten');
+          });
+          state.activeBatch = no;
+          state.rows = buildRows(no, target.count, target.createdAt);
+          state.page = 1;
+          renderBatches();
+          renderList();
+          toast('Batch switched', '已切换生效批次', 'ok');
+        }
       });
-      state.activeBatch = no;
-      renderBatches();
-      renderList();
-      toast('Batch switched', '已切换生效批次', 'ok');
     });
 
-    // 上传弹窗
-    el.filePick.addEventListener('click', function () { el.fileInput.click(); });
+    // 上传弹窗：选择文件
+    el.filePick.addEventListener('click', function () {
+      el.fileInput.value = '';
+      el.fileInput.click();
+    });
     el.fileInput.addEventListener('change', function () {
       var file = el.fileInput.files && el.fileInput.files[0];
       if (!file) return;
@@ -482,68 +570,131 @@
       el.fileName.removeAttribute('data-en');
       el.fileName.removeAttribute('data-zh');
       el.uploadPreview.hidden = false;
-      el.uploadParsed.textContent = result.parsed.toLocaleString('en-US');
-      el.uploadPassed.textContent = result.passed.toLocaleString('en-US');
-      el.uploadFailed.textContent = result.failed.toLocaleString('en-US');
-      el.uploadConfirm.disabled = false;
+      el.uploadParsed.textContent = fmt(result.parsed);
+      el.uploadPassed.textContent = fmt(result.passed);
+      el.uploadFailed.textContent = fmt(result.failed);
+
+      if (result.failed > 0) {
+        attr(el.uploadError,
+          result.failed + ' duplicate / invalid rows — the whole batch will not be imported. Fix the file and try again.',
+          '存在 ' + result.failed + ' 条重复 / 非法记录，整批不导入；请修正后重试。');
+        el.uploadDetailList.innerHTML = '';
+        result.details.forEach(function (d) {
+          var li = document.createElement('li');
+          var prefixEn = 'Row ' + d.row + ': ';
+          var prefixZh = '第 ' + d.row + ' 行：';
+          attr(li, prefixEn + d.en, prefixZh + d.zh);
+          el.uploadDetailList.appendChild(li);
+        });
+        if (result.failed > result.details.length) {
+          var more = document.createElement('li');
+          attr(more,
+            'and ' + (result.failed - result.details.length) + ' more…',
+            '……其余 ' + (result.failed - result.details.length) + ' 条');
+          el.uploadDetailList.appendChild(more);
+        }
+        el.uploadDetail.hidden = false;
+        el.uploadError.hidden = false;
+        el.uploadConfirm.disabled = true;
+      } else {
+        el.uploadError.hidden = true;
+        el.uploadDetail.hidden = true;
+        el.uploadDetailList.innerHTML = '';
+        el.uploadConfirm.disabled = false;
+      }
+      if (window.__ugApplyLang) window.__ugApplyLang();
     });
+
+    // 上传弹窗：确认导入
     el.uploadConfirm.addEventListener('click', function () {
       var result = el.parseResult;
-      if (!result) return;
+      if (!result || result.failed > 0) return;
       var no = nextBatchNo();
+      var createdAt = nowText();
       state.batches.forEach(function (b) { if (b.status === 'active') b.status = 'overwritten'; });
       state.batches.unshift({
         no: no, source: 'file', count: result.passed, status: 'active',
-        operator: 'baksun', createdAt: nowText()
+        operator: 'baksun', createdAt: createdAt
       });
       state.activeBatch = no;
-      // 覆盖语义：名单内容整体替换为本次文件的数据（原型用示例行代替真实文件内容）
-      state.rows = mockRowsFromFile(12);
+      state.rows = buildRows(no, result.passed, createdAt);
       state.page = 1;
+      closeModal();
       renderBatches();
       renderList();
-      closeModal();
-      toast('Imported ' + result.passed.toLocaleString('en-US') + ' records',
-        '已导入 ' + result.passed.toLocaleString('en-US') + ' 条，上一批次自动标记为已覆盖', 'ok');
+      toast('Imported ' + fmt(result.passed) + ' records',
+        '已导入 ' + fmt(result.passed) + ' 条，上一批次自动标记为已覆盖', 'ok');
     });
 
     // 单条新增
+    el.singleLevel.addEventListener('change', function () {
+      el.singleAccountReq.hidden = el.singleLevel.value !== 'account';
+    });
     el.singleConfirm.addEventListener('click', function () {
       var cid = el.singleCustomer.value.trim();
+      var level = el.singleLevel.value;
+      var od = el.singleAccount.value.trim();
       var tag = el.singleTag.value;
+      function fail(en, zh) {
+        el.singleError.hidden = false;
+        attr(el.singleError, en, zh);
+        if (window.__ugApplyLang) window.__ugApplyLang();
+      }
       if (!cid) {
-        el.singleError.hidden = false;
-        attr(el.singleError, 'Customer ID is required', '用户标识必填');
-        if (window.__ugApplyLang) window.__ugApplyLang();
+        fail('Customer ID is required', '用户标识必填');
         return;
       }
-      var dup = findDuplicate(cid, null);
+      if (level === 'account' && !od) {
+        fail('Account ID is required for account-level records', '账户级标签必须填写账户标识');
+        return;
+      }
+      var dup = findDuplicate(cid);
       if (dup) {
-        el.singleError.hidden = false;
-        attr(el.singleError,
-          'This customer already has a tag — one tag per customer.',
+        fail('This customer already has a tag — one tag per customer.',
           '该用户已有标签（' + TAGS[dup.tag].zh + '），一人仅允许一个标签');
-        if (window.__ugApplyLang) window.__ugApplyLang();
         return;
       }
-      state.rows.push({
-        cid: cid, od: el.singleAccount.value.trim(), level: el.singleLevel.value,
-        tag: tag, group: el.singleGroup.value.trim() || '未分组',
+      state.rows.unshift({
+        cid: cid, od: od, level: level, tag: tag,
+        group: el.singleGroup.value.trim() || '未分组',
         source: 'manual', updatedAt: nowText()
       });
-      var batch = state.batches.find(function (b) { return b.no === state.activeBatch; });
+      var batch = activeBatchObj();
       if (batch) batch.count = state.rows.length;
       el.singleCustomer.value = '';
       el.singleAccount.value = '';
       el.singleGroup.value = '';
       el.singleRemark.value = '';
+      el.singleLevel.value = 'user';
+      el.singleTag.value = 'no_adjust';
+      el.singleAccountReq.hidden = true;
       el.singleError.hidden = true;
+      state.page = 1;
+      closeModal();
       renderList();
       renderBatches();
-      closeModal();
       toast('Record added', '已新增 1 条记录', 'ok');
     });
 
+    // 下载导入模板（CSV）
+    if (el.templateLink) {
+      el.templateLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        var header = 'third_customer_id,overdraft_id,tag_level,pool_type,detail_group,remark';
+        var sample1 = 'F3B2F35A27F065672D506E99E76DF57F6988818498F860B80DDA84B13A985C14,72349947,user,increase_only,Staff组,员工入职';
+        var sample2 = 'DFAC72F8DEF3BBD12ABD0A081428C1CDA6AC4E7824CEC788618A61F600DBDBE9,80111462,account,no_adjust,回捞组,回捞实验期内锁定';
+        var csv = '﻿' + [header, sample1, sample2].join('\n') + '\n';
+        var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'special_pool_list_template.csv';
+        root.appendChild(a);
+        a.click();
+        root.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      });
+    }
   }
 
   // 缓存常用节点
