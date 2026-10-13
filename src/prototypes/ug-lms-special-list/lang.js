@@ -1,8 +1,11 @@
 (function () {
   var STORAGE_KEY = 'ug-lms-lang';
 
+  // 兼容无参调用：其它脚本会在重渲染后调 window.__ugApplyLang()，
+  // 若不兜底会把 data-lang 写成 "undefined"，整页退回英文。
   function apply(lang) {
-    var isZh = lang === 'zh';
+    var target = (lang === 'zh' || lang === 'en') ? lang : currentLang();
+    var isZh = target === 'zh';
     document.querySelectorAll('[data-zh]').forEach(function (el) {
       var next = isZh ? el.getAttribute('data-zh') : el.getAttribute('data-en');
       if (next !== null) el.textContent = next;
@@ -12,11 +15,11 @@
         ? el.getAttribute('data-zh-placeholder')
         : el.getAttribute('data-en-placeholder'));
     });
-    document.documentElement.setAttribute('data-lang', lang);
+    document.documentElement.setAttribute('data-lang', target);
     var label = document.querySelector('.ug-lang-label');
     if (label) label.textContent = isZh ? '中文' : 'English';
     document.querySelectorAll('.ug-lang-menu li').forEach(function (li) {
-      li.setAttribute('aria-selected', String(li.getAttribute('data-lang') === lang));
+      li.setAttribute('aria-selected', String(li.getAttribute('data-lang') === target));
     });
   }
 
