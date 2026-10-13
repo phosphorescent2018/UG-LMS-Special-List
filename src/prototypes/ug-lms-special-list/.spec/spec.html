@@ -167,6 +167,7 @@
       <li>图标 sprite 内联在 <code>page.html</code> 顶部（隐藏 svg），保证离线可用。</li>
       <li>折叠子菜单的 <code>&lt;li&gt;/&lt;ul&gt;</code> 不写死高度，由展开状态决定；<code>menu.js</code> 负责点击切换，<code>index.tsx</code> 以脚本注入方式加载它（innerHTML 不执行 script）。</li>
       <li>可翻译文案在 DOM 上带 <code>data-en</code> / <code>data-zh</code>（输入框为 <code>data-en-placeholder</code> / <code>data-zh-placeholder</code>），<code>lang.js</code> 负责切换并记住选择。</li>
+      <li><code>lang.js</code> 的 <code>apply()</code> 支持无参调用：缺参时回退到当前语言。其它脚本在重渲染后会调 <code>window.__ugApplyLang()</code>，若不兜底会把 <code>data-lang</code> 写成 <code>"undefined"</code> 导致整页退回英文。</li>
       <li><code>static-style.css</code> 顺序为：全局重置 → 补齐的 Tailwind 工具类 → 精确 computedStyle → antd 子菜单箭头与选中态样式；后两者覆盖前两者。</li>
       <li>生成脚本：<code>&lt;UG工作区&gt;/credit-application-clone/work/build.py</code>（还原）与 <code>export_make.py</code>（导出到本原型）。</li>
     </ul>
