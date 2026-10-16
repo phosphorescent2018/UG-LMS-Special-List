@@ -575,7 +575,7 @@
   // ── 文件解析（模拟）────────────────────────────────────
   function mockParseFile(fileName) {
     var lower = String(fileName || '').toLowerCase();
-    var failing = /(dup|repeat|重复|非法|invalid|fail|error|冲突)/.test(lower);
+    var failing = /(非法|invalid|fail|error)/.test(lower);
     var parsed = 1240 + (hashStr(lower) % 420);
     if (!failing) {
       var ow = Math.floor(parsed * 0.15);
@@ -895,9 +895,9 @@
       var dup = findSameLevelDup(level, idVal);
       if (dup) {
         fail('This ' + (level === 'user' ? 'third_customer_id' : 'overdraft_id') +
-          ' already exists — add does not overwrite; use file upload to update.',
+          ' already exists — add does not overwrite; update via file upload, or delete then re-add.',
           '该 ' + (level === 'user' ? 'third_customer_id' : 'overdraft_id') +
-          ' 已存在一条记录——新增不会覆盖，如需更新请用上传覆盖。');
+          ' 已存在一条记录——新增不会覆盖；如需更新请用上传覆盖，或删除后重新新增。');
         return;
       }
       var sRaw = el.singleStart.value;

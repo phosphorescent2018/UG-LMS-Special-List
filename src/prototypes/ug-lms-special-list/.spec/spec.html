@@ -91,6 +91,7 @@
       <li>字体依赖本机字体（-apple-system / PingFang SC），跨平台渲染会有细微差异。</li>
       <li>特殊执行名单页的执行侧匹配（odid → tcid 优先级）与跨层级共存语义只做文档口径，原型不模拟执行端；「一人一标签」在原型内以「同层级同键唯一」模拟。</li>
       <li>有效期校验的时间比较使用浏览器本机时间（生产为 opco 本地时间）；记录状态按页面打开时刻派生。</li>
+      <li>批次列表的分页与筛选：需求已列；原型演示数据不足一页，暂未体现。</li>
     </ul>
 
     <h2>六、交互还原</h2>
@@ -99,7 +100,7 @@
       <tr>
         <td>侧边菜单展开 / 收起</td>
         <td>✅ 已还原</td>
-        <td>导出时 Credit Management、Order Inquiry、Financial Products、System Management 处于收起状态、子项不在 DOM 中；已按导出包 <code>content.md</code> 的菜单结构补全，并用 <code>menu.js</code> 切换 <code>ant-menu-submenu-open</code>，视觉沿用原 antd 行为。</td>
+        <td>导出时 Credit Management、Order Inquiry、Financial Products、System Management 处于收起状态、子项不在 DOM 中；已按导出包 <code>content.md</code> 的菜单结构补全，并用 <code>interaction.js</code> 切换 <code>ant-menu-submenu-open</code>，视觉沿用原 antd 行为。</td>
       </tr>
       <tr>
         <td>中 / 英语言切换</td>
@@ -142,7 +143,7 @@
     <ul>
       <li>演示数据为确定性生成（时间按小时取整，同一小时内刷新结果一致）；初始 4 个导入批次（3 个已生效 + 1 个处理失败），名单共 1,240 条；时间窗以当前时间为基准分布（生效中 / 未生效 / 已失效，少量已停用）。</li>
       <li><b>增量导入联动</b>：上传预览「解析 / 新增 / 覆盖 / 非法」为本次文件口径；导入通过后名单条数 = 原条数 + 新增；批次详情保留解析 / 新增 / 覆盖三个数字。</li>
-      <li><b>演示整批拦截</b>：上传文件名包含 <code>dup</code> / <code>重复</code> / <code>非法</code> / <code>invalid</code> / <code>fail</code> / <code>error</code> / <code>冲突</code> 时，模拟校验失败（单 ID 互斥、ID 缺失、时间格式、开始时间早于当前、失效早于生效、组不在预设等），整批放弃并列出失败明细；其余文件名模拟全部通过。</li>
+      <li><b>演示整批拦截</b>：上传文件名包含 <code>非法</code> / <code>invalid</code> / <code>fail</code> / <code>error</code> 时，模拟校验失败（单 ID 互斥、ID 缺失、时间格式、开始时间早于当前、失效早于生效、组不在预设等），整批放弃并列出失败明细；其余文件名模拟全部通过。<b>触发词仅为演示开关，不代表真实校验逻辑；文件内同键重复按「后行覆盖前行」属合法行为。</b></li>
       <li>单条新增：标签层级切换只显示对应 ID 输入框；同键已存在时拦截提示「新增不会覆盖」；开始时间早于当前（5 分钟宽限）被拦截。</li>
       <li>执行端匹配口径（文档口径，原型不模拟）：先按 <code>overdraft_id</code> 查账户级、命中即执行；未命中再按 <code>third_customer_id</code> 查用户级；都未命中走常规。</li>
     </ul>
@@ -168,7 +169,7 @@
     <ul>
       <li><code>page.html</code> 由导出包的 DOM 树逐节点生成，保留原始 class / id / 内联尺寸，宿主为 <code>#root-master</code>。</li>
       <li>图标 sprite 内联在 <code>page.html</code> 顶部（隐藏 svg），保证离线可用。</li>
-      <li>折叠子菜单的 <code>&lt;li&gt;/&lt;ul&gt;</code> 不写死高度，由展开状态决定；<code>menu.js</code> 负责点击切换，<code>index.tsx</code> 以脚本注入方式加载它（innerHTML 不执行 script）。</li>
+      <li>折叠子菜单的 <code>&lt;li&gt;/&lt;ul&gt;</code> 不写死高度，由展开状态决定；<code>interaction.js</code> 负责点击切换，<code>index.tsx</code> 以脚本注入方式加载它（innerHTML 不执行 script）。</li>
       <li>可翻译文案在 DOM 上带 <code>data-en</code> / <code>data-zh</code>（输入框为 <code>data-en-placeholder</code> / <code>data-zh-placeholder</code>），<code>lang.js</code> 负责切换并记住选择。</li>
       <li><code>lang.js</code> 的 <code>apply()</code> 支持无参调用：缺参时回退到当前语言。其它脚本在重渲染后会调 <code>window.__ugApplyLang()</code>，若不兜底会把 <code>data-lang</code> 写成 <code>"undefined"</code> 导致整页退回英文。</li>
       <li><code>static-style.css</code> 顺序为：全局重置 → 补齐的 Tailwind 工具类 → 精确 computedStyle → antd 子菜单箭头与选中态样式；后两者覆盖前两者。</li>
