@@ -446,6 +446,18 @@
       tr.appendChild(tdTime);
 
       var tdAction = document.createElement('td');
+      var actB = document.createElement('div');
+      actB.className = 'sl-actions';
+      var btnDl = document.createElement('button');
+      btnDl.type = 'button';
+      btnDl.className = 'sl-link';
+      btnDl.style.border = '0';
+      btnDl.style.background = 'transparent';
+      btnDl.style.cursor = 'pointer';
+      btnDl.style.padding = '0';
+      btnDl.dataset.slBatchDl = batch.no;
+      attr(btnDl, 'Download', '下载');
+      actB.appendChild(btnDl);
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'sl-link';
@@ -455,7 +467,8 @@
       btn.style.padding = '0';
       btn.dataset.slDetail = batch.no;
       attr(btn, 'Details', '详情');
-      tdAction.appendChild(btn);
+      actB.appendChild(btn);
+      tdAction.appendChild(actB);
       tr.appendChild(tdAction);
 
       el.batchTbody.appendChild(tr);
@@ -524,6 +537,7 @@
         : ('Total ' + fmt(batch.count) + ' rows — previewing the first ' + Math.min(10, batch.count) + '.');
     }
     el.bdNote.textContent = note;
+    el.bdCurrent = batch.no;
 
     openModal('batch');
     if (window.__ugApplyLang) window.__ugApplyLang();
@@ -585,19 +599,10 @@
     var added = Math.floor((parsed - failed) * 0.15);
     var overwritten = parsed - failed - added;
     var detailRows = [7, 12, 23, 41, 58].slice(0, Math.min(5, failed));
-    var cycle = [
-      { en: 'user-level row must not contain overdraft_id', zh: '用户级记录不允许填写 overdraft_id' },
-      { en: 'account-level row must not contain third_customer_id', zh: '账户级记录不允许填写 third_customer_id' },
-      { en: 'user-level row is missing third_customer_id', zh: '用户级记录缺少 third_customer_id' },
-      { en: 'account-level row is missing overdraft_id', zh: '账户级记录缺少 overdraft_id' },
-      { en: 'invalid time format (expected YYYY-MM-DD HH:mm:ss)', zh: '时间格式非法（应为 YYYY-MM-DD HH:mm:ss）' },
-      { en: 'start time must not be earlier than now', zh: '开始时间不得早于当前时间' },
-      { en: 'end time must be later than start time', zh: '失效时间必须晚于生效时间' },
-      { en: 'detail_group is not in the preset list', zh: 'detail_group 不在预设八个组清单内' }
-    ];
+    var cycle = failureCycle();
     var details = detailRows.map(function (rowNo, i) {
       var c = cycle[i % cycle.length];
-      return { row: rowNo, en: c.en, zh: c.zh };
+      return { row: rowNo, en: c.en, zh: c.zh, fields: mockBadRow(i % cycle.length, rowNo) };
     });
     return { fileName: fileName, parsed: parsed, added: added, overwritten: overwritten, failed: failed, details: details };
   }
@@ -616,6 +621,98 @@
     el.uploadConfirm.disabled = true;
     el.parseResult = null;
     if (el.fileInput) el.fileInput.value = '';
+  }
+
+  // ── 文件下载 ──────────────────────────────────────────
+  function csvEscape(v) {
+    var s = String(v === null || v === undefined ? '' : v);
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+
+  function triggerDownload(blob, fileName) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    root.appendChild(a);
+    a.click();
+    root.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  var CSV_HEADER = 'third_customer_id,overdraft_id,tag_level,pool_type,detail_group,effective_start,effective_end,remark';
+
+  function downloadBatchFile(no) {
+    var batch = null;
+    state.batches.forEach(function (b) { if (b.no === no) batch = b; });
+    if (!batch) return;
+    if (batch.file) {
+      triggerDownload(batch.file, batch.file.name || (batch.no + '.csv'));
+      toast('Source file downloaded', '已下载原文件：' + (batch.file.name || batch.no), 'ok');
+      return;
+    }
+    var rows = genRows(batch.no, batch.count, batch.createdAt, { fileOnly: true });
+    var lines = rows.map(function (r) {
+      return [r.level === 'user' ? r.id : '', r.level === 'account' ? r.id : '',
+        r.level, r.tag, r.group, r.start, r.end, ''].map(csvEscape).join(',');
+    });
+    var csv = [CSV_HEADER].concat(lines).join('\n') + '\n';
+    triggerDownload(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }), batch.no + '_source.csv');
+    toast('Source file downloaded', '已下载原文件：' + batch.no, 'ok');
+  }
+
+  function failureCycle() {
+    return [
+      { en: 'user-level row must not contain overdraft_id', zh: '用户级记录不允许填写 overdraft_id' },
+      { en: 'account-level row must not contain third_customer_id', zh: '账户级记录不允许填写 third_customer_id' },
+      { en: 'user-level row is missing third_customer_id', zh: '用户级记录缺少 third_customer_id' },
+      { en: 'account-level row is missing overdraft_id', zh: '账户级记录缺少 overdraft_id' },
+      { en: 'invalid time format (expected YYYY-MM-DD HH:mm:ss)', zh: '时间格式非法（应为 YYYY-MM-DD HH:mm:ss）' },
+      { en: 'start time must not be earlier than now', zh: '开始时间不得早于当前时间' },
+      { en: 'end time must be later than start time', zh: '失效时间必须晚于生效时间' },
+      { en: 'detail_group is not in the preset list', zh: 'detail_group 不在预设八个组清单内' }
+    ];
+  }
+
+  function mockBadRow(i, rowNo) {
+    var rnd = mulberry32(hashStr('bad' + rowNo));
+    var cid = hexId(rnd);
+    var od = String(10000000 + Math.floor(rnd() * 89999999));
+    var t1 = '2026-12-01 09:00:00';
+    var t2 = '2027-12-01 09:00:00';
+    var cases = [
+      [cid, od, 'user', 'increase_only', 'Staff组', t1, t2, ''],
+      [cid, od, 'account', 'no_adjust', '回捞组', t1, t2, ''],
+      ['', '', 'user', 'decrease_only', '风险触发组', t1, t2, ''],
+      ['', '', 'account', 'no_adjust', '模型切换实验组', t1, t2, ''],
+      [cid, '', 'user', 'increase_only', 'Staff组', '2026/12/01 9:00', t2, ''],
+      [cid, '', 'user', 'decrease_only', '人工降额名单组', '2026-01-01 10:00:00', t2, ''],
+      [cid, '', 'user', 'increase_only', 'Staff组', '2027-05-01 09:00:00', '2026-12-01 09:00:00', ''],
+      [cid, '', 'user', 'decrease_only', '测试新组', t1, t2, '']
+    ];
+    return cases[i % cases.length];
+  }
+
+  function downloadFailureDetails() {
+    var result = el.parseResult;
+    if (!result || !result.failed) return;
+    var cycle = failureCycle();
+    var rows = [];
+    result.details.forEach(function (d, i) {
+      rows.push({ row: d.row, fields: mockBadRow(i % cycle.length, d.row), reason: d.zh });
+    });
+    for (var j = result.details.length; j < result.failed; j += 1) {
+      var rowNo = 60 + ((j * 7) % 40);
+      rows.push({ row: rowNo, fields: mockBadRow(j % cycle.length, rowNo), reason: cycle[j % cycle.length].zh });
+    }
+    var header = '行号,' + CSV_HEADER + ',失败原因';
+    var lines = rows.map(function (r) {
+      return [String(r.row)].concat(r.fields).concat([r.reason]).map(csvEscape).join(',');
+    });
+    var base = String(result.fileName || 'import').replace(/\.[^.]+$/, '');
+    triggerDownload(new Blob(['\ufeff' + [header].concat(lines).join('\n') + '\n'],
+      { type: 'text/csv;charset=utf-8' }), base + '_failures.csv');
+    toast('Failure details downloaded', '已下载失败明细', 'ok');
   }
 
   // ── 筛选 ──────────────────────────────────────────────
@@ -775,11 +872,21 @@
       });
     });
 
-    // 批次：详情
+    // 批次：下载 / 详情
     el.batchTbody.addEventListener('click', function (e) {
+      var dlBtn = e.target.closest('[data-sl-batch-dl]');
+      if (dlBtn) {
+        downloadBatchFile(dlBtn.getAttribute('data-sl-batch-dl'));
+        return;
+      }
       var btn = e.target.closest('[data-sl-detail]');
       if (!btn) return;
       openBatchDetail(btn.getAttribute('data-sl-detail'));
+    });
+
+    // 批次详情：下载原文件
+    el.bdDownload.addEventListener('click', function () {
+      if (el.bdCurrent) downloadBatchFile(el.bdCurrent);
     });
 
     // 上传弹窗：选择文件
@@ -832,17 +939,24 @@
       if (window.__ugApplyLang) window.__ugApplyLang();
     });
 
+    // 上传弹窗：下载失败明细
+    if (el.uploadDl) {
+      el.uploadDl.addEventListener('click', downloadFailureDetails);
+    }
+
     // 上传弹窗：确认导入（增量合并：处理中 → 已生效）
     el.uploadConfirm.addEventListener('click', function () {
       var result = el.parseResult;
       if (!result || result.failed > 0 || state.processing) return;
       var no = nextBatchNo();
       var createdAt = nowText();
+      var srcFile = el.fileInput && el.fileInput.files && el.fileInput.files[0];
       var batch = {
         no: no, source: 'file', count: result.parsed,
         added: result.added, overwritten: result.overwritten,
         status: 'processing', operator: 'baksun', createdAt: createdAt
       };
+      if (srcFile) batch.file = srcFile;
       state.batches.unshift(batch);
       state.lastBatch = no;
       state.processing = true;
@@ -1010,6 +1124,8 @@
   el.bdFail = root.querySelector('#sl-bd-fail');
   el.bdTbody = root.querySelector('#sl-bd-tbody');
   el.bdNote = root.querySelector('#sl-bd-note');
+  el.bdDownload = root.querySelector('#sl-bd-download');
+  el.uploadDl = root.querySelector('#sl-upload-dl');
   el.fileInput = (function () {
     var input = document.createElement('input');
     input.type = 'file';

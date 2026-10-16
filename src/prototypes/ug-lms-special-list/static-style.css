@@ -297,6 +297,7 @@ input.ant-input { width: 100%; }
 .sl-detail-title { font-size: 13px; color: rgb(116, 121, 140); margin-bottom: 4px; }
 .sl-detail-list { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.9; color: rgb(3, 25, 56); }
 .sl-detail-list li { word-break: break-all; }
+.sl-detail-dl { margin-top: 8px; height: 28px; padding: 0 12px; font-size: 13px; }
 
 /* Filters */
 .sl-filters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 16px; padding: 0 24px 14px; }
