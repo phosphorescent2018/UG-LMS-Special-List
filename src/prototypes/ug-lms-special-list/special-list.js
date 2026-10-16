@@ -1,9 +1,13 @@
 /* 特殊执行名单页交互（原型）
  *
- * 这是**前端原型的模拟实现**：名单数据、文件解析结果、批次状态全部在内存里。
- * 真实系统里：文件解析与校验、一人一标签校验、批次落库、执行时名单校验都在后端完成。
+ * 前端原型模拟实现：名单数据、文件解析结果、批次状态全部在内存里。
+ * 真实系统：文件解析与校验、同键覆盖（增量合并）、批次落库、执行时名单校验（odid → tcid 优先级）都在后端完成。
  *
- * 演示数据口径：预览「解析条数 / 通过 / 重复非法」与导入后的名单条数、批次条数三者一致。
+ * 演示口径：
+ *   - 上传 = 增量导入：同键（同层级同 ID）以新文件为准覆盖、其余记录全部保留；任一行校验不过 → 本次整批放弃。
+ *   - 预览「解析 / 新增 / 覆盖 / 非法」按本次文件口径；导入后名单条数 = 原条数 + 新增。
+ *   - 记录带有效期（生效/失效时间，全必填）；状态派生：未生效 / 生效中 / 已失效 / 已停用。
+ *   - 批次 = 一次导入的变更记录；状态机：处理中 → 已生效 / 处理失败；操作列仅「详情」。
  */
 (function () {
   var root = document.querySelector('.sl-page');
@@ -20,13 +24,20 @@
     account: { en: 'Account', zh: '账户级' }
   };
   var SOURCES = {
-    file: { en: 'File', zh: '文件上传' },
+    file: { en: 'File import', zh: '文件上传' },
     manual: { en: 'Manual', zh: '手工维护' }
   };
+  var GROUPS = ['回捞组', '激进提额组', '降额实验组', '模型切换实验组', 'Staff组', '白名单组', '风险触发组', '人工降额名单组'];
+  var RECORD_STATUS = {
+    active: { en: 'Active', zh: '生效中', badge: 'sl-badge-green' },
+    upcoming: { en: 'Not started', zh: '未生效', badge: 'sl-badge-blue' },
+    expired: { en: 'Expired', zh: '已失效', badge: 'sl-badge-gray' },
+    disabled: { en: 'Disabled', zh: '已停用', badge: 'sl-badge-orange' }
+  };
   var BATCH_STATUS = {
-    active: { en: 'Active', zh: '生效中', badge: 'sl-badge-blue' },
-    overwritten: { en: 'Overwritten', zh: '已覆盖', badge: 'sl-badge-gray' },
-    closed: { en: 'Closed', zh: '已作废', badge: 'sl-badge-gray' }
+    processing: { en: 'Processing', zh: '处理中', badge: 'sl-badge-blue' },
+    active: { en: 'Effective', zh: '已生效', badge: 'sl-badge-green' },
+    failed: { en: 'Failed', zh: '处理失败', badge: 'sl-badge-red' }
   };
 
   function isZh() {
@@ -48,23 +59,57 @@
     return id.length > 22 ? id.slice(0, 12) + '…' + id.slice(-6) : id;
   }
 
-  function nowText() {
-    var d = new Date();
-    function p(n) { return (n < 10 ? '0' : '') + n; }
-    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' +
-      p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+  function pad(n) {
+    return (n < 10 ? '0' : '') + n;
   }
 
-  var batchSeq = 3;
+  function fmtD(d) {
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' +
+      pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+  }
+
+  function nowText() {
+    return fmtD(new Date());
+  }
+
+  function toInputVal(d) {
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' +
+      pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+
+  function roundHour(d) {
+    var x = new Date(d.getTime());
+    x.setMinutes(0, 0, 0);
+    return x;
+  }
+
+  function parseTime(str) {
+    if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(str)) return null;
+    var p = str.split(/[-: ]/);
+    var d = new Date(+p[0], +p[1] - 1, +p[2], +p[3], +p[4], +p[5]);
+    if (d.getFullYear() !== +p[0] || d.getMonth() !== +p[1] - 1 || d.getDate() !== +p[2] ||
+        d.getHours() !== +p[3] || d.getMinutes() !== +p[4] || d.getSeconds() !== +p[5]) {
+      return null;
+    }
+    return d;
+  }
+
+  function parseInputVal(v) {
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(v)) return null;
+    var s = v.replace('T', ' ');
+    if (s.length === 16) s += ':00';
+    return parseTime(s);
+  }
+
+  var batchSeq = 4;
   function nextBatchNo() {
     batchSeq += 1;
     var d = new Date();
-    function p(n) { return (n < 10 ? '0' : '') + n; }
-    return 'SL' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '-' +
+    return 'SL' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' +
       String(batchSeq).padStart(3, '0');
   }
 
-  // ── 演示数据：确定性生成（同一批次每次生成结果一致）──────
+  // ── 演示数据：确定性生成（同一小时内刷新结果一致）──────
   function hashStr(s) {
     var h = 2166136261;
     for (var i = 0; i < s.length; i += 1) {
@@ -91,30 +136,56 @@
     return out.slice(0, 64).toUpperCase();
   }
 
-  var MANUAL_POOL = [
-    ['user', 'increase_only', 'Staff组', 'manual'],
-    ['user', 'increase_only', '白名单', 'manual'],
-    ['user', 'decrease_only', '人工降额名单', 'manual']
+  var FILE_POOLS = [
+    ['account', 'no_adjust', '回捞组'],
+    ['account', 'no_adjust', '激进提额组'],
+    ['account', 'no_adjust', '降额实验组'],
+    ['account', 'no_adjust', '模型切换实验组'],
+    ['user', 'decrease_only', '风险触发组']
   ];
-  var FILE_POOL = [
-    ['account', 'no_adjust', '回捞组', 'file'],
-    ['account', 'no_adjust', '激进提额组', 'file'],
-    ['account', 'no_adjust', '降额实验组', 'file'],
-    ['account', 'no_adjust', '模型切换实验组', 'file'],
-    ['account', 'decrease_only', '风险触发组', 'file']
+  var MANUAL_POOLS = [
+    ['user', 'increase_only', 'Staff组'],
+    ['user', 'increase_only', '白名单组'],
+    ['user', 'decrease_only', '人工降额名单组']
   ];
 
-  function buildRows(batchNo, count, createdAt) {
-    var rnd = mulberry32(hashStr(batchNo));
+  function pickPool(pool, rnd) {
+    return pool[Math.floor(rnd() * pool.length)];
+  }
+
+  function genRows(seedKey, count, createdAt, opts) {
+    var o = opts || {};
+    var rnd = mulberry32(hashStr(seedKey));
+    var nowMs = roundHour(new Date()).getTime();
     var rows = [];
     for (var i = 0; i < count; i += 1) {
-      var manual = rnd() < 0.12;
-      var pool = manual ? MANUAL_POOL : FILE_POOL;
-      var spec = pool[Math.floor(rnd() * pool.length)];
+      var manual = !o.fileOnly && rnd() < 0.12;
+      var spec = manual ? pickPool(MANUAL_POOLS, rnd) : pickPool(FILE_POOLS, rnd);
+      var bucket = rnd();
+      var startMs, endMs, stopped = false;
+      if (bucket < 0.07) {
+        startMs = nowMs + (1 + Math.floor(rnd() * 30 * 24)) * 3600000;
+        endMs = startMs + (30 + Math.floor(rnd() * 300)) * 86400000;
+      } else if (bucket < 0.14 && !o.noExpired) {
+        endMs = nowMs - (1 + Math.floor(rnd() * 60 * 24)) * 3600000;
+        startMs = endMs - (30 + Math.floor(rnd() * 300)) * 86400000;
+      } else {
+        startMs = nowMs - (1 + Math.floor(rnd() * 90 * 24)) * 3600000;
+        endMs = nowMs + (7 + Math.floor(rnd() * 300)) * 86400000;
+        stopped = rnd() < 0.05;
+      }
+      var id = spec[0] === 'user'
+        ? hexId(rnd)
+        : String(10000000 + Math.floor(rnd() * 89999999));
       rows.push({
-        cid: hexId(rnd),
-        od: String(10000000 + Math.floor(rnd() * 89999999)),
-        level: spec[0], tag: spec[1], group: spec[2], source: spec[3],
+        id: id,
+        level: spec[0],
+        tag: spec[1],
+        group: spec[2],
+        start: fmtD(new Date(startMs)),
+        end: fmtD(new Date(endMs)),
+        stopped: stopped,
+        source: manual ? 'manual' : 'file',
         updatedAt: createdAt
       });
     }
@@ -122,58 +193,57 @@
   }
 
   // ── 状态 ──────────────────────────────────────────────
-  var INITIAL_BATCH = 'SL20261012-003';
   var state = {
-    activeBatch: INITIAL_BATCH,
-    batches: [
-      { no: INITIAL_BATCH, source: 'file', count: 1240, status: 'active', operator: 'baksun', createdAt: '2026-10-12 08:20:31' },
-      { no: 'SL20261012-002', source: 'file', count: 1842, status: 'overwritten', operator: 'baksun', createdAt: '2026-10-12 07:55:02' },
-      { no: 'SL20261011-001', source: 'file', count: 1795, status: 'overwritten', operator: 'jolie', createdAt: '2026-10-11 19:03:44' }
-    ],
     rows: [],
-    filter: '',
+    lastBatch: 'SL20261015-004',
+    batches: [
+      { no: 'SL20261015-004', source: 'file', count: 1240, added: 1104, overwritten: 136, status: 'active', operator: 'baksun', createdAt: '2026-10-15 09:12:44' },
+      { no: 'SL20261014-003', source: 'file', count: 486, added: 420, overwritten: 66, status: 'active', operator: 'baksun', createdAt: '2026-10-14 17:38:10' },
+      { no: 'SL20261013-002', source: 'file', count: 318, added: 0, overwritten: 0, status: 'failed', operator: 'jolie', createdAt: '2026-10-13 10:02:55', failReason: '系统处理异常，整批未写入名单' },
+      { no: 'SL20261012-001', source: 'file', count: 952, added: 952, overwritten: 0, status: 'active', operator: 'jolie', createdAt: '2026-10-12 08:31:20' }
+    ],
+    filters: {},
     page: 1,
-    pageSize: 10
+    pageSize: 10,
+    processing: false
   };
-  state.rows = buildRows(INITIAL_BATCH, 1240, state.batches[0].createdAt);
+  state.rows = genRows('SL20261015-004', 1240, state.batches[0].createdAt);
 
-  var el = {
-    tabs: root.querySelectorAll('[data-sl-tab]'),
-    panels: root.querySelectorAll('[data-sl-panel]'),
-    tbody: root.querySelector('#sl-tbody'),
-    batchTbody: root.querySelector('#sl-batch-tbody'),
-    activeBatch: root.querySelector('#sl-active-batch'),
-    total: root.querySelector('#sl-total'),
-    pagerTotal: root.querySelector('#sl-pager-total'),
-    pagerList: root.querySelector('#sl-pager-list'),
-    pagerSize: root.querySelector('#sl-pager-size'),
-    pagerJump: root.querySelector('#sl-pager-jump'),
-    keyword: root.querySelector('#sl-keyword'),
-    toast: root.querySelector('#sl-toast'),
-    confirmTitle: root.querySelector('#sl-confirm-title'),
-    confirmText: root.querySelector('#sl-confirm-text'),
-    confirmOk: root.querySelector('#sl-confirm-ok'),
-    uploadError: root.querySelector('#sl-upload-error'),
-    uploadDetail: root.querySelector('#sl-upload-detail'),
-    uploadDetailList: root.querySelector('#sl-upload-detail-list'),
-    templateLink: root.querySelector('#sl-template-link'),
-    singleAccountReq: root.querySelector('#sl-single-account-req')
-  };
+  var el = {};
 
-  function activeBatchObj() {
-    for (var i = 0; i < state.batches.length; i += 1) {
-      if (state.batches[i].no === state.activeBatch) return state.batches[i];
-    }
-    return null;
+  // ── 派生状态 ──────────────────────────────────────────
+  function rowStatus(r) {
+    if (r.stopped) return 'disabled';
+    var now = new Date();
+    var s = parseTime(r.start);
+    var e = parseTime(r.end);
+    if (s && now.getTime() < s.getTime()) return 'upcoming';
+    if (e && now.getTime() >= e.getTime()) return 'expired';
+    return 'active';
   }
 
   // ── 渲染：名单 ────────────────────────────────────────
   function visibleRows() {
-    var kw = state.filter.trim().toLowerCase();
-    if (!kw) return state.rows;
+    var f = state.filters;
     return state.rows.filter(function (r) {
-      return r.cid.toLowerCase().indexOf(kw) >= 0 || String(r.od).indexOf(kw) >= 0;
+      if (f.tcid && !(r.level === 'user' && r.id.toLowerCase().indexOf(f.tcid.toLowerCase()) >= 0)) return false;
+      if (f.odid && !(r.level === 'account' && r.id.indexOf(f.odid) >= 0)) return false;
+      if (f.level && r.level !== f.level) return false;
+      if (f.tag && r.tag !== f.tag) return false;
+      if (f.group && r.group !== f.group) return false;
+      if (f.source && r.source !== f.source) return false;
+      if (f.status && rowStatus(r) !== f.status) return false;
+      if (f.startFrom && r.start < f.startFrom + ' 00:00:00') return false;
+      if (f.startTo && r.start > f.startTo + ' 23:59:59') return false;
+      if (f.endFrom && r.end < f.endFrom + ' 00:00:00') return false;
+      if (f.endTo && r.end > f.endTo + ' 23:59:59') return false;
+      return true;
     });
+  }
+
+  function renderMeta() {
+    el.lastBatch.textContent = state.lastBatch;
+    el.total.textContent = fmt(state.rows.length);
   }
 
   function renderList() {
@@ -189,7 +259,7 @@
     if (!pageRows.length) {
       var tr = document.createElement('tr');
       var td = document.createElement('td');
-      td.colSpan = 8;
+      td.colSpan = 11;
       td.className = 'sl-empty';
       attr(td, 'No data', '暂无数据');
       tr.appendChild(td);
@@ -197,18 +267,27 @@
     }
     pageRows.forEach(function (row) {
       var tr = document.createElement('tr');
+      var ix = state.rows.indexOf(row);
 
       var tdCid = document.createElement('td');
-      var spanCid = document.createElement('span');
-      spanCid.className = 'sl-mono';
-      spanCid.textContent = shortId(row.cid);
-      spanCid.title = row.cid;
-      tdCid.appendChild(spanCid);
+      if (row.level === 'user') {
+        var spanCid = document.createElement('span');
+        spanCid.className = 'sl-mono';
+        spanCid.textContent = shortId(row.id);
+        spanCid.title = row.id;
+        tdCid.appendChild(spanCid);
+      } else {
+        tdCid.textContent = '—';
+      }
       tr.appendChild(tdCid);
 
       var tdOd = document.createElement('td');
-      tdOd.className = 'sl-mono';
-      tdOd.textContent = row.od || '—';
+      if (row.level === 'account') {
+        tdOd.className = 'sl-mono';
+        tdOd.textContent = row.id;
+      } else {
+        tdOd.textContent = '—';
+      }
       tr.appendChild(tdOd);
 
       var tdLevel = document.createElement('td');
@@ -226,6 +305,24 @@
       tdGroup.textContent = row.group || '—';
       tr.appendChild(tdGroup);
 
+      var tdStart = document.createElement('td');
+      tdStart.className = 'sl-mono';
+      tdStart.textContent = row.start;
+      tr.appendChild(tdStart);
+
+      var tdEnd = document.createElement('td');
+      tdEnd.className = 'sl-mono';
+      tdEnd.textContent = row.end;
+      tr.appendChild(tdEnd);
+
+      var tdStatus = document.createElement('td');
+      var st = RECORD_STATUS[rowStatus(row)];
+      var badgeS = document.createElement('span');
+      badgeS.className = 'sl-badge ' + st.badge;
+      attr(badgeS, st.en, st.zh);
+      tdStatus.appendChild(badgeS);
+      tr.appendChild(tdStatus);
+
       var tdSource = document.createElement('td');
       attr(tdSource, SOURCES[row.source].en, SOURCES[row.source].zh);
       tr.appendChild(tdSource);
@@ -236,23 +333,35 @@
       tr.appendChild(tdTime);
 
       var tdAction = document.createElement('td');
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'sl-link';
-      btn.style.border = '0';
-      btn.style.background = 'transparent';
-      btn.style.cursor = 'pointer';
-      btn.style.padding = '0';
-      btn.dataset.slRemove = row.cid;
-      attr(btn, 'Remove', '移除');
-      tdAction.appendChild(btn);
+      var act = document.createElement('div');
+      act.className = 'sl-actions';
+      var btnStop = document.createElement('button');
+      btnStop.type = 'button';
+      btnStop.className = 'sl-link';
+      btnStop.style.border = '0';
+      btnStop.style.background = 'transparent';
+      btnStop.style.cursor = 'pointer';
+      btnStop.style.padding = '0';
+      btnStop.dataset.slStop = String(ix);
+      attr(btnStop, row.stopped ? 'Enable' : 'Disable', row.stopped ? '启用' : '停用');
+      act.appendChild(btnStop);
+      var btnDel = document.createElement('button');
+      btnDel.type = 'button';
+      btnDel.className = 'sl-link';
+      btnDel.style.border = '0';
+      btnDel.style.background = 'transparent';
+      btnDel.style.cursor = 'pointer';
+      btnDel.style.padding = '0';
+      btnDel.dataset.slDel = String(ix);
+      attr(btnDel, 'Delete', '删除');
+      act.appendChild(btnDel);
+      tdAction.appendChild(act);
       tr.appendChild(tdAction);
 
       el.tbody.appendChild(tr);
     });
 
-    el.activeBatch.textContent = state.activeBatch;
-    el.total.textContent = fmt(state.rows.length);
+    renderMeta();
     renderPager(rows.length, pageCount);
     if (window.__ugApplyLang) window.__ugApplyLang();
   }
@@ -321,8 +430,9 @@
 
       var tdStatus = document.createElement('td');
       var badge = document.createElement('span');
-      badge.className = 'sl-badge ' + BATCH_STATUS[batch.status].badge;
-      attr(badge, BATCH_STATUS[batch.status].en, BATCH_STATUS[batch.status].zh);
+      var st = BATCH_STATUS[batch.status];
+      badge.className = 'sl-badge ' + st.badge;
+      attr(badge, st.en, st.zh);
       tdStatus.appendChild(badge);
       tr.appendChild(tdStatus);
 
@@ -336,25 +446,86 @@
       tr.appendChild(tdTime);
 
       var tdAction = document.createElement('td');
-      if (batch.status === 'active') {
-        attr(tdAction, 'In use', '使用中');
-        tdAction.className = 'sl-muted';
-      } else {
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'sl-link';
-        btn.style.border = '0';
-        btn.style.background = 'transparent';
-        btn.style.cursor = 'pointer';
-        btn.style.padding = '0';
-        btn.dataset.slActivate = batch.no;
-        attr(btn, 'Restore', '恢复为生效');
-        tdAction.appendChild(btn);
-      }
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'sl-link';
+      btn.style.border = '0';
+      btn.style.background = 'transparent';
+      btn.style.cursor = 'pointer';
+      btn.style.padding = '0';
+      btn.dataset.slDetail = batch.no;
+      attr(btn, 'Details', '详情');
+      tdAction.appendChild(btn);
       tr.appendChild(tdAction);
 
       el.batchTbody.appendChild(tr);
     });
+    if (window.__ugApplyLang) window.__ugApplyLang();
+  }
+
+  // ── 批次详情 ──────────────────────────────────────────
+  function openBatchDetail(no) {
+    var batch = null;
+    state.batches.forEach(function (b) { if (b.no === no) batch = b; });
+    if (!batch) return;
+
+    el.bdNo.textContent = batch.no;
+    attr(el.bdSource, SOURCES[batch.source].en, SOURCES[batch.source].zh);
+    el.bdCount.textContent = fmt(batch.count);
+    el.bdAdded.textContent = fmt(batch.added || 0);
+    el.bdOverwritten.textContent = fmt(batch.overwritten || 0);
+    var st = BATCH_STATUS[batch.status];
+    el.bdStatus.className = 'sl-badge ' + st.badge;
+    attr(el.bdStatus, st.en, st.zh);
+    el.bdOperator.textContent = batch.operator;
+    el.bdTime.textContent = batch.createdAt;
+    if (batch.status === 'failed' && batch.failReason) {
+      el.bdFail.textContent = batch.failReason;
+      el.bdFailRow.hidden = false;
+    } else {
+      el.bdFailRow.hidden = true;
+    }
+
+    el.bdTbody.innerHTML = '';
+    var note;
+    if (batch.status === 'failed') {
+      note = isZh() ? '该批次处理失败，未写入名单。' : 'This import failed — nothing was written to the list.';
+    } else if (batch.status === 'processing') {
+      note = isZh() ? '批次处理中，将自动生效。' : 'Processing — it will take effect shortly.';
+    } else {
+      var rows = genRows(batch.no, batch.count, batch.createdAt, { fileOnly: true });
+      rows.slice(0, 10).forEach(function (r) {
+        var tr = document.createElement('tr');
+        var td1 = document.createElement('td');
+        td1.className = 'sl-mono';
+        if (r.level === 'user') { td1.textContent = shortId(r.id); td1.title = r.id; }
+        else td1.textContent = '—';
+        tr.appendChild(td1);
+        var td2 = document.createElement('td');
+        td2.className = 'sl-mono';
+        td2.textContent = r.level === 'account' ? r.id : '—';
+        tr.appendChild(td2);
+        var td3 = document.createElement('td');
+        attr(td3, LEVELS[r.level].en, LEVELS[r.level].zh);
+        tr.appendChild(td3);
+        var td4 = document.createElement('td');
+        var bd = document.createElement('span');
+        bd.className = 'sl-badge ' + TAGS[r.tag].badge;
+        attr(bd, TAGS[r.tag].en, TAGS[r.tag].zh);
+        td4.appendChild(bd);
+        tr.appendChild(td4);
+        var td5 = document.createElement('td');
+        td5.textContent = r.group || '—';
+        tr.appendChild(td5);
+        el.bdTbody.appendChild(tr);
+      });
+      note = isZh()
+        ? ('共 ' + fmt(batch.count) + ' 条，此处预览前 ' + Math.min(10, batch.count) + ' 条。')
+        : ('Total ' + fmt(batch.count) + ' rows — previewing the first ' + Math.min(10, batch.count) + '.');
+    }
+    el.bdNote.textContent = note;
+
+    openModal('batch');
     if (window.__ugApplyLang) window.__ugApplyLang();
   }
 
@@ -375,6 +546,7 @@
       else m.setAttribute('hidden', 'hidden');
     });
   }
+
   function closeModal() {
     root.querySelectorAll('[data-sl-modal]').forEach(function (m) {
       m.setAttribute('hidden', 'hidden');
@@ -390,17 +562,12 @@
     openModal('confirm');
     if (window.__ugApplyLang) window.__ugApplyLang();
   }
-  el.confirmOk.addEventListener('click', function () {
-    var fn = confirmHandler;
-    confirmHandler = null;
-    closeModal();
-    if (fn) fn();
-  });
 
-  // ── 一人一标签校验 ────────────────────────────────────
-  function findDuplicate(cid) {
+  // ── 同键校验（同层级同 ID）────────────────────────────
+  function findSameLevelDup(level, id) {
     for (var i = 0; i < state.rows.length; i += 1) {
-      if (state.rows[i].cid === cid) return state.rows[i];
+      var r = state.rows[i];
+      if (r.level === level && r.id === id) return r;
     }
     return null;
   }
@@ -408,23 +575,31 @@
   // ── 文件解析（模拟）────────────────────────────────────
   function mockParseFile(fileName) {
     var lower = String(fileName || '').toLowerCase();
-    var failing = /(dup|repeat|重复|非法|invalid|fail|error)/.test(lower);
+    var failing = /(dup|repeat|重复|非法|invalid|fail|error|冲突)/.test(lower);
     var parsed = 1240 + (hashStr(lower) % 420);
     if (!failing) {
-      return { fileName: fileName, parsed: parsed, passed: parsed, failed: 0, details: [] };
+      var ow = Math.floor(parsed * 0.15);
+      return { fileName: fileName, parsed: parsed, added: parsed - ow, overwritten: ow, failed: 0, details: [] };
     }
     var failed = 6 + (hashStr(lower + 'x') % 36);
+    var added = Math.floor((parsed - failed) * 0.15);
+    var overwritten = parsed - failed - added;
     var detailRows = [7, 12, 23, 41, 58].slice(0, Math.min(5, failed));
+    var cycle = [
+      { en: 'user-level row must not contain overdraft_id', zh: '用户级记录不允许填写 overdraft_id' },
+      { en: 'account-level row must not contain third_customer_id', zh: '账户级记录不允许填写 third_customer_id' },
+      { en: 'user-level row is missing third_customer_id', zh: '用户级记录缺少 third_customer_id' },
+      { en: 'account-level row is missing overdraft_id', zh: '账户级记录缺少 overdraft_id' },
+      { en: 'invalid time format (expected YYYY-MM-DD HH:mm:ss)', zh: '时间格式非法（应为 YYYY-MM-DD HH:mm:ss）' },
+      { en: 'start time must not be earlier than now', zh: '开始时间不得早于当前时间' },
+      { en: 'end time must be later than start time', zh: '失效时间必须晚于生效时间' },
+      { en: 'detail_group is not in the preset list', zh: 'detail_group 不在预设八个组清单内' }
+    ];
     var details = detailRows.map(function (rowNo, i) {
-      if (i % 3 === 1) {
-        return { row: rowNo, en: 'pool_type value is not in the enum', zh: 'pool_type 值不在枚举内' };
-      }
-      if (i % 3 === 2) {
-        return { row: rowNo, en: 'account level row without overdraft_id', zh: '账户级记录缺少 overdraft_id' };
-      }
-      return { row: rowNo, en: 'third_customer_id duplicated (same as row ' + Math.max(1, rowNo - 5) + ')', zh: 'third_customer_id 重复（与第 ' + Math.max(1, rowNo - 5) + ' 行相同）' };
+      var c = cycle[i % cycle.length];
+      return { row: rowNo, en: c.en, zh: c.zh };
     });
-    return { fileName: fileName, parsed: parsed, passed: parsed - failed, failed: failed, details: details };
+    return { fileName: fileName, parsed: parsed, added: added, overwritten: overwritten, failed: failed, details: details };
   }
 
   function resetUploadModal() {
@@ -434,9 +609,61 @@
     el.uploadError.hidden = true;
     el.uploadDetail.hidden = true;
     el.uploadDetailList.innerHTML = '';
+    el.uploadParsed.textContent = '0';
+    el.uploadAdded.textContent = '0';
+    el.uploadOverwritten.textContent = '0';
+    el.uploadFailed.textContent = '0';
     el.uploadConfirm.disabled = true;
     el.parseResult = null;
     if (el.fileInput) el.fileInput.value = '';
+  }
+
+  // ── 筛选 ──────────────────────────────────────────────
+  function readFilters() {
+    return {
+      tcid: el.fTcid.value.trim(),
+      odid: el.fOdid.value.trim(),
+      startFrom: el.fStartFrom.value,
+      startTo: el.fStartTo.value,
+      endFrom: el.fEndFrom.value,
+      endTo: el.fEndTo.value,
+      group: el.fGroup.value,
+      level: el.fLevel.value,
+      tag: el.fTag.value,
+      source: el.fSource.value,
+      status: el.fStatus.value
+    };
+  }
+
+  function applySearch() {
+    state.filters = readFilters();
+    state.page = 1;
+    renderList();
+  }
+
+  function resetFilters() {
+    [el.fTcid, el.fOdid, el.fStartFrom, el.fStartTo, el.fEndFrom, el.fEndTo].forEach(function (n) { n.value = ''; });
+    [el.fGroup, el.fLevel, el.fTag, el.fSource, el.fStatus].forEach(function (n) { n.value = ''; });
+    state.filters = {};
+    state.page = 1;
+    renderList();
+  }
+
+  // ── 单条新增 ──────────────────────────────────────────
+  function resetSingle() {
+    el.singleError.hidden = true;
+    el.singleTcid.value = '';
+    el.singleOdid.value = '';
+    el.singleLevel.value = 'user';
+    el.singleTcidField.hidden = false;
+    el.singleOdidField.hidden = true;
+    el.singleTag.value = 'no_adjust';
+    el.singleGroup.value = '';
+    el.singleRemark.value = '';
+    var now = new Date();
+    el.singleStart.value = toInputVal(now);
+    el.singleStart.min = toInputVal(now);
+    el.singleEnd.value = toInputVal(new Date(now.getTime() + 180 * 86400000));
   }
 
   // ── 事件绑定 ──────────────────────────────────────────
@@ -461,19 +688,21 @@
           resetUploadModal();
           openModal('upload');
         } else if (action === 'single') {
-          el.singleError.hidden = true;
+          resetSingle();
           openModal('single');
         } else if (action === 'search') {
-          state.filter = el.keyword.value;
-          state.page = 1;
-          renderList();
+          applySearch();
+        } else if (action === 'reset') {
+          resetFilters();
         }
       });
     });
-    el.keyword.addEventListener('input', function () {
-      state.filter = el.keyword.value;
-      state.page = 1;
-      renderList();
+
+    // 筛选：回车触发查询
+    [el.fTcid, el.fOdid].forEach(function (n) {
+      n.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') applySearch();
+      });
     });
 
     // 分页
@@ -506,54 +735,51 @@
     root.querySelectorAll('[data-sl-close]').forEach(function (node) {
       node.addEventListener('click', closeModal);
     });
+    el.confirmOk.addEventListener('click', function () {
+      var fn = confirmHandler;
+      confirmHandler = null;
+      closeModal();
+      if (fn) fn();
+    });
 
-    // 名单：移除（带确认）
+    // 名单：停用 / 启用、删除
     el.tbody.addEventListener('click', function (e) {
-      var btn = e.target.closest('[data-sl-remove]');
-      if (!btn) return;
-      var cid = btn.getAttribute('data-sl-remove');
+      var stopBtn = e.target.closest('[data-sl-stop]');
+      if (stopBtn) {
+        var ixs = parseInt(stopBtn.getAttribute('data-sl-stop'), 10);
+        var r = state.rows[ixs];
+        if (!r) return;
+        r.stopped = !r.stopped;
+        r.updatedAt = nowText();
+        renderList();
+        toast(r.stopped ? 'Record disabled' : 'Record enabled',
+          r.stopped ? '已停用该记录' : '已启用该记录', 'ok');
+        return;
+      }
+      var delBtn = e.target.closest('[data-sl-del]');
+      if (!delBtn) return;
+      var ix = parseInt(delBtn.getAttribute('data-sl-del'), 10);
+      var rr = state.rows[ix];
+      if (!rr) return;
       openConfirm({
-        titleEn: 'Remove record',
-        titleZh: '移除记录',
-        textEn: 'Remove ' + shortId(cid) + ' from the active list? This takes effect immediately in limit adjustment.',
-        textZh: '确认把 ' + shortId(cid) + ' 从当前生效名单中移除？移除后立即按常规逻辑参与调额。',
+        titleEn: 'Delete record',
+        titleZh: '删除记录',
+        textEn: 'Delete ' + shortId(rr.id) + '? It will stop participating in limit adjustment immediately and cannot be restored (use Disable if you may need it back).',
+        textZh: '确认删除 ' + shortId(rr.id) + '？删除后立即不再参与调额匹配，且不可恢复（如需保留请用「停用」）。',
         danger: true,
         onOk: function () {
-          state.rows = state.rows.filter(function (r) { return r.cid !== cid; });
-          var batch = activeBatchObj();
-          if (batch) batch.count = state.rows.length;
+          state.rows.splice(ix, 1);
           renderList();
-          renderBatches();
-          toast('Record removed', '已移除该条记录', 'ok');
+          toast('Record deleted', '已删除该条记录', 'ok');
         }
       });
     });
 
-    // 批次：恢复为生效（带确认）
+    // 批次：详情
     el.batchTbody.addEventListener('click', function (e) {
-      var btn = e.target.closest('[data-sl-activate]');
+      var btn = e.target.closest('[data-sl-detail]');
       if (!btn) return;
-      var no = btn.getAttribute('data-sl-activate');
-      var target = null;
-      state.batches.forEach(function (b) { if (b.no === no) target = b; });
-      if (!target) return;
-      openConfirm({
-        titleEn: 'Restore batch',
-        titleZh: '恢复为生效批次',
-        textEn: 'Restore ' + no + ' (' + fmt(target.count) + ' records) as the active batch? The current active batch will be marked as overwritten.',
-        textZh: '确认把批次 ' + no + '（' + fmt(target.count) + ' 条）恢复为生效？当前生效批次将被标记为「已覆盖」。',
-        onOk: function () {
-          state.batches.forEach(function (b) {
-            b.status = (b.no === no) ? 'active' : (b.status === 'closed' ? 'closed' : 'overwritten');
-          });
-          state.activeBatch = no;
-          state.rows = buildRows(no, target.count, target.createdAt);
-          state.page = 1;
-          renderBatches();
-          renderList();
-          toast('Batch switched', '已切换生效批次', 'ok');
-        }
-      });
+      openBatchDetail(btn.getAttribute('data-sl-detail'));
     });
 
     // 上传弹窗：选择文件
@@ -571,13 +797,14 @@
       el.fileName.removeAttribute('data-zh');
       el.uploadPreview.hidden = false;
       el.uploadParsed.textContent = fmt(result.parsed);
-      el.uploadPassed.textContent = fmt(result.passed);
+      el.uploadAdded.textContent = fmt(result.added);
+      el.uploadOverwritten.textContent = fmt(result.overwritten);
       el.uploadFailed.textContent = fmt(result.failed);
 
       if (result.failed > 0) {
         attr(el.uploadError,
-          result.failed + ' duplicate / invalid rows — the whole batch will not be imported. Fix the file and try again.',
-          '存在 ' + result.failed + ' 条重复 / 非法记录，整批不导入；请修正后重试。');
+          result.failed + ' invalid rows — the whole import is abandoned. Fix the file and try again.',
+          '存在 ' + result.failed + ' 条非法记录，本次整批放弃导入；请修正后重试。');
         el.uploadDetailList.innerHTML = '';
         result.details.forEach(function (d) {
           var li = document.createElement('li');
@@ -605,74 +832,98 @@
       if (window.__ugApplyLang) window.__ugApplyLang();
     });
 
-    // 上传弹窗：确认导入
+    // 上传弹窗：确认导入（增量合并：处理中 → 已生效）
     el.uploadConfirm.addEventListener('click', function () {
       var result = el.parseResult;
-      if (!result || result.failed > 0) return;
+      if (!result || result.failed > 0 || state.processing) return;
       var no = nextBatchNo();
       var createdAt = nowText();
-      state.batches.forEach(function (b) { if (b.status === 'active') b.status = 'overwritten'; });
-      state.batches.unshift({
-        no: no, source: 'file', count: result.passed, status: 'active',
-        operator: 'baksun', createdAt: createdAt
-      });
-      state.activeBatch = no;
-      state.rows = buildRows(no, result.passed, createdAt);
-      state.page = 1;
+      var batch = {
+        no: no, source: 'file', count: result.parsed,
+        added: result.added, overwritten: result.overwritten,
+        status: 'processing', operator: 'baksun', createdAt: createdAt
+      };
+      state.batches.unshift(batch);
+      state.lastBatch = no;
+      state.processing = true;
       closeModal();
       renderBatches();
-      renderList();
-      toast('Imported ' + fmt(result.passed) + ' records',
-        '已导入 ' + fmt(result.passed) + ' 条，上一批次自动标记为已覆盖', 'ok');
+      renderMeta();
+      toast('Import processing…', '导入处理中…', '');
+      setTimeout(function () {
+        batch.status = 'active';
+        state.processing = false;
+        var newRows = genRows(no, result.added, createdAt, { fileOnly: true, noExpired: true });
+        state.rows = newRows.concat(state.rows);
+        renderBatches();
+        renderList();
+        toast('Imported ' + fmt(result.parsed) + ' rows (added ' + fmt(result.added) + ' / overwritten ' + fmt(result.overwritten) + ')',
+          '已导入 ' + fmt(result.parsed) + ' 条（新增 ' + fmt(result.added) + ' / 覆盖 ' + fmt(result.overwritten) + '）', 'ok');
+      }, 900);
     });
 
-    // 单条新增
+    // 单条新增：层级切换 → 只显示对应 ID 输入框
     el.singleLevel.addEventListener('change', function () {
-      el.singleAccountReq.hidden = el.singleLevel.value !== 'account';
+      var isUser = el.singleLevel.value === 'user';
+      el.singleTcidField.hidden = !isUser;
+      el.singleOdidField.hidden = isUser;
     });
+
+    // 单条新增：保存
     el.singleConfirm.addEventListener('click', function () {
-      var cid = el.singleCustomer.value.trim();
       var level = el.singleLevel.value;
-      var od = el.singleAccount.value.trim();
-      var tag = el.singleTag.value;
+      var tcid = el.singleTcid.value.trim();
+      var odid = el.singleOdid.value.trim();
       function fail(en, zh) {
         el.singleError.hidden = false;
         attr(el.singleError, en, zh);
         if (window.__ugApplyLang) window.__ugApplyLang();
       }
-      if (!cid) {
-        fail('Customer ID is required', '用户标识必填');
+      if (level === 'user' && !tcid) {
+        fail('third_customer_id is required', '用户级必须填写 third_customer_id');
         return;
       }
-      if (level === 'account' && !od) {
-        fail('Account ID is required for account-level records', '账户级标签必须填写账户标识');
+      if (level === 'account' && !odid) {
+        fail('overdraft_id is required', '账户级必须填写 overdraft_id');
         return;
       }
-      var dup = findDuplicate(cid);
+      if (level === 'account' && !/^\d{1,18}$/.test(odid)) {
+        fail('overdraft_id must be numeric', 'overdraft_id 必须为数字');
+        return;
+      }
+      var idVal = level === 'user' ? tcid : odid;
+      var dup = findSameLevelDup(level, idVal);
       if (dup) {
-        fail('This customer already has a tag — one tag per customer.',
-          '该用户已有标签（' + TAGS[dup.tag].zh + '），一人仅允许一个标签');
+        fail('This ' + (level === 'user' ? 'third_customer_id' : 'overdraft_id') +
+          ' already exists — add does not overwrite; use file upload to update.',
+          '该 ' + (level === 'user' ? 'third_customer_id' : 'overdraft_id') +
+          ' 已存在一条记录——新增不会覆盖，如需更新请用上传覆盖。');
+        return;
+      }
+      var sRaw = el.singleStart.value;
+      var eRaw = el.singleEnd.value;
+      if (!sRaw) { fail('Effective from is required', '请选择生效时间'); return; }
+      if (!eRaw) { fail('Effective to is required', '请选择失效时间'); return; }
+      var s = parseInputVal(sRaw);
+      var e2 = parseInputVal(eRaw);
+      if (!s || !e2) { fail('Invalid time format', '时间格式非法'); return; }
+      if (s.getTime() < Date.now() - 5 * 60000) {
+        fail('Start time must not be earlier than now (opco local time)', '开始时间不得早于当前时间（opco 本地时间）');
+        return;
+      }
+      if (e2.getTime() <= s.getTime()) {
+        fail('Effective to must be later than effective from', '失效时间必须晚于生效时间');
         return;
       }
       state.rows.unshift({
-        cid: cid, od: od, level: level, tag: tag,
-        group: el.singleGroup.value.trim() || '未分组',
-        source: 'manual', updatedAt: nowText()
+        id: idVal, level: level, tag: el.singleTag.value,
+        group: el.singleGroup.value || '',
+        start: fmtD(s), end: fmtD(e2),
+        stopped: false, source: 'manual', updatedAt: nowText()
       });
-      var batch = activeBatchObj();
-      if (batch) batch.count = state.rows.length;
-      el.singleCustomer.value = '';
-      el.singleAccount.value = '';
-      el.singleGroup.value = '';
-      el.singleRemark.value = '';
-      el.singleLevel.value = 'user';
-      el.singleTag.value = 'no_adjust';
-      el.singleAccountReq.hidden = true;
-      el.singleError.hidden = true;
       state.page = 1;
       closeModal();
       renderList();
-      renderBatches();
       toast('Record added', '已新增 1 条记录', 'ok');
     });
 
@@ -680,10 +931,10 @@
     if (el.templateLink) {
       el.templateLink.addEventListener('click', function (e) {
         e.preventDefault();
-        var header = 'third_customer_id,overdraft_id,tag_level,pool_type,detail_group,remark';
-        var sample1 = 'F3B2F35A27F065672D506E99E76DF57F6988818498F860B80DDA84B13A985C14,72349947,user,increase_only,Staff组,员工入职';
-        var sample2 = 'DFAC72F8DEF3BBD12ABD0A081428C1CDA6AC4E7824CEC788618A61F600DBDBE9,80111462,account,no_adjust,回捞组,回捞实验期内锁定';
-        var csv = '﻿' + [header, sample1, sample2].join('\n') + '\n';
+        var header = 'third_customer_id,overdraft_id,tag_level,pool_type,detail_group,effective_start,effective_end,remark';
+        var sample1 = 'F3B2F35A27F065672D506E99E76DF57F6988818498F860B80DDA84B13A985C14,,user,increase_only,Staff组,2026-11-01 09:00:00,2027-11-01 09:00:00,员工入职';
+        var sample2 = ',80111462,account,no_adjust,回捞组,2026-11-01 09:00:00,2026-12-31 23:59:59,回捞实验期内锁定';
+        var csv = '\ufeff' + [header, sample1, sample2].join('\n') + '\n';
         var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a');
@@ -697,8 +948,68 @@
     }
   }
 
-  // 缓存常用节点
+  // ── 缓存常用节点 ──────────────────────────────────────
+  el.tabs = root.querySelectorAll('[data-sl-tab]');
+  el.panels = root.querySelectorAll('[data-sl-panel]');
+  el.tbody = root.querySelector('#sl-tbody');
+  el.batchTbody = root.querySelector('#sl-batch-tbody');
+  el.lastBatch = root.querySelector('#sl-last-batch');
+  el.total = root.querySelector('#sl-total');
+  el.pagerTotal = root.querySelector('#sl-pager-total');
+  el.pagerList = root.querySelector('#sl-pager-list');
+  el.pagerSize = root.querySelector('#sl-pager-size');
+  el.pagerJump = root.querySelector('#sl-pager-jump');
+  el.toast = root.querySelector('#sl-toast');
+  el.confirmTitle = root.querySelector('#sl-confirm-title');
+  el.confirmText = root.querySelector('#sl-confirm-text');
+  el.confirmOk = root.querySelector('#sl-confirm-ok');
+  el.uploadError = root.querySelector('#sl-upload-error');
+  el.uploadDetail = root.querySelector('#sl-upload-detail');
+  el.uploadDetailList = root.querySelector('#sl-upload-detail-list');
+  el.templateLink = root.querySelector('#sl-template-link');
   el.filePick = root.querySelector('#sl-file-pick');
+  el.fileName = root.querySelector('#sl-file-name');
+  el.uploadPreview = root.querySelector('#sl-upload-preview');
+  el.uploadParsed = root.querySelector('#sl-upload-parsed');
+  el.uploadAdded = root.querySelector('#sl-upload-added');
+  el.uploadOverwritten = root.querySelector('#sl-upload-overwritten');
+  el.uploadFailed = root.querySelector('#sl-upload-failed');
+  el.uploadConfirm = root.querySelector('#sl-upload-confirm');
+  el.singleLevel = root.querySelector('#sl-single-level');
+  el.singleTcidField = root.querySelector('#sl-single-tcid-field');
+  el.singleOdidField = root.querySelector('#sl-single-odid-field');
+  el.singleTcid = root.querySelector('#sl-single-tcid');
+  el.singleOdid = root.querySelector('#sl-single-odid');
+  el.singleTag = root.querySelector('#sl-single-tag');
+  el.singleGroup = root.querySelector('#sl-single-group');
+  el.singleStart = root.querySelector('#sl-single-start');
+  el.singleEnd = root.querySelector('#sl-single-end');
+  el.singleRemark = root.querySelector('#sl-single-remark');
+  el.singleError = root.querySelector('#sl-single-error');
+  el.singleConfirm = root.querySelector('#sl-single-confirm');
+  el.fTcid = root.querySelector('#sl-f-tcid');
+  el.fOdid = root.querySelector('#sl-f-odid');
+  el.fStartFrom = root.querySelector('#sl-f-start-from');
+  el.fStartTo = root.querySelector('#sl-f-start-to');
+  el.fEndFrom = root.querySelector('#sl-f-end-from');
+  el.fEndTo = root.querySelector('#sl-f-end-to');
+  el.fGroup = root.querySelector('#sl-f-group');
+  el.fLevel = root.querySelector('#sl-f-level');
+  el.fTag = root.querySelector('#sl-f-tag');
+  el.fSource = root.querySelector('#sl-f-source');
+  el.fStatus = root.querySelector('#sl-f-status');
+  el.bdNo = root.querySelector('#sl-bd-no');
+  el.bdSource = root.querySelector('#sl-bd-source');
+  el.bdCount = root.querySelector('#sl-bd-count');
+  el.bdAdded = root.querySelector('#sl-bd-added');
+  el.bdOverwritten = root.querySelector('#sl-bd-overwritten');
+  el.bdStatus = root.querySelector('#sl-bd-status');
+  el.bdOperator = root.querySelector('#sl-bd-operator');
+  el.bdTime = root.querySelector('#sl-bd-time');
+  el.bdFailRow = root.querySelector('#sl-bd-fail-row');
+  el.bdFail = root.querySelector('#sl-bd-fail');
+  el.bdTbody = root.querySelector('#sl-bd-tbody');
+  el.bdNote = root.querySelector('#sl-bd-note');
   el.fileInput = (function () {
     var input = document.createElement('input');
     input.type = 'file';
@@ -707,20 +1018,7 @@
     root.appendChild(input);
     return input;
   })();
-  el.fileName = root.querySelector('#sl-file-name');
-  el.uploadPreview = root.querySelector('#sl-upload-preview');
-  el.uploadParsed = root.querySelector('#sl-upload-parsed');
-  el.uploadPassed = root.querySelector('#sl-upload-passed');
-  el.uploadFailed = root.querySelector('#sl-upload-failed');
-  el.uploadConfirm = root.querySelector('#sl-upload-confirm');
-  el.singleLevel = root.querySelector('#sl-single-level');
-  el.singleCustomer = root.querySelector('#sl-single-customer');
-  el.singleAccount = root.querySelector('#sl-single-account');
-  el.singleTag = root.querySelector('#sl-single-tag');
-  el.singleGroup = root.querySelector('#sl-single-group');
-  el.singleRemark = root.querySelector('#sl-single-remark');
-  el.singleError = root.querySelector('#sl-single-error');
-  el.singleConfirm = root.querySelector('#sl-single-confirm');
+
   bind();
   renderList();
   renderBatches();

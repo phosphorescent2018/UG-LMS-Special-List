@@ -298,6 +298,28 @@ input.ant-input { width: 100%; }
 .sl-detail-list { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.9; color: rgb(3, 25, 56); }
 .sl-detail-list li { word-break: break-all; }
 
+/* Filters */
+.sl-filters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 16px; padding: 0 24px 14px; }
+.sl-filter label { display: block; margin-bottom: 4px; font-size: 12.5px; color: rgb(116, 121, 140); }
+.sl-filter .sl-input { height: 30px; font-size: 13px; }
+.sl-filter select.sl-input { padding: 0 8px; }
+.sl-range { display: flex; align-items: center; gap: 6px; }
+.sl-range .sl-input { flex: 1; min-width: 0; }
+.sl-range-sep { color: rgb(152, 161, 184); font-size: 12px; }
+
+/* Row actions */
+.sl-actions { display: flex; align-items: center; gap: 12px; }
+
+/* Batch detail modal */
+.sl-bd-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 24px; margin-bottom: 14px; }
+.sl-bd-item { font-size: 13px; }
+.sl-bd-k { display: inline-block; min-width: 76px; color: rgb(116, 121, 140); margin-right: 8px; }
+.sl-bd-fail { color: #ff4d4f; }
+.sl-bd-table-wrap { border: 1px solid rgb(240, 240, 240); border-radius: 4px; }
+.sl-bd-table th, .sl-bd-table td { padding: 6px 10px; font-size: 12.5px; }
+.sl-bd-table th:first-child, .sl-bd-table td:first-child { padding-left: 12px; }
+.sl-bd-note { margin-top: 8px; font-size: 12.5px; color: rgb(116, 121, 140); }
+
 
 /* Tailwind 子集（补齐 display / flex 等未导出的计算样式） */
 .-mb-3 { margin-bottom: -12px; }

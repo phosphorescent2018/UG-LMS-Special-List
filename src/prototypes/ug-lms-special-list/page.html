@@ -356,36 +356,104 @@
         <div class="sl-toolbar-left">
           <button type="button" class="sl-btn sl-btn-primary" data-sl-action="upload">
             <svg viewBox="0 0 1024 1024" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M512 128 320 320h128v256h128V320h128L512 128zM192 704h640v128H192z"/></svg>
-            <span data-en="Upload file (overwrite)" data-zh="上传文件（覆盖）">上传文件（覆盖）</span>
+            <span data-en="Upload file" data-zh="上传文件">上传文件</span>
           </button>
           <button type="button" class="sl-btn" data-sl-action="single" data-en="Add one" data-zh="单条新增">单条新增</button>
         </div>
         <div class="sl-toolbar-right">
-          <input type="text" class="sl-input" id="sl-keyword"
-                 data-en-placeholder="Search customer / account ID"
-                 data-zh-placeholder="请输入用户标识 / 账户标识">
-          <button type="button" class="sl-btn" data-sl-action="search" data-en="Search" data-zh="查询">查询</button>
+          <button type="button" class="sl-btn" data-sl-action="reset" data-en="Reset" data-zh="重置">重置</button>
+          <button type="button" class="sl-btn sl-btn-primary" data-sl-action="search" data-en="Query" data-zh="查询">查询</button>
+        </div>
+      </div>
+
+      <div class="sl-filters">
+        <div class="sl-filter">
+          <label data-en="third_customer_id" data-zh="third_customer_id">third_customer_id</label>
+          <input type="text" class="sl-input" id="sl-f-tcid" data-en-placeholder="third_customer_id" data-zh-placeholder="third_customer_id">
+        </div>
+        <div class="sl-filter">
+          <label data-en="overdraft_id" data-zh="overdraft_id">overdraft_id</label>
+          <input type="text" class="sl-input" id="sl-f-odid" data-en-placeholder="overdraft_id" data-zh-placeholder="overdraft_id">
+        </div>
+        <div class="sl-filter">
+          <label data-en="Effective from" data-zh="生效时间">生效时间</label>
+          <div class="sl-range"><input type="date" class="sl-input" id="sl-f-start-from"><span class="sl-range-sep">~</span><input type="date" class="sl-input" id="sl-f-start-to"></div>
+        </div>
+        <div class="sl-filter">
+          <label data-en="Effective to" data-zh="失效时间">失效时间</label>
+          <div class="sl-range"><input type="date" class="sl-input" id="sl-f-end-from"><span class="sl-range-sep">~</span><input type="date" class="sl-input" id="sl-f-end-to"></div>
+        </div>
+        <div class="sl-filter">
+          <label data-en="Group" data-zh="明细组">明细组</label>
+          <select class="sl-input" id="sl-f-group">
+            <option value="" data-en="All" data-zh="全部">全部</option>
+            <option value="回捞组" data-en="回捞组" data-zh="回捞组">回捞组</option>
+            <option value="激进提额组" data-en="激进提额组" data-zh="激进提额组">激进提额组</option>
+            <option value="降额实验组" data-en="降额实验组" data-zh="降额实验组">降额实验组</option>
+            <option value="模型切换实验组" data-en="模型切换实验组" data-zh="模型切换实验组">模型切换实验组</option>
+            <option value="Staff组" data-en="Staff组" data-zh="Staff组">Staff组</option>
+            <option value="白名单组" data-en="白名单组" data-zh="白名单组">白名单组</option>
+            <option value="风险触发组" data-en="风险触发组" data-zh="风险触发组">风险触发组</option>
+            <option value="人工降额名单组" data-en="人工降额名单组" data-zh="人工降额名单组">人工降额名单组</option>
+          </select>
+        </div>
+        <div class="sl-filter">
+          <label data-en="Level" data-zh="标签层级">标签层级</label>
+          <select class="sl-input" id="sl-f-level">
+            <option value="" data-en="All" data-zh="全部">全部</option>
+            <option value="user" data-en="User" data-zh="用户级">用户级</option>
+            <option value="account" data-en="Account" data-zh="账户级">账户级</option>
+          </select>
+        </div>
+        <div class="sl-filter">
+          <label data-en="Execution tag" data-zh="执行标签">执行标签</label>
+          <select class="sl-input" id="sl-f-tag">
+            <option value="" data-en="All" data-zh="全部">全部</option>
+            <option value="no_adjust" data-en="No adjustment" data-zh="不参与调额">不参与调额</option>
+            <option value="increase_only" data-en="Increase only" data-zh="仅参与提额">仅参与提额</option>
+            <option value="decrease_only" data-en="Decrease only" data-zh="仅参与降额">仅参与降额</option>
+          </select>
+        </div>
+        <div class="sl-filter">
+          <label data-en="Source" data-zh="来源">来源</label>
+          <select class="sl-input" id="sl-f-source">
+            <option value="" data-en="All" data-zh="全部">全部</option>
+            <option value="file" data-en="File import" data-zh="文件上传">文件上传</option>
+            <option value="manual" data-en="Manual" data-zh="手工维护">手工维护</option>
+          </select>
+        </div>
+        <div class="sl-filter">
+          <label data-en="Status" data-zh="状态">状态</label>
+          <select class="sl-input" id="sl-f-status">
+            <option value="" data-en="All" data-zh="全部">全部</option>
+            <option value="active" data-en="Active" data-zh="生效中">生效中</option>
+            <option value="upcoming" data-en="Not started" data-zh="未生效">未生效</option>
+            <option value="expired" data-en="Expired" data-zh="已失效">已失效</option>
+            <option value="disabled" data-en="Disabled" data-zh="已停用">已停用</option>
+          </select>
         </div>
       </div>
 
       <div class="sl-meta">
-        <span class="sl-meta-item"><span data-en="Active batch" data-zh="生效批次">生效批次</span>：<b id="sl-active-batch">—</b></span>
+        <span class="sl-meta-item"><span data-en="Latest import" data-zh="最近导入批次">最近导入批次</span>：<b id="sl-last-batch">—</b></span>
         <span class="sl-meta-item"><span data-en="Records" data-zh="名单条数">名单条数</span>：<b id="sl-total">0</b></span>
-        <span class="sl-badge sl-badge-blue" data-en="Active" data-zh="生效中">生效中</span>
       </div>
 
       <div class="sl-table-wrap">
         <table class="sl-table">
           <thead>
             <tr>
-              <th style="width:210px" data-en="Customer ID" data-zh="用户标识">用户标识</th>
-              <th style="width:110px" data-en="Account ID" data-zh="账户标识">账户标识</th>
+              <th style="width:200px" data-en="third_customer_id" data-zh="third_customer_id">third_customer_id</th>
+              <th style="width:110px" data-en="overdraft_id" data-zh="overdraft_id">overdraft_id</th>
               <th style="width:96px" data-en="Level" data-zh="标签层级">标签层级</th>
               <th style="width:126px" data-en="Execution tag" data-zh="执行标签">执行标签</th>
-              <th style="width:130px" data-en="Group" data-zh="明细组">明细组</th>
+              <th style="width:120px" data-en="Group" data-zh="明细组">明细组</th>
+              <th style="width:158px" data-en="Effective from" data-zh="生效时间">生效时间</th>
+              <th style="width:158px" data-en="Effective to" data-zh="失效时间">失效时间</th>
+              <th style="width:88px" data-en="Status" data-zh="状态">状态</th>
               <th style="width:96px" data-en="Source" data-zh="来源">来源</th>
               <th style="width:158px" data-en="Updated at" data-zh="更新时间">更新时间</th>
-              <th style="width:80px" data-en="Action" data-zh="操作">操作</th>
+              <th style="width:110px" data-en="Action" data-zh="操作">操作</th>
             </tr>
           </thead>
           <tbody id="sl-tbody"></tbody>
@@ -419,12 +487,12 @@
         <div class="sl-toolbar-left">
           <button type="button" class="sl-btn sl-btn-primary" data-sl-action="upload">
             <svg viewBox="0 0 1024 1024" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M512 128 320 320h128v256h128V320h128L512 128zM192 704h640v128H192z"/></svg>
-            <span data-en="Upload file (overwrite)" data-zh="上传文件（覆盖）">上传文件（覆盖）</span>
+            <span data-en="Upload file" data-zh="上传文件">上传文件</span>
           </button>
         </div>
         <div class="sl-toolbar-right">
-          <span class="sl-hint" data-en="A new batch takes effect immediately; the previous batch is marked as overwritten."
-                data-zh="新批次上传即生效，上一批次自动标记为「已覆盖」。">新批次上传即生效，上一批次自动标记为「已覆盖」。</span>
+          <span class="sl-hint" data-en="Each upload is an incremental import: same-key rows are overwritten by the new file, all other records are kept. A new batch goes Processing then Effective."
+                data-zh="每次上传为增量导入：同键记录以新文件为准覆盖，其余记录全部保留；新批次处理中 → 已生效。">每次上传为增量导入：同键记录以新文件为准覆盖，其余记录全部保留；新批次处理中 → 已生效。</span>
         </div>
       </div>
 
@@ -456,8 +524,8 @@
         <button type="button" class="sl-modal-close" data-sl-close aria-label="close">×</button>
       </div>
       <div class="sl-modal-body">
-        <div class="sl-alert" data-en="Uploading creates a new batch and overwrites the current active list. Duplicate tags are validated (one tag per customer)."
-             data-zh="上传会生成新批次并覆盖当前生效名单；会校验「一人一标签」，重复将整批失败。">上传会生成新批次并覆盖当前生效名单；会校验「一人一标签」，重复将整批失败。</div>
+        <div class="sl-alert" data-en="Upload is an incremental import: rows with the same key (same level + same ID) overwrite existing records, all other records are kept. If any row fails validation the whole import is abandoned. Template columns: third_customer_id, overdraft_id, tag_level, pool_type, detail_group, effective_start, effective_end, remark (time format: YYYY-MM-DD HH:mm:ss)."
+             data-zh="上传为增量导入：同键（同层级同 ID）记录以新文件为准覆盖，其余记录全部保留；任何一行校验不通过则本次整批放弃。模板列：third_customer_id, overdraft_id, tag_level, pool_type, detail_group, effective_start, effective_end, remark（时间格式：YYYY-MM-DD HH:mm:ss）。">上传为增量导入：同键（同层级同 ID）记录以新文件为准覆盖，其余记录全部保留；任何一行校验不通过则本次整批放弃。模板列：third_customer_id, overdraft_id, tag_level, pool_type, detail_group, effective_start, effective_end, remark（时间格式：YYYY-MM-DD HH:mm:ss）。</div>
         <div class="sl-field">
           <label class="sl-label" data-en="List file" data-zh="名单文件">名单文件</label>
           <div class="sl-file">
@@ -468,12 +536,13 @@
         </div>
         <div class="sl-preview" id="sl-upload-preview" hidden>
           <div class="sl-preview-row"><span data-en="Parsed rows" data-zh="解析条数">解析条数</span><b id="sl-upload-parsed">0</b></div>
-          <div class="sl-preview-row"><span data-en="Validation passed" data-zh="校验通过">校验通过</span><b class="sl-ok" id="sl-upload-passed">0</b></div>
-          <div class="sl-preview-row"><span data-en="Duplicate / invalid" data-zh="重复 / 非法">重复 / 非法</span><b class="sl-warn" id="sl-upload-failed">0</b></div>
+          <div class="sl-preview-row"><span data-en="New rows" data-zh="新增">新增</span><b class="sl-ok" id="sl-upload-added">0</b></div>
+          <div class="sl-preview-row"><span data-en="Overwritten rows" data-zh="覆盖">覆盖</span><b id="sl-upload-overwritten">0</b></div>
+          <div class="sl-preview-row"><span data-en="Invalid rows" data-zh="非法">非法</span><b class="sl-warn" id="sl-upload-failed">0</b></div>
         </div>
         <div class="sl-alert sl-alert-warn" id="sl-upload-error" hidden></div>
         <div class="sl-detail" id="sl-upload-detail" hidden>
-          <div class="sl-detail-title" data-en="Duplicate / invalid details" data-zh="重复 / 非法明细">重复 / 非法明细</div>
+          <div class="sl-detail-title" data-en="Validation failures" data-zh="校验失败明细">校验失败明细</div>
           <ul class="sl-detail-list" id="sl-upload-detail-list"></ul>
         </div>
       </div>
@@ -497,17 +566,17 @@
         <div class="sl-field">
           <label class="sl-label"><i class="sl-req">*</i><span data-en="Level" data-zh="标签层级">标签层级</span></label>
           <select class="sl-input" id="sl-single-level">
-            <option value="user" data-en="User level (customer)" data-zh="用户级（绑客户）">用户级（绑客户）</option>
-            <option value="account" data-en="Account level (overdraft)" data-zh="账户级（绑账户）">账户级（绑账户）</option>
+            <option value="user" data-en="User level" data-zh="用户级">用户级</option>
+            <option value="account" data-en="Account level" data-zh="账户级">账户级</option>
           </select>
         </div>
-        <div class="sl-field">
-          <label class="sl-label"><i class="sl-req">*</i><span data-en="Customer ID" data-zh="用户标识">用户标识</span></label>
-          <input type="text" class="sl-input" id="sl-single-customer" data-en-placeholder="third_customer_id" data-zh-placeholder="third_customer_id">
+        <div class="sl-field" id="sl-single-tcid-field">
+          <label class="sl-label"><i class="sl-req">*</i><span data-en="third_customer_id" data-zh="third_customer_id">third_customer_id</span></label>
+          <input type="text" class="sl-input" id="sl-single-tcid" data-en-placeholder="third_customer_id" data-zh-placeholder="third_customer_id">
         </div>
-        <div class="sl-field">
-          <label class="sl-label"><i class="sl-req" id="sl-single-account-req" hidden>*</i><span data-en="Account ID" data-zh="账户标识">账户标识</span></label>
-          <input type="text" class="sl-input" id="sl-single-account" data-en-placeholder="overdraft_id (account level only)" data-zh-placeholder="overdraft_id（仅账户级需要）">
+        <div class="sl-field" id="sl-single-odid-field" hidden>
+          <label class="sl-label"><i class="sl-req">*</i><span data-en="overdraft_id" data-zh="overdraft_id">overdraft_id</span></label>
+          <input type="text" class="sl-input" id="sl-single-odid" data-en-placeholder="overdraft_id" data-zh-placeholder="overdraft_id">
         </div>
         <div class="sl-field">
           <label class="sl-label"><i class="sl-req">*</i><span data-en="Execution tag" data-zh="执行标签">执行标签</span></label>
@@ -519,7 +588,25 @@
         </div>
         <div class="sl-field">
           <label class="sl-label" data-en="Group" data-zh="明细组">明细组</label>
-          <input type="text" class="sl-input" id="sl-single-group" data-en-placeholder="e.g. Staff / Whitelist" data-zh-placeholder="如：Staff组 / 白名单">
+          <select class="sl-input" id="sl-single-group">
+            <option value="" data-en="(Not specified)" data-zh="（不指定）">（不指定）</option>
+            <option value="回捞组" data-en="回捞组" data-zh="回捞组">回捞组</option>
+            <option value="激进提额组" data-en="激进提额组" data-zh="激进提额组">激进提额组</option>
+            <option value="降额实验组" data-en="降额实验组" data-zh="降额实验组">降额实验组</option>
+            <option value="模型切换实验组" data-en="模型切换实验组" data-zh="模型切换实验组">模型切换实验组</option>
+            <option value="Staff组" data-en="Staff组" data-zh="Staff组">Staff组</option>
+            <option value="白名单组" data-en="白名单组" data-zh="白名单组">白名单组</option>
+            <option value="风险触发组" data-en="风险触发组" data-zh="风险触发组">风险触发组</option>
+            <option value="人工降额名单组" data-en="人工降额名单组" data-zh="人工降额名单组">人工降额名单组</option>
+          </select>
+        </div>
+        <div class="sl-field">
+          <label class="sl-label"><i class="sl-req">*</i><span data-en="Effective from" data-zh="生效时间">生效时间</span></label>
+          <input type="datetime-local" class="sl-input" id="sl-single-start">
+        </div>
+        <div class="sl-field">
+          <label class="sl-label"><i class="sl-req">*</i><span data-en="Effective to" data-zh="失效时间">失效时间</span></label>
+          <input type="datetime-local" class="sl-input" id="sl-single-end">
         </div>
         <div class="sl-field">
           <label class="sl-label" data-en="Remark" data-zh="备注">备注</label>
@@ -530,6 +617,48 @@
       <div class="sl-modal-foot">
         <button type="button" class="sl-btn" data-sl-close data-en="Cancel" data-zh="取消">取消</button>
         <button type="button" class="sl-btn sl-btn-primary" id="sl-single-confirm" data-en="Save" data-zh="保存">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 弹窗：批次详情 ── -->
+  <div class="sl-modal" data-sl-modal="batch" hidden>
+    <div class="sl-modal-mask" data-sl-close></div>
+    <div class="sl-modal-box sl-modal-box-wide">
+      <div class="sl-modal-head">
+        <span data-en="Batch details" data-zh="批次详情">批次详情</span>
+        <button type="button" class="sl-modal-close" data-sl-close aria-label="close">×</button>
+      </div>
+      <div class="sl-modal-body">
+        <div class="sl-bd-meta">
+          <div class="sl-bd-item"><span class="sl-bd-k" data-en="Batch No." data-zh="批次号">批次号</span><b class="sl-mono" id="sl-bd-no">—</b></div>
+          <div class="sl-bd-item"><span class="sl-bd-k" data-en="Source" data-zh="来源">来源</span><b id="sl-bd-source">—</b></div>
+          <div class="sl-bd-item"><span class="sl-bd-k" data-en="Parsed rows" data-zh="解析条数">解析条数</span><b id="sl-bd-count">—</b></div>
+          <div class="sl-bd-item"><span class="sl-bd-k" data-en="New / Overwritten" data-zh="新增 / 覆盖">新增 / 覆盖</span><b><span id="sl-bd-added">—</span> / <span id="sl-bd-overwritten">—</span></b></div>
+          <div class="sl-bd-item"><span class="sl-bd-k" data-en="Status" data-zh="状态">状态</span><b><span class="sl-badge" id="sl-bd-status">—</span></b></div>
+          <div class="sl-bd-item"><span class="sl-bd-k" data-en="Operator" data-zh="操作人">操作人</span><b id="sl-bd-operator">—</b></div>
+          <div class="sl-bd-item"><span class="sl-bd-k" data-en="Created at" data-zh="创建时间">创建时间</span><b class="sl-mono" id="sl-bd-time">—</b></div>
+          <div class="sl-bd-item" id="sl-bd-fail-row" hidden><span class="sl-bd-k" data-en="Failure reason" data-zh="失败原因">失败原因</span><b class="sl-bd-fail" id="sl-bd-fail">—</b></div>
+        </div>
+        <div class="sl-detail-title" data-en="Records in this import (preview)" data-zh="本批记录（预览）">本批记录（预览）</div>
+        <div class="sl-table-wrap sl-bd-table-wrap">
+          <table class="sl-table sl-bd-table">
+            <thead>
+              <tr>
+                <th data-en="third_customer_id" data-zh="third_customer_id">third_customer_id</th>
+                <th data-en="overdraft_id" data-zh="overdraft_id">overdraft_id</th>
+                <th data-en="Level" data-zh="标签层级">标签层级</th>
+                <th data-en="Execution tag" data-zh="执行标签">执行标签</th>
+                <th data-en="Group" data-zh="明细组">明细组</th>
+              </tr>
+            </thead>
+            <tbody id="sl-bd-tbody"></tbody>
+          </table>
+        </div>
+        <div class="sl-bd-note" id="sl-bd-note"></div>
+      </div>
+      <div class="sl-modal-foot">
+        <button type="button" class="sl-btn" data-sl-close data-en="Close" data-zh="关闭">关闭</button>
       </div>
     </div>
   </div>
