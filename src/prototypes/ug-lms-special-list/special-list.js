@@ -274,7 +274,12 @@
 
   function updateBatchButtons() {
     var n = state.selected.length;
-    root.querySelectorAll('[data-sl-batch]').forEach(function (b) { b.disabled = n === 0; });
+    root.querySelectorAll('[data-sl-batch]').forEach(function (b) {
+      b.disabled = n < 2;
+      b.title = n < 2
+        ? (isZh() ? '批量操作需至少选择 2 条；单条请用行内「停用 / 删除」' : 'Select at least 2 records; use row actions for a single record')
+        : '';
+    });
   }
 
   function updateSelBar() {
