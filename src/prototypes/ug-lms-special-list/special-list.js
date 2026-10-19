@@ -490,11 +490,6 @@
     colPop.style.top = (rect.bottom + 6) + 'px';
   }
 
-  function renderMeta() {
-    el.lastBatch.textContent = state.lastBatch;
-    el.total.textContent = fmt(state.rows.length);
-  }
-
   function renderList() {
     var rows = visibleRows();
     el.tbody.innerHTML = '';
@@ -638,7 +633,6 @@
       pickAll.indeterminate = picked > 0 && picked < pageRows.length;
     }
     updateBatchButtons();
-    renderMeta();
     renderPager(rows.length, pageCount);
     if (window.__ugApplyLang) window.__ugApplyLang();
   }
@@ -1580,7 +1574,6 @@
       state.processing = true;
       closeModal();
       renderChanges();
-      renderMeta();
       toast('Import processing…', '导入处理中…', '');
       setTimeout(function () {
         batch.status = 'processed';
@@ -1708,8 +1701,6 @@
   el.panels = root.querySelectorAll('[data-sl-panel]');
   el.tbody = root.querySelector('#sl-tbody');
   el.changeTbody = root.querySelector('#sl-change-tbody');
-  el.lastBatch = root.querySelector('#sl-last-batch');
-  el.total = root.querySelector('#sl-total');
   el.pagerTotal = root.querySelector('#sl-pager-total');
   el.pagerList = root.querySelector('#sl-pager-list');
   el.pagerSize = root.querySelector('#sl-pager-size');
