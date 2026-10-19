@@ -192,11 +192,8 @@
       var id = spec[0] === 'user'
         ? hexId(rnd)
         : String(10000000 + Math.floor(rnd() * 89999999));
+      // 本期业务产品固定 OD
       var product = 'OD';
-      if (spec[0] === 'user') {
-        var pr = rnd();
-        product = pr < 0.45 ? '' : (pr < 0.8 ? 'OD' : 'BL');
-      }
       rows.push({
         id: id,
         level: spec[0],
@@ -884,7 +881,7 @@
       { en: 'end time must be later than start time', zh: '失效时间必须晚于生效时间' },
       { en: 'detail_group is not in the preset list', zh: 'detail_group 不在预设八个组清单内' },
       { en: 'detail_group conflicts with tag_level / pool_type', zh: '明细组与标签层级 / 执行标签不匹配（组目录交叉校验失败）' },
-      { en: 'product_code is invalid (account-level supports OD only)', zh: 'product_code 非法（只能为空 / OD / BL；账户级仅支持 OD）' }
+      { en: 'product_code is invalid (OD only in this release)', zh: 'product_code 非法（本期仅允许 OD）' }
     ];
   }
 
@@ -895,15 +892,15 @@
     var t1 = '2026-12-01 09:00:00';
     var t2 = '2027-12-01 09:00:00';
     var cases = [
-      [cid, od, 'user', 'increase_only', '', 'Staff组', t1, t2, ''],
+      [cid, od, 'user', 'increase_only', 'OD', 'Staff组', t1, t2, ''],
       [cid, od, 'account', 'no_adjust', 'OD', '回捞组', t1, t2, ''],
-      ['', '', 'user', 'decrease_only', '', '风险触发组', t1, t2, ''],
+      ['', '', 'user', 'decrease_only', 'OD', '风险触发组', t1, t2, ''],
       ['', '', 'account', 'no_adjust', 'OD', '模型切换实验组', t1, t2, ''],
-      [cid, '', 'user', 'increase_only', '', 'Staff组', '2026/12/01 9:00', t2, ''],
-      [cid, '', 'user', 'decrease_only', '', '人工降额名单组', '2026-01-01 10:00:00', t2, ''],
-      [cid, '', 'user', 'increase_only', '', 'Staff组', '2027-05-01 09:00:00', '2026-12-01 09:00:00', ''],
-      [cid, '', 'user', 'decrease_only', '', '测试新组', t1, t2, ''],
-      [cid, '', 'user', 'no_adjust', '', 'Staff组', t1, t2, ''],
+      [cid, '', 'user', 'increase_only', 'OD', 'Staff组', '2026/12/01 9:00', t2, ''],
+      [cid, '', 'user', 'decrease_only', 'OD', '人工降额名单组', '2026-01-01 10:00:00', t2, ''],
+      [cid, '', 'user', 'increase_only', 'OD', 'Staff组', '2027-05-01 09:00:00', '2026-12-01 09:00:00', ''],
+      [cid, '', 'user', 'decrease_only', 'OD', '测试新组', t1, t2, ''],
+      [cid, '', 'user', 'no_adjust', 'OD', 'Staff组', t1, t2, ''],
       [cid, '', 'account', 'no_adjust', 'BL', '降额实验组', t1, t2, '']
     ];
     return cases[i % cases.length];
@@ -976,7 +973,7 @@
     el.singleOdidField.hidden = true;
     el.singleTag.value = 'no_adjust';
     el.singleTag.disabled = false;
-    el.singleProduct.value = '';
+    el.singleProduct.value = 'OD';
     el.singleProduct.disabled = false;
     el.singleCascadeHint.hidden = true;
     el.singleGroup.value = '';
@@ -1353,7 +1350,7 @@
         return;
       }
       var idVal = level === 'user' ? tcid : odid;
-      var product = level === 'account' ? 'OD' : el.singleProduct.value;
+      var product = 'OD';
       var dup = findSameLevelDup(product, level, idVal);
       if (dup) {
         fail('This ' + (level === 'user' ? 'third_customer_id' : 'overdraft_id') +
@@ -1394,7 +1391,7 @@
       el.templateLink.addEventListener('click', function (e) {
         e.preventDefault();
         var header = 'third_customer_id,overdraft_id,tag_level,pool_type,product_code,detail_group,effective_start,effective_end,remark';
-        var sample1 = 'F3B2F35A27F065672D506E99E76DF57F6988818498F860B80DDA84B13A985C14,,user,increase_only,,Staff组,2026-11-01 09:00:00,2027-11-01 09:00:00,员工入职';
+        var sample1 = 'F3B2F35A27F065672D506E99E76DF57F6988818498F860B80DDA84B13A985C14,,user,increase_only,OD,Staff组,2026-11-01 09:00:00,2027-11-01 09:00:00,员工入职';
         var sample2 = ',80111462,account,no_adjust,OD,回捞组,2026-11-01 09:00:00,2026-12-31 23:59:59,回捞实验期内锁定';
         var csv = '\ufeff' + [header, sample1, sample2].join('\n') + '\n';
         var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
