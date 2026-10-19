@@ -276,7 +276,15 @@
 
   function updateBatchButtons() {
     var n = state.selected.length;
+    var stoppedN = state.selected.filter(function (r) { return r.stopped; }).length;
     root.querySelectorAll('[data-sl-batch]').forEach(function (b) {
+      if (b.getAttribute('data-sl-batch') === 'enable') {
+        b.disabled = n < 2 || stoppedN === 0;
+        b.title = stoppedN === 0
+          ? (isZh() ? '所选记录均未停用，无需启用（已失效请修改有效期）' : 'No disabled records selected')
+          : '';
+        return;
+      }
       b.disabled = n < 2;
       b.title = n < 2
         ? (isZh() ? '批量操作需至少选择 2 条；单条请用行内「停用 / 删除」' : 'Select at least 2 records; use row actions for a single record')
@@ -1607,22 +1615,30 @@
             }
           });
         } else if (action === 'enable') {
+          var stoppedList = list.filter(function (r) { return r.stopped; });
+          if (!stoppedList.length) {
+            toast('No disabled records selected', '所选记录均未停用，无需启用', '');
+            return;
+          }
+          var expiredN = stoppedList.filter(function (r) { return rowStatus(r) === 'expired'; }).length;
           openConfirm({
             titleEn: 'Enable selected records',
             titleZh: '批量启用',
-            textEn: 'Enable ' + list.length + ' selected record(s)? They will resume participating in limit adjustment according to their validity windows.',
-            textZh: '确认启用所选 ' + list.length + ' 条记录？启用后按各自有效期窗口恢复参与调额匹配（已过期的仍为已失效）。',
+            textEn: 'Enable ' + stoppedList.length + ' selected record(s)?' +
+              (expiredN ? ' ' + expiredN + ' of them are already expired and will remain Expired — update their validity to make them effective.' : ' They will resume participating according to their validity windows.'),
+            textZh: '确认启用所选记录中的 ' + stoppedList.length + ' 条停用记录？' +
+              (expiredN ? '其中 ' + expiredN + ' 条已过失效时间，启用后仍为「已失效」，需修改有效期才能恢复生效。' : '启用后按各自有效期窗口恢复参与调额匹配。'),
             danger: false,
             onOk: function () {
-              var n = 0;
-              list.forEach(function (r) {
-                if (r.stopped) { r.stopped = false; r.updatedAt = nowText(); n += 1; }
+              stoppedList.forEach(function (r) {
+                r.stopped = false;
+                r.updatedAt = nowText();
               });
               state.selected = [];
               state.allSelected = false;
-              logOp('批量启用', 'Bulk enable', list);
+              logOp('批量启用', 'Bulk enable', stoppedList);
               renderList();
-              toast('Records enabled', '已启用 ' + n + ' 条记录', 'ok');
+              toast('Records enabled', '已启用 ' + stoppedList.length + ' 条记录', 'ok');
             }
           });
         } else {
