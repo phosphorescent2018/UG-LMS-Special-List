@@ -222,6 +222,7 @@
     ],
     filters: {},
     selected: [],
+    changeQuery: '',
     allSelected: false,
     cols: { tcid: true, odid: true, level: true, tag: true, product: true, group: true, start: true, end: true, status: true, source: true, updated: true },
     opLogs: [],
@@ -509,6 +510,55 @@
     colPop.style.top = (rect.bottom + 6) + 'px';
   }
 
+  function openRecordDetail(ix) {
+    var row = state.rows[ix];
+    if (!row) return;
+    el.rdTcid.textContent = row.level === 'user' ? row.id : '—';
+    el.rdOdid.textContent = row.level === 'account' ? row.id : '—';
+    attr(el.rdLevel, LEVELS[row.level].en, LEVELS[row.level].zh);
+    attr(el.rdTag, TAGS[row.tag].en, TAGS[row.tag].zh);
+    el.rdProduct.textContent = row.product || 'OD';
+    el.rdGroup.textContent = row.group || '—';
+    el.rdStart.textContent = row.start;
+    el.rdEnd.textContent = row.end;
+    var st = RECORD_STATUS[rowStatus(row)];
+    el.rdStatus.className = 'sl-badge ' + st.badge;
+    attr(el.rdStatus, st.en, st.zh);
+    attr(el.rdSource, SOURCES[row.source].en, SOURCES[row.source].zh);
+    el.rdUpdated.textContent = row.updatedAt;
+
+    var hist = [];
+    state.opLogs.forEach(function (op) {
+      var hit = op.rows.some(function (r) { return r.level === row.level && r.id === row.id; });
+      if (hit) hist.push({ time: op.time, typeEn: op.typeEn, typeZh: op.typeZh, no: op.no, operator: op.operator });
+    });
+    hist.sort(function (a, b) { return a.time === b.time ? 0 : (a.time < b.time ? 1 : -1); });
+    el.rdHistory.innerHTML = '';
+    hist.forEach(function (h) {
+      var tr = document.createElement('tr');
+      var td1 = document.createElement('td');
+      td1.className = 'sl-mono';
+      td1.textContent = h.time;
+      tr.appendChild(td1);
+      var td2 = document.createElement('td');
+      attr(td2, h.typeEn, h.typeZh);
+      tr.appendChild(td2);
+      var td3 = document.createElement('td');
+      td3.className = 'sl-mono';
+      td3.textContent = h.no;
+      tr.appendChild(td3);
+      var td4 = document.createElement('td');
+      td4.textContent = h.operator;
+      tr.appendChild(td4);
+      el.rdHistory.appendChild(tr);
+    });
+    el.rdNote.textContent = hist.length
+      ? (isZh() ? '共 ' + hist.length + ' 条页面操作记录（导入明细在真实系统可查）' : hist.length + ' page operation(s); import details are available in production.')
+      : (isZh() ? '暂无页面操作记录' : 'No page operation records yet.');
+    openModal('record');
+    if (window.__ugApplyLang) window.__ugApplyLang();
+  }
+
   function renderList() {
     var rows = visibleRows();
     el.tbody.innerHTML = '';
@@ -612,6 +662,16 @@
       var tdAction = document.createElement('td');
       var act = document.createElement('div');
       act.className = 'sl-actions';
+      var btnDetail = document.createElement('button');
+      btnDetail.type = 'button';
+      btnDetail.className = 'sl-link';
+      btnDetail.style.border = '0';
+      btnDetail.style.background = 'transparent';
+      btnDetail.style.cursor = 'pointer';
+      btnDetail.style.padding = '0';
+      btnDetail.dataset.slRecord = String(ix);
+      attr(btnDetail, 'Details', '详情');
+      act.appendChild(btnDetail);
       var btnStop = document.createElement('button');
       btnStop.type = 'button';
       btnStop.className = 'sl-link';
@@ -705,11 +765,19 @@
     el.changeTbody.innerHTML = '';
     var items = [];
     state.batches.forEach(function (b) {
-      items.push({ kind: 'import', no: b.no, typeEn: 'File import', typeZh: '文件导入', count: b.count, status: b.status, operator: b.operator, time: b.createdAt });
+      items.push({ kind: 'import', ref: b, no: b.no, typeEn: 'File import', typeZh: '文件导入', count: b.count, status: b.status, operator: b.operator, time: b.createdAt });
     });
     state.opLogs.forEach(function (o) {
-      items.push({ kind: 'op', no: o.no, typeEn: o.typeEn, typeZh: o.typeZh, count: o.count, status: 'done', operator: o.operator, time: o.time });
+      items.push({ kind: 'op', ref: o, no: o.no, typeEn: o.typeEn, typeZh: o.typeZh, count: o.count, status: 'done', operator: o.operator, time: o.time });
     });
+    var q = (state.changeQuery || '').toLowerCase();
+    if (q) {
+      items = items.filter(function (it) {
+        return it.kind === 'op' && it.ref.rows.some(function (r) {
+          return String(r.id).toLowerCase().indexOf(q) >= 0;
+        });
+      });
+    }
     items.sort(function (a, b) { return a.time === b.time ? 0 : (a.time < b.time ? 1 : -1); });
 
     if (!items.length) {
@@ -1391,6 +1459,27 @@
       if (fn) fn();
     });
 
+    // 名单：详情
+    el.tbody.addEventListener('click', function (e) {
+      var rbtn = e.target.closest('[data-sl-record]');
+      if (rbtn) openRecordDetail(parseInt(rbtn.getAttribute('data-sl-record'), 10));
+    });
+
+    // 变更记录：按对象 ID 过滤
+    if (el.changeQ) {
+      el.changeQ.addEventListener('input', function () {
+        state.changeQuery = el.changeQ.value.trim();
+        renderChanges();
+      });
+    }
+    if (el.changeClear) {
+      el.changeClear.addEventListener('click', function () {
+        state.changeQuery = '';
+        if (el.changeQ) el.changeQ.value = '';
+        renderChanges();
+      });
+    }
+
     // 名单：停用 / 启用、删除
     el.tbody.addEventListener('click', function (e) {
       var stopBtn = e.target.closest('[data-sl-stop]');
@@ -1849,6 +1938,21 @@
   el.fTag = root.querySelector('#sl-f-tag');
   el.fProduct = root.querySelector('#sl-f-product');
   el.listTable = root.querySelector('#sl-list-table');
+  el.rdTcid = root.querySelector('#sl-rd-tcid');
+  el.rdOdid = root.querySelector('#sl-rd-odid');
+  el.rdLevel = root.querySelector('#sl-rd-level');
+  el.rdTag = root.querySelector('#sl-rd-tag');
+  el.rdProduct = root.querySelector('#sl-rd-product');
+  el.rdGroup = root.querySelector('#sl-rd-group');
+  el.rdStart = root.querySelector('#sl-rd-start');
+  el.rdEnd = root.querySelector('#sl-rd-end');
+  el.rdStatus = root.querySelector('#sl-rd-status');
+  el.rdSource = root.querySelector('#sl-rd-source');
+  el.rdUpdated = root.querySelector('#sl-rd-updated');
+  el.rdHistory = root.querySelector('#sl-rd-history');
+  el.rdNote = root.querySelector('#sl-rd-note');
+  el.changeQ = root.querySelector('#sl-change-q');
+  el.changeClear = root.querySelector('#sl-change-clear');
   el.oplogTbody = root.querySelector('#sl-oplog-tbody');
   el.opNo = root.querySelector('#sl-op-no');
   el.opType = root.querySelector('#sl-op-type');
