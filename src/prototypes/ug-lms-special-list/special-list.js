@@ -231,6 +231,7 @@
   };
   state.rows = genRows('SL20261015-004', 1240, state.batches[0].createdAt);
   state.opLogs = [
+    { no: 'OP20261019-004', typeZh: '批量启用', typeEn: 'Bulk enable', count: 5, operator: 'jolie', time: '2026-10-19 12:05:33', rows: genRows('op-004', 5, '2026-10-19 12:05:33', { fileOnly: true }) },
     { no: 'OP20261019-003', typeZh: '批量停用', typeEn: 'Bulk disable', count: 2, operator: 'baksun', time: '2026-10-19 11:52:10', rows: genRows('op-003', 2, '2026-10-19 11:52:10', { fileOnly: true }) },
     { no: 'OP20261019-002', typeZh: '批量删除', typeEn: 'Bulk delete', count: 10, operator: 'jolie', time: '2026-10-19 10:31:02', rows: genRows('op-002', 10, '2026-10-19 10:31:02', { fileOnly: true }) },
     { no: 'OP20261019-001', typeZh: '单条新增', typeEn: 'Add one', count: 1, operator: 'baksun', time: '2026-10-19 09:12:44', rows: genRows('op-001', 1, '2026-10-19 09:12:44', { fileOnly: true }) }
