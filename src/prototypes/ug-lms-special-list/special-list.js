@@ -291,7 +291,7 @@
         return { id: r.id, level: r.level, tag: r.tag, product: r.product || 'OD', group: r.group || '' };
       })
     });
-    renderOpLogs();
+    renderChanges();
   }
 
   function renderOpLogs() {
@@ -687,68 +687,102 @@
   }
 
   // ── 渲染：批次 ────────────────────────────────────────
-  function renderBatches() {
-    el.batchTbody.innerHTML = '';
-    state.batches.forEach(function (batch) {
+  function renderChanges() {
+    el.changeTbody.innerHTML = '';
+    var items = [];
+    state.batches.forEach(function (b) {
+      items.push({ kind: 'import', no: b.no, typeEn: 'File import', typeZh: '文件导入', count: b.count, status: b.status, operator: b.operator, time: b.createdAt });
+    });
+    state.opLogs.forEach(function (o) {
+      items.push({ kind: 'op', no: o.no, typeEn: o.typeEn, typeZh: o.typeZh, count: o.count, status: 'done', operator: o.operator, time: o.time });
+    });
+    items.sort(function (a, b) { return a.time === b.time ? 0 : (a.time < b.time ? 1 : -1); });
+
+    if (!items.length) {
+      var tr0 = document.createElement('tr');
+      var td0 = document.createElement('td');
+      td0.colSpan = 7;
+      td0.className = 'sl-empty';
+      attr(td0, 'No data', '暂无数据');
+      tr0.appendChild(td0);
+      el.changeTbody.appendChild(tr0);
+      return;
+    }
+
+    items.forEach(function (it) {
       var tr = document.createElement('tr');
 
       var tdNo = document.createElement('td');
       tdNo.className = 'sl-mono';
-      tdNo.textContent = batch.no;
+      tdNo.textContent = it.no;
       tr.appendChild(tdNo);
 
-      var tdSource = document.createElement('td');
-      attr(tdSource, SOURCES[batch.source].en, SOURCES[batch.source].zh);
-      tr.appendChild(tdSource);
+      var tdType = document.createElement('td');
+      attr(tdType, it.typeEn, it.typeZh);
+      tr.appendChild(tdType);
 
       var tdCount = document.createElement('td');
-      tdCount.textContent = fmt(batch.count);
+      tdCount.textContent = fmt(it.count);
       tr.appendChild(tdCount);
 
       var tdStatus = document.createElement('td');
       var badge = document.createElement('span');
-      var st = BATCH_STATUS[batch.status];
+      var st = it.kind === 'import' ? BATCH_STATUS[it.status] : { en: 'Completed', zh: '已完成', badge: 'sl-badge-green' };
       badge.className = 'sl-badge ' + st.badge;
       attr(badge, st.en, st.zh);
       tdStatus.appendChild(badge);
       tr.appendChild(tdStatus);
 
       var tdOperator = document.createElement('td');
-      tdOperator.textContent = batch.operator;
+      tdOperator.textContent = it.operator;
       tr.appendChild(tdOperator);
 
       var tdTime = document.createElement('td');
       tdTime.className = 'sl-mono';
-      tdTime.textContent = batch.createdAt;
+      tdTime.textContent = it.time;
       tr.appendChild(tdTime);
 
       var tdAction = document.createElement('td');
-      var actB = document.createElement('div');
-      actB.className = 'sl-actions';
-      var btnDl = document.createElement('button');
-      btnDl.type = 'button';
-      btnDl.className = 'sl-link';
-      btnDl.style.border = '0';
-      btnDl.style.background = 'transparent';
-      btnDl.style.cursor = 'pointer';
-      btnDl.style.padding = '0';
-      btnDl.dataset.slBatchDl = batch.no;
-      attr(btnDl, 'Download', '下载');
-      actB.appendChild(btnDl);
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'sl-link';
-      btn.style.border = '0';
-      btn.style.background = 'transparent';
-      btn.style.cursor = 'pointer';
-      btn.style.padding = '0';
-      btn.dataset.slDetail = batch.no;
-      attr(btn, 'Details', '详情');
-      actB.appendChild(btn);
-      tdAction.appendChild(actB);
+      var act = document.createElement('div');
+      act.className = 'sl-actions';
+      if (it.kind === 'import') {
+        var btnDl = document.createElement('button');
+        btnDl.type = 'button';
+        btnDl.className = 'sl-link';
+        btnDl.style.border = '0';
+        btnDl.style.background = 'transparent';
+        btnDl.style.cursor = 'pointer';
+        btnDl.style.padding = '0';
+        btnDl.setAttribute('data-sl-change-download', it.no);
+        attr(btnDl, 'Download', '下载');
+        act.appendChild(btnDl);
+      }
+      var btnDetail = document.createElement('button');
+      btnDetail.type = 'button';
+      btnDetail.className = 'sl-link';
+      btnDetail.style.border = '0';
+      btnDetail.style.background = 'transparent';
+      btnDetail.style.cursor = 'pointer';
+      btnDetail.style.padding = '0';
+      btnDetail.setAttribute('data-sl-change-detail', it.kind + ':' + it.no);
+      attr(btnDetail, 'Details', '详情');
+      act.appendChild(btnDetail);
+      if (it.kind === 'op') {
+        var btnEx = document.createElement('button');
+        btnEx.type = 'button';
+        btnEx.className = 'sl-link';
+        btnEx.style.border = '0';
+        btnEx.style.background = 'transparent';
+        btnEx.style.cursor = 'pointer';
+        btnEx.style.padding = '0';
+        btnEx.setAttribute('data-sl-change-export', it.no);
+        attr(btnEx, 'Export list', '导出清单');
+        act.appendChild(btnEx);
+      }
+      tdAction.appendChild(act);
       tr.appendChild(tdAction);
 
-      el.batchTbody.appendChild(tr);
+      el.changeTbody.appendChild(tr);
     });
     if (window.__ugApplyLang) window.__ugApplyLang();
   }
@@ -1442,30 +1476,30 @@
       });
     });
 
-    // 操作记录：详情 / 导出
-    if (el.oplogTbody) {
-      el.oplogTbody.addEventListener('click', function (e) {
-        var d = e.target.closest('[data-sl-op-detail]');
-        if (d) { openOplog(d.getAttribute('data-sl-op-detail')); return; }
-        var x = e.target.closest('[data-sl-op-export]');
-        if (x) exportOplog(x.getAttribute('data-sl-op-export'));
-      });
-      if (el.opExport && el.opDetailOwner === undefined) {
-        el.opExport.addEventListener('click', function () { exportOplog(el.opNo.textContent); });
-      }
-      renderOpLogs();
+    // 操作详情：导出清单
+    if (el.opExport) {
+      el.opExport.addEventListener('click', function () { exportOplog(el.opNo.textContent); });
     }
 
-    // 批次：下载 / 详情
-    el.batchTbody.addEventListener('click', function (e) {
-      var dlBtn = e.target.closest('[data-sl-batch-dl]');
+    // 变更记录：下载 / 导出 / 详情
+    el.changeTbody.addEventListener('click', function (e) {
+      var dlBtn = e.target.closest('[data-sl-change-download]');
       if (dlBtn) {
-        downloadBatchFile(dlBtn.getAttribute('data-sl-batch-dl'));
+        downloadBatchFile(dlBtn.getAttribute('data-sl-change-download'));
         return;
       }
-      var btn = e.target.closest('[data-sl-detail]');
+      var exBtn = e.target.closest('[data-sl-change-export]');
+      if (exBtn) {
+        exportOplog(exBtn.getAttribute('data-sl-change-export'));
+        return;
+      }
+      var btn = e.target.closest('[data-sl-change-detail]');
       if (!btn) return;
-      openBatchDetail(btn.getAttribute('data-sl-detail'));
+      var v = btn.getAttribute('data-sl-change-detail');
+      var i = v.indexOf(':');
+      var kind = v.slice(0, i), no = v.slice(i + 1);
+      if (kind === 'import') openBatchDetail(no);
+      else openOplog(no);
     });
 
     // 批次详情：下载原文件
@@ -1545,7 +1579,7 @@
       state.lastBatch = no;
       state.processing = true;
       closeModal();
-      renderBatches();
+      renderChanges();
       renderMeta();
       toast('Import processing…', '导入处理中…', '');
       setTimeout(function () {
@@ -1554,7 +1588,7 @@
         var newRows = genRows(no, result.added, createdAt, { fileOnly: true, noExpired: true });
         state.rows = newRows.concat(state.rows);
         state.selected = [];
-        renderBatches();
+        renderChanges();
         renderList();
         toast('Imported ' + fmt(result.parsed) + ' rows (added ' + fmt(result.added) + ' / overwritten ' + fmt(result.overwritten) + ')',
           '已导入 ' + fmt(result.parsed) + ' 条（新增 ' + fmt(result.added) + ' / 覆盖 ' + fmt(result.overwritten) + '）', 'ok');
@@ -1673,7 +1707,7 @@
   el.tabs = root.querySelectorAll('[data-sl-tab]');
   el.panels = root.querySelectorAll('[data-sl-panel]');
   el.tbody = root.querySelector('#sl-tbody');
-  el.batchTbody = root.querySelector('#sl-batch-tbody');
+  el.changeTbody = root.querySelector('#sl-change-tbody');
   el.lastBatch = root.querySelector('#sl-last-batch');
   el.total = root.querySelector('#sl-total');
   el.pagerTotal = root.querySelector('#sl-pager-total');
@@ -1757,6 +1791,6 @@
 
   bind();
   renderList();
-  renderBatches();
+  renderChanges();
   if (window.__ugApplyLang) window.__ugApplyLang();
 })();

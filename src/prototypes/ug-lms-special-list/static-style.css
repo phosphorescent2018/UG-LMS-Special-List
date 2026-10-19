@@ -2925,6 +2925,9 @@ input.ant-input { width: 100%; }
 .ug-special-page .sl-table-wrap { flex: 1 1 auto; min-height: 0; overflow: auto; }
 .ug-special-page .sl-pager { flex: 0 0 auto; }
 
+/* 表格上方工具栏 */
+.sl-table-tools { display: flex; justify-content: flex-end; padding: 0 24px 8px; }
+
 /* 列设置下拉 */
 .sl-colpop {
   position: fixed; z-index: 1200; width: 280px; padding: 12px;

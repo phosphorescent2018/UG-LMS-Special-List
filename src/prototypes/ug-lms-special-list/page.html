@@ -346,8 +346,7 @@
 
   <div class="sl-tabs">
     <button type="button" class="sl-tab sl-tab-active" data-sl-tab="list" data-en="List" data-zh="名单">名单</button>
-    <button type="button" class="sl-tab" data-sl-tab="batches" data-en="Batch Management" data-zh="批次管理">批次管理</button>
-    <button type="button" class="sl-tab" data-sl-tab="oplogs" data-en="Operation Logs" data-zh="操作记录">操作记录</button>
+    <button type="button" class="sl-tab" data-sl-tab="changes" data-en="Change History" data-zh="变更记录">变更记录</button>
   </div>
 
   <!-- ── 名单 ── -->
@@ -364,7 +363,6 @@
           <button type="button" class="sl-btn" data-sl-batch="del" disabled data-en="Delete selected" data-zh="批量删除">批量删除</button>
         </div>
         <div class="sl-toolbar-right">
-          <button type="button" class="sl-btn" data-sl-colbtn data-en="Columns" data-zh="列设置">列设置</button>
           <button type="button" class="sl-btn" data-sl-action="reset" data-en="Reset" data-zh="重置">重置</button>
           <button type="button" class="sl-btn sl-btn-primary" data-sl-action="search" data-en="Query" data-zh="查询">查询</button>
         </div>
@@ -450,6 +448,10 @@
         <span class="sl-meta-item"><span data-en="Records" data-zh="名单条数">名单条数</span>：<b id="sl-total">0</b></span>
       </div>
 
+      <div class="sl-table-tools">
+        <button type="button" class="sl-btn" data-sl-colbtn data-en="Columns" data-zh="列设置">列设置</button>
+      </div>
+
       <div class="sl-table-wrap">
         <table class="sl-table" id="sl-list-table">
           <thead>
@@ -493,8 +495,8 @@
     </div>
   </section>
 
-  <!-- ── 批次管理 ── -->
-  <section class="sl-panel" data-sl-panel="batches" hidden>
+  <!-- ── 变更记录 ── -->
+  <section class="sl-panel" data-sl-panel="changes" hidden>
     <div class="sl-card">
       <div class="sl-toolbar">
         <div class="sl-toolbar-left">
@@ -504,53 +506,24 @@
           </button>
         </div>
         <div class="sl-toolbar-right">
-          <span class="sl-hint" data-en="Each upload is an incremental import: same-key rows are overwritten by the new file, all other records are kept. A new batch goes Processing then Processed."
-                data-zh="每次上传为增量导入：同键记录以新文件为准覆盖，其余记录全部保留；新批次处理中 → 已处理。">每次上传为增量导入：同键记录以新文件为准覆盖，其余记录全部保留；新批次处理中 → 已处理。</span>
+          <span class="sl-hint" data-en="Imports and page operations share one history: one operation = one record; open details to view and export affected records."
+                data-zh="导入与页面操作合并为一条流水：一次操作一条记录；详情可查看受影响记录并导出。">导入与页面操作合并为一条流水：一次操作一条记录；详情可查看受影响记录并导出。</span>
         </div>
       </div>
-
       <div class="sl-table-wrap">
         <table class="sl-table">
           <thead>
             <tr>
-              <th style="width:190px" data-en="Batch No." data-zh="批次号">批次号</th>
-              <th style="width:96px" data-en="Source" data-zh="来源">来源</th>
-              <th style="width:88px" data-en="Records" data-zh="条数">条数</th>
+              <th style="width:200px" data-en="No." data-zh="编号">编号</th>
+              <th style="width:120px" data-en="Type" data-zh="类型">类型</th>
+              <th style="width:80px" data-en="Records" data-zh="对象数">对象数</th>
               <th style="width:110px" data-en="Status" data-zh="状态">状态</th>
               <th style="width:100px" data-en="Operator" data-zh="操作人">操作人</th>
-              <th style="width:158px" data-en="Created at" data-zh="创建时间">创建时间</th>
-              <th style="width:120px" data-en="Action" data-zh="操作">操作</th>
+              <th style="width:170px" data-en="Time" data-zh="时间">时间</th>
+              <th style="width:190px" data-en="Action" data-zh="操作">操作</th>
             </tr>
           </thead>
-          <tbody id="sl-batch-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-
-  <!-- ── 操作记录 ── -->
-  <section class="sl-panel" data-sl-panel="oplogs" hidden>
-    <div class="sl-card">
-      <div class="sl-toolbar">
-        <div class="sl-toolbar-left">
-          <span class="sl-hint" data-en="One operation = one record (bulk actions included). Open details to view and export the affected records."
-                data-zh="一次操作 = 一条记录（含批量操作）；详情可查看受影响记录并导出清单。">一次操作 = 一条记录（含批量操作）；详情可查看受影响记录并导出清单。</span>
-        </div>
-      </div>
-      <div class="sl-table-wrap">
-        <table class="sl-table">
-          <thead>
-            <tr>
-              <th style="width:200px" data-en="Operation No." data-zh="操作号">操作号</th>
-              <th style="width:120px" data-en="Type" data-zh="操作类型">操作类型</th>
-              <th style="width:80px" data-en="Records" data-zh="对象数">对象数</th>
-              <th style="width:100px" data-en="Operator" data-zh="操作人">操作人</th>
-              <th style="width:170px" data-en="Operated at" data-zh="操作时间">操作时间</th>
-              <th style="width:180px" data-en="Action" data-zh="操作">操作</th>
-            </tr>
-          </thead>
-          <tbody id="sl-oplog-tbody"></tbody>
+          <tbody id="sl-change-tbody"></tbody>
         </table>
       </div>
     </div>
