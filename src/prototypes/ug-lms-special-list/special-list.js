@@ -861,11 +861,25 @@
         var ixs = parseInt(stopBtn.getAttribute('data-sl-stop'), 10);
         var r = state.rows[ixs];
         if (!r) return;
-        r.stopped = !r.stopped;
-        r.updatedAt = nowText();
-        renderList();
-        toast(r.stopped ? 'Record disabled' : 'Record enabled',
-          r.stopped ? '已停用该记录' : '已启用该记录', 'ok');
+        var willStop = !r.stopped;
+        openConfirm({
+          titleEn: willStop ? 'Disable record' : 'Enable record',
+          titleZh: willStop ? '停用记录' : '启用记录',
+          textEn: willStop
+            ? 'Disable ' + shortId(r.id) + '? It will stop participating in limit adjustment immediately; you can enable it again at any time.'
+            : 'Enable ' + shortId(r.id) + '? It will resume participating in limit adjustment according to its validity window.',
+          textZh: willStop
+            ? '确认停用 ' + shortId(r.id) + '？停用后该记录立即不再参与调额匹配，可随时启用。'
+            : '确认启用 ' + shortId(r.id) + '？启用后将按有效期窗口恢复参与调额匹配。',
+          danger: false,
+          onOk: function () {
+            r.stopped = willStop;
+            r.updatedAt = nowText();
+            renderList();
+            toast(willStop ? 'Record disabled' : 'Record enabled',
+              willStop ? '已停用该记录' : '已启用该记录', 'ok');
+          }
+        });
         return;
       }
       var delBtn = e.target.closest('[data-sl-del]');
