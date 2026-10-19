@@ -347,6 +347,7 @@
   <div class="sl-tabs">
     <button type="button" class="sl-tab sl-tab-active" data-sl-tab="list" data-en="List" data-zh="名单">名单</button>
     <button type="button" class="sl-tab" data-sl-tab="batches" data-en="Batch Management" data-zh="批次管理">批次管理</button>
+    <button type="button" class="sl-tab" data-sl-tab="oplogs" data-en="Operation Logs" data-zh="操作记录">操作记录</button>
   </div>
 
   <!-- ── 名单 ── -->
@@ -526,6 +527,34 @@
     </div>
   </section>
 
+
+  <!-- ── 操作记录 ── -->
+  <section class="sl-panel" data-sl-panel="oplogs" hidden>
+    <div class="sl-card">
+      <div class="sl-toolbar">
+        <div class="sl-toolbar-left">
+          <span class="sl-hint" data-en="One operation = one record (bulk actions included). Open details to view and export the affected records."
+                data-zh="一次操作 = 一条记录（含批量操作）；详情可查看受影响记录并导出清单。">一次操作 = 一条记录（含批量操作）；详情可查看受影响记录并导出清单。</span>
+        </div>
+      </div>
+      <div class="sl-table-wrap">
+        <table class="sl-table">
+          <thead>
+            <tr>
+              <th style="width:200px" data-en="Operation No." data-zh="操作号">操作号</th>
+              <th style="width:120px" data-en="Type" data-zh="操作类型">操作类型</th>
+              <th style="width:80px" data-en="Records" data-zh="对象数">对象数</th>
+              <th style="width:100px" data-en="Operator" data-zh="操作人">操作人</th>
+              <th style="width:170px" data-en="Operated at" data-zh="操作时间">操作时间</th>
+              <th style="width:180px" data-en="Action" data-zh="操作">操作</th>
+            </tr>
+          </thead>
+          <tbody id="sl-oplog-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
   <!-- ── 弹窗：上传文件 ── -->
   <div class="sl-modal" data-sl-modal="upload" hidden>
     <div class="sl-modal-mask" data-sl-close></div>
@@ -699,6 +728,47 @@
       <div class="sl-modal-foot">
         <button type="button" class="sl-btn" data-sl-close data-en="Cancel" data-zh="取消">取消</button>
         <button type="button" class="sl-btn sl-btn-primary" id="sl-confirm-ok" data-en="Confirm" data-zh="确认">确认</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ── 弹窗：操作详情 ── -->
+  <div class="sl-modal" data-sl-modal="oplog" hidden>
+    <div class="sl-modal-mask" data-sl-close></div>
+    <div class="sl-modal-box sl-modal-box-wide">
+      <div class="sl-modal-head">
+        <span data-en="Operation details" data-zh="操作详情">操作详情</span>
+        <button type="button" class="sl-modal-close" data-sl-close aria-label="close">×</button>
+      </div>
+      <div class="sl-modal-body">
+        <div class="sl-bd-meta">
+          <div class="sl-bd-item"><span class="sl-bd-k" data-en="Operation No." data-zh="操作号">操作号</span><b class="sl-mono" id="sl-op-no">—</b></div>
+          <div class="sl-bd-item"><span class="sl-bd-k" data-en="Type" data-zh="操作类型">操作类型</span><b id="sl-op-type">—</b></div>
+          <div class="sl-bd-item"><span class="sl-bd-k" data-en="Records" data-zh="对象数">对象数</span><b id="sl-op-count">—</b></div>
+          <div class="sl-bd-item"><span class="sl-bd-k" data-en="Operator" data-zh="操作人">操作人</span><b id="sl-op-operator">—</b></div>
+          <div class="sl-bd-item"><span class="sl-bd-k" data-en="Operated at" data-zh="操作时间">操作时间</span><b class="sl-mono" id="sl-op-time">—</b></div>
+        </div>
+        <div class="sl-detail-title" data-en="Affected records (snapshot)" data-zh="受影响记录（快照）">受影响记录（快照）</div>
+        <div class="sl-table-wrap sl-bd-table-wrap">
+          <table class="sl-table sl-bd-table">
+            <thead>
+              <tr>
+                <th data-en="third_customer_id" data-zh="third_customer_id">third_customer_id</th>
+                <th data-en="overdraft_id" data-zh="overdraft_id">overdraft_id</th>
+                <th data-en="Level" data-zh="标签层级">标签层级</th>
+                <th data-en="Execution tag" data-zh="执行标签">执行标签</th>
+                <th data-en="Group" data-zh="明细组">明细组</th>
+              </tr>
+            </thead>
+            <tbody id="sl-op-tbody"></tbody>
+          </table>
+        </div>
+        <div class="sl-bd-note" id="sl-op-note"></div>
+      </div>
+      <div class="sl-modal-foot">
+        <button type="button" class="sl-btn" id="sl-op-export" data-en="Export list" data-zh="导出清单">导出清单</button>
+        <button type="button" class="sl-btn" data-sl-close data-en="Close" data-zh="关闭">关闭</button>
       </div>
     </div>
   </div>

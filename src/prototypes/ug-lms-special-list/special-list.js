@@ -222,11 +222,17 @@
     ],
     filters: {},
     selected: [],
+    opLogs: [],
     page: 1,
     pageSize: 10,
     processing: false
   };
   state.rows = genRows('SL20261015-004', 1240, state.batches[0].createdAt);
+  state.opLogs = [
+    { no: 'OP20261019-003', typeZh: '批量停用', typeEn: 'Bulk disable', count: 2, operator: 'baksun', time: '2026-10-19 11:52:10', rows: genRows('op-003', 2, '2026-10-19 11:52:10', { fileOnly: true }) },
+    { no: 'OP20261019-002', typeZh: '批量删除', typeEn: 'Bulk delete', count: 10, operator: 'jolie', time: '2026-10-19 10:31:02', rows: genRows('op-002', 10, '2026-10-19 10:31:02', { fileOnly: true }) },
+    { no: 'OP20261019-001', typeZh: '单条新增', typeEn: 'Add one', count: 1, operator: 'baksun', time: '2026-10-19 09:12:44', rows: genRows('op-001', 1, '2026-10-19 09:12:44', { fileOnly: true }) }
+  ];
 
   var el = {};
 
@@ -267,6 +273,144 @@
   function updateBatchButtons() {
     var n = state.selected.length;
     root.querySelectorAll('[data-sl-batch]').forEach(function (b) { b.disabled = n === 0; });
+  }
+
+  var opSeq = 4;
+  function nextOpNo() {
+    opSeq += 1;
+    var d = new Date();
+    return 'OP' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + String(opSeq).padStart(3, '0');
+  }
+
+  function logOp(typeZh, typeEn, rows) {
+    state.opLogs.unshift({
+      no: nextOpNo(), typeZh: typeZh, typeEn: typeEn, count: rows.length,
+      operator: 'baksun', time: nowText(),
+      rows: rows.map(function (r) {
+        return { id: r.id, level: r.level, tag: r.tag, product: r.product || 'OD', group: r.group || '' };
+      })
+    });
+    renderOpLogs();
+  }
+
+  function renderOpLogs() {
+    if (!el.oplogTbody) return;
+    el.oplogTbody.innerHTML = '';
+    if (!state.opLogs.length) {
+      var tr0 = document.createElement('tr');
+      var td0 = document.createElement('td');
+      td0.colSpan = 6;
+      td0.className = 'sl-empty';
+      attr(td0, 'No data', '暂无数据');
+      tr0.appendChild(td0);
+      el.oplogTbody.appendChild(tr0);
+      return;
+    }
+    state.opLogs.forEach(function (op) {
+      var tr = document.createElement('tr');
+      var tdNo = document.createElement('td');
+      tdNo.className = 'sl-mono';
+      tdNo.textContent = op.no;
+      tr.appendChild(tdNo);
+      var tdType = document.createElement('td');
+      attr(tdType, op.typeEn, op.typeZh);
+      tr.appendChild(tdType);
+      var tdCount = document.createElement('td');
+      tdCount.textContent = fmt(op.count);
+      tr.appendChild(tdCount);
+      var tdOperator = document.createElement('td');
+      tdOperator.textContent = op.operator;
+      tr.appendChild(tdOperator);
+      var tdTime = document.createElement('td');
+      tdTime.className = 'sl-mono';
+      tdTime.textContent = op.time;
+      tr.appendChild(tdTime);
+      var tdAct = document.createElement('td');
+      var act = document.createElement('div');
+      act.className = 'sl-actions';
+      var bDetail = document.createElement('button');
+      bDetail.type = 'button';
+      bDetail.className = 'sl-link';
+      bDetail.style.border = '0';
+      bDetail.style.background = 'transparent';
+      bDetail.style.cursor = 'pointer';
+      bDetail.style.padding = '0';
+      bDetail.setAttribute('data-sl-op-detail', op.no);
+      attr(bDetail, 'Details', '详情');
+      act.appendChild(bDetail);
+      var bExport = document.createElement('button');
+      bExport.type = 'button';
+      bExport.className = 'sl-link';
+      bExport.style.border = '0';
+      bExport.style.background = 'transparent';
+      bExport.style.cursor = 'pointer';
+      bExport.style.padding = '0';
+      bExport.setAttribute('data-sl-op-export', op.no);
+      attr(bExport, 'Export list', '导出清单');
+      act.appendChild(bExport);
+      tdAct.appendChild(act);
+      tr.appendChild(tdAct);
+      el.oplogTbody.appendChild(tr);
+    });
+  }
+
+  function findOp(no) {
+    for (var i = 0; i < state.opLogs.length; i += 1) {
+      if (state.opLogs[i].no === no) return state.opLogs[i];
+    }
+    return null;
+  }
+
+  function openOplog(no) {
+    var op = findOp(no);
+    if (!op) return;
+    el.opNo.textContent = op.no;
+    attr(el.opType, op.typeEn, op.typeZh);
+    el.opCount.textContent = fmt(op.count);
+    el.opOperator.textContent = op.operator;
+    el.opTime.textContent = op.time;
+    el.opTbody.innerHTML = '';
+    op.rows.forEach(function (r) {
+      var tr = document.createElement('tr');
+      var td1 = document.createElement('td');
+      td1.className = 'sl-mono';
+      if (r.level === 'user') { td1.textContent = shortId(r.id); td1.title = r.id; }
+      else td1.textContent = '—';
+      tr.appendChild(td1);
+      var td2 = document.createElement('td');
+      td2.className = 'sl-mono';
+      td2.textContent = r.level === 'account' ? r.id : '—';
+      tr.appendChild(td2);
+      var td3 = document.createElement('td');
+      attr(td3, LEVELS[r.level].en, LEVELS[r.level].zh);
+      tr.appendChild(td3);
+      var td4 = document.createElement('td');
+      var badge = document.createElement('span');
+      badge.className = 'sl-badge ' + TAGS[r.tag].badge;
+      attr(badge, TAGS[r.tag].en, TAGS[r.tag].zh);
+      td4.appendChild(badge);
+      tr.appendChild(td4);
+      var td5 = document.createElement('td');
+      td5.textContent = r.group || '—';
+      tr.appendChild(td5);
+      el.opTbody.appendChild(tr);
+    });
+    el.opNote.textContent = isZh() ? ('共 ' + fmt(op.count) + ' 条（快照）') : (fmt(op.count) + ' record(s) (snapshot)');
+    openModal('oplog');
+    if (window.__ugApplyLang) window.__ugApplyLang();
+  }
+
+  function exportOplog(no) {
+    var op = findOp(no);
+    if (!op) return;
+    var header = 'third_customer_id,overdraft_id,tag_level,pool_type,detail_group';
+    var lines = op.rows.map(function (r) {
+      return [r.level === 'user' ? r.id : '', r.level === 'account' ? r.id : '',
+        r.level, r.tag, r.group].map(csvEscape).join(',');
+    });
+    var csv = '\ufeff' + [header].concat(lines).join('\n') + '\n';
+    triggerDownload(new Blob([csv], { type: 'text/csv;charset=utf-8' }), op.no + '_records.csv');
+    toast('Record list exported', '已导出操作清单', 'ok');
   }
 
   function renderMeta() {
@@ -1099,6 +1243,7 @@
           onOk: function () {
             r.stopped = willStop;
             r.updatedAt = nowText();
+            logOp(willStop ? '停用' : '启用', willStop ? 'Disable' : 'Enable', [r]);
             renderList();
             toast(willStop ? 'Record disabled' : 'Record enabled',
               willStop ? '已停用该记录' : '已启用该记录', 'ok');
@@ -1118,6 +1263,7 @@
         textZh: '确认删除 ' + shortId(rr.id) + '？删除后立即不再参与调额匹配，且不可恢复（如需保留请用「停用」）。',
         danger: true,
         onOk: function () {
+          logOp('单条删除', 'Delete', [rr]);
           state.rows.splice(ix, 1);
           renderList();
           toast('Record deleted', '已删除该条记录', 'ok');
@@ -1173,6 +1319,7 @@
                 if (!r.stopped) { r.stopped = true; r.updatedAt = nowText(); n += 1; }
               });
               state.selected = [];
+              logOp('批量停用', 'Bulk disable', list);
               renderList();
               toast('Records disabled', '已停用 ' + n + ' 条记录', 'ok');
             }
@@ -1185,6 +1332,7 @@
             textZh: '确认删除所选 ' + list.length + ' 条记录？删除后立即不再参与调额匹配，且不可恢复（如需保留请用「停用」）。',
             danger: true,
             onOk: function () {
+              logOp('批量删除', 'Bulk delete', list);
               state.rows = state.rows.filter(function (r) { return list.indexOf(r) < 0; });
               state.selected = [];
               renderList();
@@ -1194,6 +1342,20 @@
         }
       });
     });
+
+    // 操作记录：详情 / 导出
+    if (el.oplogTbody) {
+      el.oplogTbody.addEventListener('click', function (e) {
+        var d = e.target.closest('[data-sl-op-detail]');
+        if (d) { openOplog(d.getAttribute('data-sl-op-detail')); return; }
+        var x = e.target.closest('[data-sl-op-export]');
+        if (x) exportOplog(x.getAttribute('data-sl-op-export'));
+      });
+      if (el.opExport && el.opDetailOwner === undefined) {
+        el.opExport.addEventListener('click', function () { exportOplog(el.opNo.textContent); });
+      }
+      renderOpLogs();
+    }
 
     // 批次：下载 / 详情
     el.batchTbody.addEventListener('click', function (e) {
@@ -1381,6 +1543,7 @@
         stopped: false, source: 'manual', updatedAt: nowText()
       });
       state.page = 1;
+      logOp('单条新增', 'Add one', [state.rows[0]]);
       closeModal();
       renderList();
       toast('Record added', '已新增 1 条记录', 'ok');
@@ -1458,6 +1621,15 @@
   el.fLevel = root.querySelector('#sl-f-level');
   el.fTag = root.querySelector('#sl-f-tag');
   el.fProduct = root.querySelector('#sl-f-product');
+  el.oplogTbody = root.querySelector('#sl-oplog-tbody');
+  el.opNo = root.querySelector('#sl-op-no');
+  el.opType = root.querySelector('#sl-op-type');
+  el.opCount = root.querySelector('#sl-op-count');
+  el.opOperator = root.querySelector('#sl-op-operator');
+  el.opTime = root.querySelector('#sl-op-time');
+  el.opTbody = root.querySelector('#sl-op-tbody');
+  el.opNote = root.querySelector('#sl-op-note');
+  el.opExport = root.querySelector('#sl-op-export');
   el.fSource = root.querySelector('#sl-f-source');
   el.fStatus = root.querySelector('#sl-f-status');
   el.bdNo = root.querySelector('#sl-bd-no');
