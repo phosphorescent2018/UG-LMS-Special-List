@@ -446,6 +446,7 @@
       tr.appendChild(td5);
       el.opTbody.appendChild(tr);
     });
+    if (el.opExport) el.opExport.hidden = op.count <= 1;
     el.opNote.textContent = isZh() ? ('共 ' + fmt(op.count) + ' 条（快照）') : (fmt(op.count) + ' record(s) (snapshot)');
     openModal('oplog');
     if (window.__ugApplyLang) window.__ugApplyLang();
@@ -905,7 +906,7 @@
       btnDetail.setAttribute('data-sl-change-detail', it.kind + ':' + it.no);
       attr(btnDetail, 'Details', '详情');
       act.appendChild(btnDetail);
-      if (it.kind === 'op') {
+      if (it.kind === 'op' && it.count > 1) {
         var btnEx = document.createElement('button');
         btnEx.type = 'button';
         btnEx.className = 'sl-link';
