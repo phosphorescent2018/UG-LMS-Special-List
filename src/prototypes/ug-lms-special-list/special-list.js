@@ -277,11 +277,22 @@
   function updateBatchButtons() {
     var n = state.selected.length;
     var stoppedN = state.selected.filter(function (r) { return r.stopped; }).length;
+    var stoppableN = state.selected.filter(function (r) {
+      return !r.stopped && rowStatus(r) !== 'expired';
+    }).length;
     root.querySelectorAll('[data-sl-batch]').forEach(function (b) {
-      if (b.getAttribute('data-sl-batch') === 'enable') {
+      var kind = b.getAttribute('data-sl-batch');
+      if (kind === 'enable') {
         b.disabled = n < 2 || stoppedN === 0;
         b.title = stoppedN === 0
           ? (isZh() ? '所选记录均未停用，无需启用（已失效请修改有效期）' : 'No disabled records selected')
+          : '';
+        return;
+      }
+      if (kind === 'stop') {
+        b.disabled = n < 2 || stoppableN === 0;
+        b.title = stoppableN === 0
+          ? (isZh() ? '所选记录均已停用或已失效，无需停用' : 'Selected records are already disabled or expired')
           : '';
         return;
       }
@@ -1596,22 +1607,30 @@
         var list = state.selected.slice();
         if (!list.length) return;
         if (action === 'stop') {
+          var stoppable = list.filter(function (r) { return !r.stopped && rowStatus(r) !== 'expired'; });
+          if (!stoppable.length) {
+            toast('No records to disable', '所选记录均已停用或已失效，无需停用', '');
+            return;
+          }
+          var skipped = list.length - stoppable.length;
           openConfirm({
             titleEn: 'Disable selected records',
             titleZh: '批量停用',
-            textEn: 'Disable ' + list.length + ' selected record(s)? They will stop participating in limit adjustment immediately; you can enable them again later.',
-            textZh: '确认停用所选 ' + list.length + ' 条记录？停用后立即不再参与调额匹配，可随时启用。',
+            textEn: 'Disable ' + stoppable.length + ' selected record(s)?' +
+              (skipped ? ' ' + skipped + ' already disabled / expired record(s) will be skipped.' : ' They will stop participating in limit adjustment immediately; you can enable them again later.'),
+            textZh: '确认停用所选记录中的 ' + stoppable.length + ' 条？' +
+              (skipped ? '已有 ' + skipped + ' 条为已停用或已失效，将跳过。' : '停用后立即不再参与调额匹配，可随时启用。'),
             danger: false,
             onOk: function () {
-              var n = 0;
-              list.forEach(function (r) {
-                if (!r.stopped) { r.stopped = true; r.updatedAt = nowText(); n += 1; }
+              stoppable.forEach(function (r) {
+                r.stopped = true;
+                r.updatedAt = nowText();
               });
               state.selected = [];
               state.allSelected = false;
-              logOp('批量停用', 'Bulk disable', list);
+              logOp('批量停用', 'Bulk disable', stoppable);
               renderList();
-              toast('Records disabled', '已停用 ' + n + ' 条记录', 'ok');
+              toast('Records disabled', '已停用 ' + stoppable.length + ' 条记录', 'ok');
             }
           });
         } else if (action === 'enable') {
