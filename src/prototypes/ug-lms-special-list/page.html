@@ -538,8 +538,11 @@
         <button type="button" class="sl-modal-close" data-sl-close aria-label="close">×</button>
       </div>
       <div class="sl-modal-body">
-        <div class="sl-alert" data-en="Upload is an incremental import: rows with the same key (same level + same ID) overwrite existing records (including resetting disabled records back to normal); all other records are kept. If any row fails validation the whole import is abandoned. Template columns: third_customer_id, overdraft_id, tag_level, pool_type, product_code, detail_group, effective_start, effective_end, remark (time format: YYYY-MM-DD HH:mm:ss)."
-             data-zh="上传为增量导入：同键（同层级同 ID）记录以新文件为准覆盖（含已停用记录重置为正常），其余记录全部保留；任何一行校验不通过则本次整批放弃。模板列：third_customer_id, overdraft_id, tag_level, pool_type, product_code, detail_group, effective_start, effective_end, remark（时间格式：YYYY-MM-DD HH:mm:ss）。">上传为增量导入：同键（同层级同 ID）记录以新文件为准覆盖（含已停用记录重置为正常），其余记录全部保留；任何一行校验不通过则本次整批放弃。模板列：third_customer_id, overdraft_id, tag_level, pool_type, product_code, detail_group, effective_start, effective_end, remark（时间格式：YYYY-MM-DD HH:mm:ss）。</div>
+        <div class="sl-alert">
+          <div data-en="Upload is an incremental import" data-zh="上传为增量导入">上传为增量导入</div>
+          <div data-en="Same-key records are overwritten by the new file; all other records are kept" data-zh="同键记录以新文件为准覆盖，其余记录全部保留">同键记录以新文件为准覆盖，其余记录全部保留</div>
+          <div data-en="If any row fails validation, the whole import is abandoned" data-zh="任何一行校验不通过则整批放弃">任何一行校验不通过则整批放弃</div>
+        </div>
         <div class="sl-field">
           <label class="sl-label" data-en="List file" data-zh="名单文件">名单文件</label>
           <div class="sl-file">
