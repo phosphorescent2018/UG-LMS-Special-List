@@ -222,6 +222,7 @@
     ],
     filters: {},
     selected: [],
+    cols: { tcid: true, odid: true, level: true, tag: true, product: true, group: true, start: true, end: true, status: true, source: true, updated: true },
     opLogs: [],
     page: 1,
     pageSize: 10,
@@ -413,6 +414,82 @@
     toast('Record list exported', '已导出操作清单', 'ok');
   }
 
+  var COL_KEYS = ['pick', 'tcid', 'odid', 'level', 'tag', 'product', 'group', 'start', 'end', 'status', 'source', 'updated', 'action'];
+  var COLS = [
+    ['tcid', 'third_customer_id', 'third_customer_id'],
+    ['odid', 'overdraft_id', 'overdraft_id'],
+    ['level', '标签层级', 'Level'],
+    ['tag', '执行标签', 'Execution tag'],
+    ['product', '业务产品', 'Product'],
+    ['group', '明细组', 'Group'],
+    ['start', '生效时间', 'Effective from'],
+    ['end', '失效时间', 'Effective to'],
+    ['status', '状态', 'Status'],
+    ['source', '来源', 'Source'],
+    ['updated', '更新时间', 'Updated at']
+  ];
+  var colPop = null;
+
+  function applyCols() {
+    if (!el.listTable) return;
+    Array.prototype.forEach.call(el.listTable.querySelectorAll('thead th'), function (th) {
+      var key = th.getAttribute('data-col');
+      if (!key) return;
+      th.hidden = state.cols[key] === false;
+    });
+  }
+
+  function renderColPop() {
+    var zh = isZh();
+    var html = '<div class="sl-colpop-head"><span>' + (zh ? '列设置' : 'Columns') + '</span></div><div class="sl-colpop-list">';
+    COLS.forEach(function (c) {
+      html += '<label><input type="checkbox" data-col-key="' + c[0] + '"' + (state.cols[c[0]] === false ? '' : ' checked') +
+        '><span data-en="' + c[2] + '" data-zh="' + c[1] + '">' + (zh ? c[1] : c[2]) + '</span></label>';
+    });
+    html += '</div><div class="sl-colpop-foot"><button type="button" data-col-all>' + (zh ? '全选' : 'Select all') +
+      '</button><button type="button" data-col-reset>' + (zh ? '恢复默认' : 'Reset') + '</button></div>';
+    colPop.innerHTML = html;
+  }
+
+  function buildColPop() {
+    colPop = document.createElement('div');
+    colPop.className = 'sl-colpop';
+    colPop.hidden = true;
+    root.appendChild(colPop);
+    colPop.addEventListener('click', function (e) {
+      var cb = e.target.closest('input[data-col-key]');
+      if (cb) {
+        state.cols[cb.getAttribute('data-col-key')] = cb.checked;
+        applyCols();
+        renderList();
+        return;
+      }
+      if (e.target.closest('[data-col-all]') || e.target.closest('[data-col-reset]')) {
+        COLS.forEach(function (c) { state.cols[c[0]] = true; });
+        renderColPop();
+        applyCols();
+        renderList();
+      }
+    });
+    document.addEventListener('mousedown', function (e) {
+      if (!colPop || colPop.hidden) return;
+      if (colPop.contains(e.target)) return;
+      if (e.target.closest && e.target.closest('[data-sl-colbtn]')) return;
+      colPop.hidden = true;
+    });
+    window.addEventListener('resize', function () { if (colPop) colPop.hidden = true; });
+  }
+
+  function openColPop(btn) {
+    renderColPop();
+    colPop.hidden = false;
+    var rect = btn.getBoundingClientRect();
+    var w = 280;
+    var left = Math.min(rect.right - w, window.innerWidth - w - 12);
+    colPop.style.left = Math.max(12, left) + 'px';
+    colPop.style.top = (rect.bottom + 6) + 'px';
+  }
+
   function renderMeta() {
     el.lastBatch.textContent = state.lastBatch;
     el.total.textContent = fmt(state.rows.length);
@@ -543,6 +620,13 @@
       act.appendChild(btnDel);
       tdAction.appendChild(act);
       tr.appendChild(tdAction);
+
+      Array.prototype.forEach.call(tr.children, function (td, ci) {
+        var key = COL_KEYS[ci];
+        if (!key) return;
+        td.setAttribute('data-col', key);
+        if (state.cols[key] === false) td.hidden = true;
+      });
 
       el.tbody.appendChild(tr);
     });
@@ -1166,6 +1250,21 @@
       });
     });
 
+    // 列设置：表头列标识 + 弹出勾选面板（勾选列 / 操作列固定）
+    Array.prototype.forEach.call(el.listTable.querySelectorAll('thead th'), function (th, i) {
+      if (COL_KEYS[i]) th.setAttribute('data-col', COL_KEYS[i]);
+    });
+    applyCols();
+    var colBtn = root.querySelector('[data-sl-colbtn]');
+    if (colBtn) {
+      colBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (!colPop) buildColPop();
+        if (colPop.hidden) openColPop(colBtn);
+        else colPop.hidden = true;
+      });
+    }
+
     // 日期选择器：点击输入框或日历图标打开（自定义实现，跨浏览器一致）
     buildPicker();
     root.querySelectorAll('[data-sl-date-input]').forEach(function (n) {
@@ -1621,6 +1720,7 @@
   el.fLevel = root.querySelector('#sl-f-level');
   el.fTag = root.querySelector('#sl-f-tag');
   el.fProduct = root.querySelector('#sl-f-product');
+  el.listTable = root.querySelector('#sl-list-table');
   el.oplogTbody = root.querySelector('#sl-oplog-tbody');
   el.opNo = root.querySelector('#sl-op-no');
   el.opType = root.querySelector('#sl-op-type');

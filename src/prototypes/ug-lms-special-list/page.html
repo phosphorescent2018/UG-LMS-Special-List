@@ -364,6 +364,7 @@
           <button type="button" class="sl-btn" data-sl-batch="del" disabled data-en="Delete selected" data-zh="批量删除">批量删除</button>
         </div>
         <div class="sl-toolbar-right">
+          <button type="button" class="sl-btn" data-sl-colbtn data-en="Columns" data-zh="列设置">列设置</button>
           <button type="button" class="sl-btn" data-sl-action="reset" data-en="Reset" data-zh="重置">重置</button>
           <button type="button" class="sl-btn sl-btn-primary" data-sl-action="search" data-en="Query" data-zh="查询">查询</button>
         </div>
@@ -450,7 +451,7 @@
       </div>
 
       <div class="sl-table-wrap">
-        <table class="sl-table">
+        <table class="sl-table" id="sl-list-table">
           <thead>
             <tr>
               <th style="width:36px"><input type="checkbox" id="sl-pick-all" aria-label="select all"></th>

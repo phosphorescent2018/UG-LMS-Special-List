@@ -2924,3 +2924,15 @@ input.ant-input { width: 100%; }
 .ug-special-page .sl-card { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
 .ug-special-page .sl-table-wrap { flex: 1 1 auto; min-height: 0; overflow: auto; }
 .ug-special-page .sl-pager { flex: 0 0 auto; }
+
+/* 列设置下拉 */
+.sl-colpop {
+  position: fixed; z-index: 1200; width: 280px; padding: 12px;
+  background: #fff; border: 1px solid rgb(229, 231, 237); border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(3, 25, 56, 0.12); font-size: 13px; color: rgb(3, 25, 56);
+}
+.sl-colpop-head { font-weight: 600; margin-bottom: 8px; }
+.sl-colpop-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
+.sl-colpop-list label { display: flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap; }
+.sl-colpop-foot { display: flex; justify-content: space-between; margin-top: 10px; }
+.sl-colpop-foot button { border: 0; background: transparent; color: rgb(80, 149, 255); cursor: pointer; font-size: 12px; padding: 0; }
