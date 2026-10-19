@@ -1466,10 +1466,18 @@
     });
 
     // 变更记录：按对象 ID 过滤
-    if (el.changeQ) {
-      el.changeQ.addEventListener('input', function () {
-        state.changeQuery = el.changeQ.value.trim();
+    if (el.changeSearch) {
+      el.changeSearch.addEventListener('click', function () {
+        state.changeQuery = (el.changeQ && el.changeQ.value || '').trim();
         renderChanges();
+      });
+    }
+    if (el.changeQ) {
+      el.changeQ.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          state.changeQuery = el.changeQ.value.trim();
+          renderChanges();
+        }
       });
     }
     if (el.changeClear) {
@@ -1952,6 +1960,7 @@
   el.rdHistory = root.querySelector('#sl-rd-history');
   el.rdNote = root.querySelector('#sl-rd-note');
   el.changeQ = root.querySelector('#sl-change-q');
+  el.changeSearch = root.querySelector('#sl-change-search');
   el.changeClear = root.querySelector('#sl-change-clear');
   el.oplogTbody = root.querySelector('#sl-oplog-tbody');
   el.opNo = root.querySelector('#sl-op-no');
