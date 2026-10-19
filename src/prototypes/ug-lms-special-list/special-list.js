@@ -7,7 +7,7 @@
  *   - 上传 = 增量导入：同键（同层级同 ID）以新文件为准覆盖、其余记录全部保留；任一行校验不过 → 本次整批放弃。
  *   - 预览「解析 / 新增 / 覆盖 / 非法」按本次文件口径；导入后名单条数 = 原条数 + 新增。
  *   - 记录带有效期（生效/失效时间，全必填）；状态派生：未生效 / 生效中 / 已失效 / 已停用。
- *   - 批次 = 一次导入的变更记录；状态机：处理中 → 已生效 / 处理失败；操作列仅「详情」。
+ *   - 批次 = 一次导入的变更记录；状态机：处理中 → 已处理 / 处理失败；操作列「下载 + 详情」。
  */
 (function () {
   var root = document.querySelector('.sl-page');
@@ -46,7 +46,7 @@
   };
   var BATCH_STATUS = {
     processing: { en: 'Processing', zh: '处理中', badge: 'sl-badge-blue' },
-    active: { en: 'Effective', zh: '已生效', badge: 'sl-badge-green' },
+    processed: { en: 'Processed', zh: '已处理', badge: 'sl-badge-green' },
     failed: { en: 'Failed', zh: '处理失败', badge: 'sl-badge-red' }
   };
 
@@ -207,10 +207,10 @@
     rows: [],
     lastBatch: 'SL20261015-004',
     batches: [
-      { no: 'SL20261015-004', source: 'file', count: 1240, added: 1104, overwritten: 136, status: 'active', operator: 'baksun', createdAt: '2026-10-15 09:12:44' },
-      { no: 'SL20261014-003', source: 'file', count: 486, added: 420, overwritten: 66, status: 'active', operator: 'baksun', createdAt: '2026-10-14 17:38:10' },
+      { no: 'SL20261015-004', source: 'file', count: 1240, added: 1104, overwritten: 136, status: 'processed', operator: 'baksun', createdAt: '2026-10-15 09:12:44' },
+      { no: 'SL20261014-003', source: 'file', count: 486, added: 420, overwritten: 66, status: 'processed', operator: 'baksun', createdAt: '2026-10-14 17:38:10' },
       { no: 'SL20261013-002', source: 'file', count: 318, added: 0, overwritten: 0, status: 'failed', operator: 'jolie', createdAt: '2026-10-13 10:02:55', failReason: '系统处理异常，整批未写入名单' },
-      { no: 'SL20261012-001', source: 'file', count: 952, added: 952, overwritten: 0, status: 'active', operator: 'jolie', createdAt: '2026-10-12 08:31:20' }
+      { no: 'SL20261012-001', source: 'file', count: 952, added: 952, overwritten: 0, status: 'processed', operator: 'jolie', createdAt: '2026-10-12 08:31:20' }
     ],
     filters: {},
     page: 1,
@@ -973,7 +973,7 @@
       el.uploadDl.addEventListener('click', downloadFailureDetails);
     }
 
-    // 上传弹窗：确认导入（增量合并：处理中 → 已生效）
+    // 上传弹窗：确认导入（增量合并：处理中 → 已处理）
     el.uploadConfirm.addEventListener('click', function () {
       var result = el.parseResult;
       if (!result || result.failed > 0 || state.processing) return;
@@ -994,7 +994,7 @@
       renderMeta();
       toast('Import processing…', '导入处理中…', '');
       setTimeout(function () {
-        batch.status = 'active';
+        batch.status = 'processed';
         state.processing = false;
         var newRows = genRows(no, result.added, createdAt, { fileOnly: true, noExpired: true });
         state.rows = newRows.concat(state.rows);
