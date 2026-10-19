@@ -324,6 +324,11 @@
     txt.textContent = state.allSelected
       ? (isZh() ? '已选择全部 ' + fmt(n) + ' 条（当前筛选结果）' : 'All ' + fmt(n) + ' records selected (current filter)')
       : (isZh() ? '已选择 ' + fmt(n) + ' 条' : fmt(n) + ' record(s) selected');
+    var allBtn = root.querySelector('#sl-selbar-all');
+    if (allBtn) {
+      allBtn.hidden = state.allSelected;
+      allBtn.textContent = isZh() ? '全选当前筛选结果（' + fmt(visibleRows().length) + ' 条）' : 'Select all ' + fmt(visibleRows().length) + ' filtered records';
+    }
   }
 
   var opSeq = 7;
@@ -1624,17 +1629,21 @@
         if (state.page > pageCount) state.page = pageCount;
         var from = (state.page - 1) * state.pageSize;
         var pageRows = rows.slice(from, from + state.pageSize);
-        var pageAll = pageRows.length > 0 && pageRows.every(function (r) { return state.selected.indexOf(r) >= 0; });
-        if (state.allSelected) {
-          state.selected = [];
-          state.allSelected = false;
-        } else if (pageAll) {
-          state.selected = rows.slice();
-          state.allSelected = true;
+        if (pickAllEl.checked) {
+          pageRows.forEach(function (r) { if (state.selected.indexOf(r) < 0) state.selected.push(r); });
         } else {
-          state.selected = pageRows.slice();
-          state.allSelected = false;
+          state.selected = state.selected.filter(function (r) { return pageRows.indexOf(r) < 0; });
         }
+        state.allSelected = false;
+        renderList();
+      });
+    }
+
+    var selAll = root.querySelector('#sl-selbar-all');
+    if (selAll) {
+      selAll.addEventListener('click', function () {
+        state.selected = visibleRows().slice();
+        state.allSelected = true;
         renderList();
       });
     }
