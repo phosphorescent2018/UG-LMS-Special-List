@@ -805,7 +805,6 @@
     el.singleTag.disabled = false;
     el.singleProduct.value = '';
     el.singleProduct.disabled = false;
-    el.singleProductHint.hidden = true;
     el.singleCascadeHint.hidden = true;
     el.singleGroup.value = '';
     el.singleRemark.value = '';
@@ -1053,20 +1052,8 @@
       var isUser = el.singleLevel.value === 'user';
       el.singleTcidField.hidden = !isUser;
       el.singleOdidField.hidden = isUser;
-      // 业务产品：账户级本期仅支持 OD（锁定）；用户级可选（全部产品 / OD / BL）
-      if (isUser) {
-        if (el.singleProduct.dataset.forced === '1') {
-          el.singleProduct.value = '';
-          el.singleProduct.dataset.forced = '';
-        }
-        el.singleProduct.disabled = false;
-        el.singleProductHint.hidden = true;
-      } else {
-        el.singleProduct.value = 'OD';
-        el.singleProduct.disabled = true;
-        el.singleProduct.dataset.forced = '1';
-        el.singleProductHint.hidden = false;
-      }
+      // 业务产品：两级均可选（原型不绑定实现；各产品的账户键由开发映射）
+      el.singleProduct.disabled = false;
     }
     el.singleLevel.addEventListener('change', syncSingleIdFields);
 
@@ -1203,7 +1190,6 @@
   el.singleGroup = root.querySelector('#sl-single-group');
   el.singleCascadeHint = root.querySelector('#sl-single-cascade-hint');
   el.singleProduct = root.querySelector('#sl-single-product');
-  el.singleProductHint = root.querySelector('#sl-single-product-hint');
   el.singleStart = root.querySelector('#sl-single-start');
   el.singleEnd = root.querySelector('#sl-single-end');
   el.singleRemark = root.querySelector('#sl-single-remark');
