@@ -404,7 +404,7 @@
   function exportOplog(no) {
     var op = findOp(no);
     if (!op) return;
-    var header = 'third_customer_id,overdraft_id,tag_level,pool_type,detail_group';
+    var header = 'third_customer_id（用户ID）,overdraft_id（账户ID）,tag_level（标签层级）,pool_type（执行标签）,detail_group（明细组）';
     var lines = op.rows.map(function (r) {
       return [r.level === 'user' ? r.id : '', r.level === 'account' ? r.id : '',
         r.level, r.tag, r.group].map(csvEscape).join(',');
@@ -1105,7 +1105,7 @@
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
   }
 
-  var CSV_HEADER = 'third_customer_id,overdraft_id,tag_level,pool_type,product_code,detail_group,effective_start,effective_end,remark';
+  var CSV_HEADER = 'third_customer_id（用户ID）,overdraft_id（账户ID）,tag_level（标签层级）,pool_type（执行标签）,product_code（业务产品）,detail_group（明细组）,effective_start（生效时间）,effective_end（失效时间）,remark（备注）';
 
   function downloadBatchFile(no) {
     var batch = null;
@@ -1679,7 +1679,7 @@
     if (el.templateLink) {
       el.templateLink.addEventListener('click', function (e) {
         e.preventDefault();
-        var header = 'third_customer_id,overdraft_id,tag_level,pool_type,product_code,detail_group,effective_start,effective_end,remark';
+        var header = 'third_customer_id（用户ID）,overdraft_id（账户ID）,tag_level（标签层级）,pool_type（执行标签）,product_code（业务产品）,detail_group（明细组）,effective_start（生效时间）,effective_end（失效时间）,remark（备注）';
         var sample1 = 'F3B2F35A27F065672D506E99E76DF57F6988818498F860B80DDA84B13A985C14,,user,increase_only,OD,Staff组,2026-11-01 09:00:00,2027-11-01 09:00:00,员工入职';
         var sample2 = ',80111462,account,no_adjust,OD,回捞组,2026-11-01 09:00:00,2026-12-31 23:59:59,回捞实验期内锁定';
         var csv = '\ufeff' + [header, sample1, sample2].join('\n') + '\n';
