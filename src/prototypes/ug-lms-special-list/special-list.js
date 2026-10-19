@@ -222,6 +222,7 @@
     ],
     filters: {},
     selected: [],
+    allSelected: false,
     cols: { tcid: true, odid: true, level: true, tag: true, product: true, group: true, start: true, end: true, status: true, source: true, updated: true },
     opLogs: [],
     page: 1,
@@ -274,6 +275,18 @@
   function updateBatchButtons() {
     var n = state.selected.length;
     root.querySelectorAll('[data-sl-batch]').forEach(function (b) { b.disabled = n === 0; });
+  }
+
+  function updateSelBar() {
+    var bar = root.querySelector('#sl-selbar');
+    var txt = root.querySelector('#sl-selbar-text');
+    if (!bar || !txt) return;
+    var n = state.selected.length;
+    if (!n) { bar.hidden = true; return; }
+    bar.hidden = false;
+    txt.textContent = state.allSelected
+      ? (isZh() ? '已选择全部 ' + fmt(n) + ' 条（当前筛选结果）' : 'All ' + fmt(n) + ' records selected (current filter)')
+      : (isZh() ? '已选择 ' + fmt(n) + ' 条' : fmt(n) + ' record(s) selected');
   }
 
   var opSeq = 4;
@@ -633,6 +646,7 @@
       pickAll.indeterminate = picked > 0 && picked < pageRows.length;
     }
     updateBatchButtons();
+    updateSelBar();
     renderPager(rows.length, pageCount);
     if (window.__ugApplyLang) window.__ugApplyLang();
   }
@@ -1204,6 +1218,7 @@
 
   function applySearch() {
     state.selected = [];
+    state.allSelected = false;
     state.filters = readFilters();
     state.page = 1;
     renderList();
@@ -1211,6 +1226,7 @@
 
   function resetFilters() {
     state.selected = [];
+    state.allSelected = false;
     [el.fTcid, el.fOdid, el.fStartFrom, el.fStartTo, el.fEndFrom, el.fEndTo].forEach(function (n) { n.value = ''; });
     [el.fGroup, el.fLevel, el.fTag, el.fProduct, el.fSource, el.fStatus].forEach(function (n) { n.value = ''; });
     state.filters = {};
@@ -1413,17 +1429,32 @@
 
     var pickAllEl = root.querySelector('#sl-pick-all');
     if (pickAllEl) {
-      pickAllEl.addEventListener('change', function () {
+      pickAllEl.addEventListener('click', function () {
         var rows = visibleRows();
         var pageCount = Math.max(1, Math.ceil(rows.length / state.pageSize));
         if (state.page > pageCount) state.page = pageCount;
         var from = (state.page - 1) * state.pageSize;
         var pageRows = rows.slice(from, from + state.pageSize);
-        if (pickAllEl.checked) {
-          pageRows.forEach(function (r) { if (state.selected.indexOf(r) < 0) state.selected.push(r); });
+        var pageAll = pageRows.length > 0 && pageRows.every(function (r) { return state.selected.indexOf(r) >= 0; });
+        if (state.allSelected) {
+          state.selected = [];
+          state.allSelected = false;
+        } else if (pageAll) {
+          state.selected = rows.slice();
+          state.allSelected = true;
         } else {
-          state.selected = state.selected.filter(function (r) { return pageRows.indexOf(r) < 0; });
+          state.selected = pageRows.slice();
+          state.allSelected = false;
         }
+        renderList();
+      });
+    }
+
+    var selClear = root.querySelector('#sl-selbar-clear');
+    if (selClear) {
+      selClear.addEventListener('click', function () {
+        state.selected = [];
+        state.allSelected = false;
         renderList();
       });
     }
@@ -1446,6 +1477,7 @@
                 if (!r.stopped) { r.stopped = true; r.updatedAt = nowText(); n += 1; }
               });
               state.selected = [];
+              state.allSelected = false;
               logOp('批量停用', 'Bulk disable', list);
               renderList();
               toast('Records disabled', '已停用 ' + n + ' 条记录', 'ok');
@@ -1462,6 +1494,7 @@
               logOp('批量删除', 'Bulk delete', list);
               state.rows = state.rows.filter(function (r) { return list.indexOf(r) < 0; });
               state.selected = [];
+              state.allSelected = false;
               renderList();
               toast('Records deleted', '已删除 ' + list.length + ' 条记录', 'ok');
             }

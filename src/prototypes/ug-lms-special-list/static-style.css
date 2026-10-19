@@ -301,7 +301,7 @@ input.ant-input { width: 100%; }
 .sl-field .sl-hint { margin-top: 6px; }
 
 /* Filters */
-.sl-filters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 16px; padding: 0 24px 14px; }
+.sl-filters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 16px; padding: 18px 24px 14px; }
 .sl-filter label { display: block; margin-bottom: 4px; font-size: 12.5px; color: rgb(116, 121, 140); }
 .sl-filter .sl-input { height: 30px; font-size: 13px; }
 .sl-filter select.sl-input { padding: 0 8px; }
@@ -2924,6 +2924,10 @@ input.ant-input { width: 100%; }
 .ug-special-page .sl-card { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
 .ug-special-page .sl-table-wrap { flex: 1 1 auto; min-height: 0; overflow: auto; }
 .ug-special-page .sl-pager { flex: 0 0 auto; }
+
+/* 选择横幅 */
+.sl-selbar { display: flex; align-items: center; gap: 12px; margin: 0 24px 8px; padding: 8px 12px;
+  background: rgb(240, 245, 255); border: 1px solid rgb(214, 228, 255); border-radius: 4px; font-size: 13px; color: rgb(3, 25, 56); }
 
 /* 表格上方工具栏 */
 .sl-table-tools { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 0 24px 8px; }
