@@ -415,6 +415,15 @@
           </select>
         </div>
         <div class="sl-filter">
+          <label data-en="Product" data-zh="业务产品">业务产品</label>
+          <select class="sl-input" id="sl-f-product">
+            <option value="" data-en="All" data-zh="全部">全部</option>
+            <option value="OD" data-en="OD" data-zh="OD">OD</option>
+            <option value="BL" data-en="BL" data-zh="BL">BL</option>
+            <option value="__blank__" data-en="All products" data-zh="全部产品（不限）">全部产品（不限）</option>
+          </select>
+        </div>
+        <div class="sl-filter">
           <label data-en="Source" data-zh="来源">来源</label>
           <select class="sl-input" id="sl-f-source">
             <option value="" data-en="All" data-zh="全部">全部</option>
@@ -447,6 +456,7 @@
               <th style="width:110px" data-en="overdraft_id" data-zh="overdraft_id">overdraft_id</th>
               <th style="width:96px" data-en="Level" data-zh="标签层级">标签层级</th>
               <th style="width:126px" data-en="Execution tag" data-zh="执行标签">执行标签</th>
+              <th style="width:110px" data-en="Product" data-zh="业务产品">业务产品</th>
               <th style="width:120px" data-en="Group" data-zh="明细组">明细组</th>
               <th style="width:158px" data-en="Effective from" data-zh="生效时间">生效时间</th>
               <th style="width:158px" data-en="Effective to" data-zh="失效时间">失效时间</th>
@@ -524,8 +534,8 @@
         <button type="button" class="sl-modal-close" data-sl-close aria-label="close">×</button>
       </div>
       <div class="sl-modal-body">
-        <div class="sl-alert" data-en="Upload is an incremental import: rows with the same key (same level + same ID) overwrite existing records (including resetting disabled records back to normal); all other records are kept. If any row fails validation the whole import is abandoned. Template columns: third_customer_id, overdraft_id, tag_level, pool_type, detail_group, effective_start, effective_end, remark (time format: YYYY-MM-DD HH:mm:ss)."
-             data-zh="上传为增量导入：同键（同层级同 ID）记录以新文件为准覆盖（含已停用记录重置为正常），其余记录全部保留；任何一行校验不通过则本次整批放弃。模板列：third_customer_id, overdraft_id, tag_level, pool_type, detail_group, effective_start, effective_end, remark（时间格式：YYYY-MM-DD HH:mm:ss）。">上传为增量导入：同键（同层级同 ID）记录以新文件为准覆盖（含已停用记录重置为正常），其余记录全部保留；任何一行校验不通过则本次整批放弃。模板列：third_customer_id, overdraft_id, tag_level, pool_type, detail_group, effective_start, effective_end, remark（时间格式：YYYY-MM-DD HH:mm:ss）。</div>
+        <div class="sl-alert" data-en="Upload is an incremental import: rows with the same key (same level + same ID) overwrite existing records (including resetting disabled records back to normal); all other records are kept. If any row fails validation the whole import is abandoned. Template columns: third_customer_id, overdraft_id, tag_level, pool_type, product_code, detail_group, effective_start, effective_end, remark (time format: YYYY-MM-DD HH:mm:ss)."
+             data-zh="上传为增量导入：同键（同层级同 ID）记录以新文件为准覆盖（含已停用记录重置为正常），其余记录全部保留；任何一行校验不通过则本次整批放弃。模板列：third_customer_id, overdraft_id, tag_level, pool_type, product_code, detail_group, effective_start, effective_end, remark（时间格式：YYYY-MM-DD HH:mm:ss）。">上传为增量导入：同键（同层级同 ID）记录以新文件为准覆盖（含已停用记录重置为正常），其余记录全部保留；任何一行校验不通过则本次整批放弃。模板列：third_customer_id, overdraft_id, tag_level, pool_type, product_code, detail_group, effective_start, effective_end, remark（时间格式：YYYY-MM-DD HH:mm:ss）。</div>
         <div class="sl-field">
           <label class="sl-label" data-en="List file" data-zh="名单文件">名单文件</label>
           <div class="sl-file">
@@ -586,6 +596,15 @@
             <option value="increase_only" data-en="Increase only" data-zh="仅参与提额">仅参与提额</option>
             <option value="decrease_only" data-en="Decrease only" data-zh="仅参与降额">仅参与降额</option>
           </select>
+        </div>
+        <div class="sl-field">
+          <label class="sl-label" data-en="Product" data-zh="业务产品">业务产品</label>
+          <select class="sl-input" id="sl-single-product">
+            <option value="" data-en="All products" data-zh="全部产品（不限）">全部产品（不限）</option>
+            <option value="OD" data-en="OD" data-zh="OD">OD</option>
+            <option value="BL" data-en="BL" data-zh="BL">BL</option>
+          </select>
+          <div class="sl-hint" id="sl-single-product-hint" hidden data-en="Account level supports OD only (BL account key not defined yet)." data-zh="账户级仅支持 OD（BL 账户键待定义）">账户级仅支持 OD（BL 账户键待定义）</div>
         </div>
         <div class="sl-field">
           <label class="sl-label" data-en="Group" data-zh="明细组">明细组</label>
@@ -651,6 +670,7 @@
                 <th data-en="overdraft_id" data-zh="overdraft_id">overdraft_id</th>
                 <th data-en="Level" data-zh="标签层级">标签层级</th>
                 <th data-en="Execution tag" data-zh="执行标签">执行标签</th>
+                <th data-en="Product" data-zh="业务产品">业务产品</th>
                 <th data-en="Group" data-zh="明细组">明细组</th>
               </tr>
             </thead>

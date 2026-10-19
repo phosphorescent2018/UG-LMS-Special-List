@@ -27,6 +27,11 @@
     file: { en: 'File import', zh: '文件上传' },
     manual: { en: 'Manual', zh: '手工维护' }
   };
+  var PRODUCTS = {
+    'OD': { en: 'OD', zh: 'OD' },
+    'BL': { en: 'BL', zh: 'BL' },
+    '': { en: 'All products', zh: '全部产品' }
+  };
   var GROUPS = ['回捞组', '激进提额组', '降额实验组', '模型切换实验组', 'Staff组', '白名单组', '风险触发组', '人工降额名单组'];
   var GROUP_CATALOG = {
     '回捞组': { level: 'account', tag: 'no_adjust' },
@@ -187,10 +192,16 @@
       var id = spec[0] === 'user'
         ? hexId(rnd)
         : String(10000000 + Math.floor(rnd() * 89999999));
+      var product = 'OD';
+      if (spec[0] === 'user') {
+        var pr = rnd();
+        product = pr < 0.45 ? '' : (pr < 0.8 ? 'OD' : 'BL');
+      }
       rows.push({
         id: id,
         level: spec[0],
         tag: spec[1],
+        product: product,
         group: spec[2],
         start: fmtD(new Date(startMs)),
         end: fmtD(new Date(endMs)),
@@ -238,6 +249,10 @@
     return state.rows.filter(function (r) {
       if (f.tcid && !(r.level === 'user' && r.id.toLowerCase().indexOf(f.tcid.toLowerCase()) >= 0)) return false;
       if (f.odid && !(r.level === 'account' && r.id.indexOf(f.odid) >= 0)) return false;
+      if (f.product) {
+        var pv = r.product || '';
+        if (f.product === '__blank__' ? pv !== '' : pv !== f.product) return false;
+      }
       if (f.level && r.level !== f.level) return false;
       if (f.tag && r.tag !== f.tag) return false;
       if (f.group && r.group !== f.group) return false;
@@ -310,6 +325,10 @@
       attr(badge, TAGS[row.tag].en, TAGS[row.tag].zh);
       tdTag.appendChild(badge);
       tr.appendChild(tdTag);
+
+      var tdProduct = document.createElement('td');
+      attr(tdProduct, PRODUCTS[row.product || ''].en, PRODUCTS[row.product || ''].zh);
+      tr.appendChild(tdProduct);
 
       var tdGroup = document.createElement('td');
       tdGroup.textContent = row.group || '—';
@@ -537,6 +556,9 @@
         attr(bd, TAGS[r.tag].en, TAGS[r.tag].zh);
         td4.appendChild(bd);
         tr.appendChild(td4);
+        var td5p = document.createElement('td');
+        attr(td5p, PRODUCTS[r.product || ''].en, PRODUCTS[r.product || ''].zh);
+        tr.appendChild(td5p);
         var td5 = document.createElement('td');
         td5.textContent = r.group || '—';
         tr.appendChild(td5);
@@ -588,10 +610,10 @@
   }
 
   // ── 同键校验（同层级同 ID）────────────────────────────
-  function findSameLevelDup(level, id) {
+  function findSameLevelDup(product, level, id) {
     for (var i = 0; i < state.rows.length; i += 1) {
       var r = state.rows[i];
-      if (r.level === level && r.id === id) return r;
+      if ((r.product || '') === (product || '') && r.level === level && r.id === id) return r;
     }
     return null;
   }
@@ -650,7 +672,7 @@
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
   }
 
-  var CSV_HEADER = 'third_customer_id,overdraft_id,tag_level,pool_type,detail_group,effective_start,effective_end,remark';
+  var CSV_HEADER = 'third_customer_id,overdraft_id,tag_level,pool_type,product_code,detail_group,effective_start,effective_end,remark';
 
   function downloadBatchFile(no) {
     var batch = null;
@@ -664,7 +686,7 @@
     var rows = genRows(batch.no, batch.count, batch.createdAt, { fileOnly: true });
     var lines = rows.map(function (r) {
       return [r.level === 'user' ? r.id : '', r.level === 'account' ? r.id : '',
-        r.level, r.tag, r.group, r.start, r.end, ''].map(csvEscape).join(',');
+        r.level, r.tag, r.product || '', r.group, r.start, r.end, ''].map(csvEscape).join(',');
     });
     var csv = [CSV_HEADER].concat(lines).join('\n') + '\n';
     triggerDownload(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }), batch.no + '_source.csv');
@@ -681,7 +703,8 @@
       { en: 'start time must not be earlier than now', zh: '开始时间不得早于当前时间' },
       { en: 'end time must be later than start time', zh: '失效时间必须晚于生效时间' },
       { en: 'detail_group is not in the preset list', zh: 'detail_group 不在预设八个组清单内' },
-      { en: 'detail_group conflicts with tag_level / pool_type', zh: '明细组与标签层级 / 执行标签不匹配（组目录交叉校验失败）' }
+      { en: 'detail_group conflicts with tag_level / pool_type', zh: '明细组与标签层级 / 执行标签不匹配（组目录交叉校验失败）' },
+      { en: 'product_code is invalid (account-level supports OD only)', zh: 'product_code 非法（只能为空 / OD / BL；账户级仅支持 OD）' }
     ];
   }
 
@@ -692,15 +715,16 @@
     var t1 = '2026-12-01 09:00:00';
     var t2 = '2027-12-01 09:00:00';
     var cases = [
-      [cid, od, 'user', 'increase_only', 'Staff组', t1, t2, ''],
-      [cid, od, 'account', 'no_adjust', '回捞组', t1, t2, ''],
-      ['', '', 'user', 'decrease_only', '风险触发组', t1, t2, ''],
-      ['', '', 'account', 'no_adjust', '模型切换实验组', t1, t2, ''],
-      [cid, '', 'user', 'increase_only', 'Staff组', '2026/12/01 9:00', t2, ''],
-      [cid, '', 'user', 'decrease_only', '人工降额名单组', '2026-01-01 10:00:00', t2, ''],
-      [cid, '', 'user', 'increase_only', 'Staff组', '2027-05-01 09:00:00', '2026-12-01 09:00:00', ''],
-      [cid, '', 'user', 'decrease_only', '测试新组', t1, t2, ''],
-      [cid, '', 'user', 'no_adjust', 'Staff组', t1, t2, '']
+      [cid, od, 'user', 'increase_only', '', 'Staff组', t1, t2, ''],
+      [cid, od, 'account', 'no_adjust', 'OD', '回捞组', t1, t2, ''],
+      ['', '', 'user', 'decrease_only', '', '风险触发组', t1, t2, ''],
+      ['', '', 'account', 'no_adjust', 'OD', '模型切换实验组', t1, t2, ''],
+      [cid, '', 'user', 'increase_only', '', 'Staff组', '2026/12/01 9:00', t2, ''],
+      [cid, '', 'user', 'decrease_only', '', '人工降额名单组', '2026-01-01 10:00:00', t2, ''],
+      [cid, '', 'user', 'increase_only', '', 'Staff组', '2027-05-01 09:00:00', '2026-12-01 09:00:00', ''],
+      [cid, '', 'user', 'decrease_only', '', '测试新组', t1, t2, ''],
+      [cid, '', 'user', 'no_adjust', '', 'Staff组', t1, t2, ''],
+      [cid, '', 'account', 'no_adjust', 'BL', '降额实验组', t1, t2, '']
     ];
     return cases[i % cases.length];
   }
@@ -739,6 +763,7 @@
       group: el.fGroup.value,
       level: el.fLevel.value,
       tag: el.fTag.value,
+      product: el.fProduct.value,
       source: el.fSource.value,
       status: el.fStatus.value
     };
@@ -752,7 +777,7 @@
 
   function resetFilters() {
     [el.fTcid, el.fOdid, el.fStartFrom, el.fStartTo, el.fEndFrom, el.fEndTo].forEach(function (n) { n.value = ''; });
-    [el.fGroup, el.fLevel, el.fTag, el.fSource, el.fStatus].forEach(function (n) { n.value = ''; });
+    [el.fGroup, el.fLevel, el.fTag, el.fProduct, el.fSource, el.fStatus].forEach(function (n) { n.value = ''; });
     state.filters = {};
     state.page = 1;
     renderList();
@@ -769,6 +794,9 @@
     el.singleOdidField.hidden = true;
     el.singleTag.value = 'no_adjust';
     el.singleTag.disabled = false;
+    el.singleProduct.value = '';
+    el.singleProduct.disabled = false;
+    el.singleProductHint.hidden = true;
     el.singleCascadeHint.hidden = true;
     el.singleGroup.value = '';
     el.singleRemark.value = '';
@@ -1010,6 +1038,20 @@
       var isUser = el.singleLevel.value === 'user';
       el.singleTcidField.hidden = !isUser;
       el.singleOdidField.hidden = isUser;
+      // 业务产品：账户级本期仅支持 OD（锁定）；用户级可选（全部产品 / OD / BL）
+      if (isUser) {
+        if (el.singleProduct.dataset.forced === '1') {
+          el.singleProduct.value = '';
+          el.singleProduct.dataset.forced = '';
+        }
+        el.singleProduct.disabled = false;
+        el.singleProductHint.hidden = true;
+      } else {
+        el.singleProduct.value = 'OD';
+        el.singleProduct.disabled = true;
+        el.singleProduct.dataset.forced = '1';
+        el.singleProductHint.hidden = false;
+      }
     }
     el.singleLevel.addEventListener('change', syncSingleIdFields);
 
@@ -1053,7 +1095,8 @@
         return;
       }
       var idVal = level === 'user' ? tcid : odid;
-      var dup = findSameLevelDup(level, idVal);
+      var product = level === 'account' ? 'OD' : el.singleProduct.value;
+      var dup = findSameLevelDup(product, level, idVal);
       if (dup) {
         fail('This ' + (level === 'user' ? 'third_customer_id' : 'overdraft_id') +
           ' already exists — add does not overwrite; update via file upload, or delete then re-add.',
@@ -1077,7 +1120,7 @@
         return;
       }
       state.rows.unshift({
-        id: idVal, level: level, tag: el.singleTag.value,
+        id: idVal, level: level, tag: el.singleTag.value, product: product,
         group: el.singleGroup.value || '',
         start: fmtD(s), end: fmtD(e2),
         stopped: false, source: 'manual', updatedAt: nowText()
@@ -1092,9 +1135,9 @@
     if (el.templateLink) {
       el.templateLink.addEventListener('click', function (e) {
         e.preventDefault();
-        var header = 'third_customer_id,overdraft_id,tag_level,pool_type,detail_group,effective_start,effective_end,remark';
-        var sample1 = 'F3B2F35A27F065672D506E99E76DF57F6988818498F860B80DDA84B13A985C14,,user,increase_only,Staff组,2026-11-01 09:00:00,2027-11-01 09:00:00,员工入职';
-        var sample2 = ',80111462,account,no_adjust,回捞组,2026-11-01 09:00:00,2026-12-31 23:59:59,回捞实验期内锁定';
+        var header = 'third_customer_id,overdraft_id,tag_level,pool_type,product_code,detail_group,effective_start,effective_end,remark';
+        var sample1 = 'F3B2F35A27F065672D506E99E76DF57F6988818498F860B80DDA84B13A985C14,,user,increase_only,,Staff组,2026-11-01 09:00:00,2027-11-01 09:00:00,员工入职';
+        var sample2 = ',80111462,account,no_adjust,OD,回捞组,2026-11-01 09:00:00,2026-12-31 23:59:59,回捞实验期内锁定';
         var csv = '\ufeff' + [header, sample1, sample2].join('\n') + '\n';
         var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
         var url = URL.createObjectURL(blob);
@@ -1144,6 +1187,8 @@
   el.singleTag = root.querySelector('#sl-single-tag');
   el.singleGroup = root.querySelector('#sl-single-group');
   el.singleCascadeHint = root.querySelector('#sl-single-cascade-hint');
+  el.singleProduct = root.querySelector('#sl-single-product');
+  el.singleProductHint = root.querySelector('#sl-single-product-hint');
   el.singleStart = root.querySelector('#sl-single-start');
   el.singleEnd = root.querySelector('#sl-single-end');
   el.singleRemark = root.querySelector('#sl-single-remark');
@@ -1158,6 +1203,7 @@
   el.fGroup = root.querySelector('#sl-f-group');
   el.fLevel = root.querySelector('#sl-f-level');
   el.fTag = root.querySelector('#sl-f-tag');
+  el.fProduct = root.querySelector('#sl-f-product');
   el.fSource = root.querySelector('#sl-f-source');
   el.fStatus = root.querySelector('#sl-f-status');
   el.bdNo = root.querySelector('#sl-bd-no');
