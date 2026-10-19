@@ -845,7 +845,7 @@
       attr(td0, 'No data', '暂无数据');
       tr0.appendChild(td0);
       el.changeTbody.appendChild(tr0);
-      return;
+      return 0;
     }
 
     items.forEach(function (it) {
@@ -1374,6 +1374,7 @@
     state.filters = readFilters();
     state.page = 1;
     renderList();
+    toast('Query completed', '查询完成，已更新 ' + fmt(visibleRows().length) + ' 条', 'ok');
   }
 
   function resetFilters() {
@@ -1536,7 +1537,8 @@
     }
     function applyChangeFilters() {
       state.changeFilters = readChangeFilters();
-      renderChanges();
+      var n = renderChanges();
+      toast('Query completed', '查询完成，已更新 ' + fmt(n || 0) + ' 条', 'ok');
     }
     if (el.changeSearch) el.changeSearch.addEventListener('click', applyChangeFilters);
     [el.changeQ, el.changeOperator, el.changeFrom, el.changeTo].forEach(function (n) {
