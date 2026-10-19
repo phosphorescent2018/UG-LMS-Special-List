@@ -110,8 +110,8 @@
   }
 
   function parseInputVal(v) {
-    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(v)) return null;
-    var s = v.replace('T', ' ');
+    if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?$/.test(v)) return null;
+    var s = v;
     if (s.length === 16) s += ':00';
     return parseTime(s);
   }
@@ -609,6 +609,163 @@
     if (window.__ugApplyLang) window.__ugApplyLang();
   }
 
+  // ── 日期选择器（自定义，跨浏览器一致）──────────────────
+  var pickerState = { box: null, input: null, mode: 'date', viewY: 0, viewM: 0, sel: null, hh: 0, mm: 0 };
+
+  function pd2(n) { return n < 10 ? '0' + n : String(n); }
+
+  function parsePickerVal(v, mode) {
+    var re = mode === 'date' ? /^(\d{4})-(\d{2})-(\d{2})$/ : /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})$/;
+    var m = re.exec((v || '').trim());
+    if (!m) return null;
+    return { y: +m[1], m: +m[2] - 1, d: +m[3], hh: m[4] ? +m[4] : 0, mm: m[5] ? +m[5] : 0 };
+  }
+
+  function pickerText(st, mode) {
+    var base = st.y + '-' + pd2(st.m + 1) + '-' + pd2(st.d);
+    return mode === 'date' ? base : base + ' ' + pd2(st.hh) + ':' + pd2(st.mm);
+  }
+
+  function buildPicker() {
+    var box = document.createElement('div');
+    box.className = 'sl-date-pop';
+    box.hidden = true;
+    box.innerHTML = '<div class="sl-date-head">' +
+      '<button type="button" class="sl-date-nav" data-sl-prev>&lsaquo;</button>' +
+      '<span class="sl-date-title"></span>' +
+      '<button type="button" class="sl-date-nav" data-sl-next>&rsaquo;</button>' +
+      '</div><div class="sl-date-week"></div><div class="sl-date-grid"></div>' +
+      '<div class="sl-date-time" hidden><select class="sl-date-sel" data-sl-hh></select><span>:</span><select class="sl-date-sel" data-sl-mm></select></div>' +
+      '<div class="sl-date-foot"><button type="button" class="sl-date-btn2" data-sl-clear></button>' +
+      '<button type="button" class="sl-date-btn2 sl-date-ok" data-sl-ok></button></div>';
+    root.appendChild(box);
+    pickerState.box = box;
+
+    box.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    box.addEventListener('click', function (e) {
+      if (e.target.closest('[data-sl-prev]')) { shiftMonth(-1); return; }
+      if (e.target.closest('[data-sl-next]')) { shiftMonth(1); return; }
+      if (e.target.closest('[data-sl-clear]')) { commitPicker('', true); return; }
+      if (e.target.closest('[data-sl-ok]')) {
+        var cur = pickerState.sel;
+        if (!cur) return;
+        commitPicker(pickerText({ y: cur.y, m: cur.m, d: cur.d, hh: pickerState.hh, mm: pickerState.mm }, pickerState.mode), true);
+        return;
+      }
+      var day = e.target.closest('[data-sl-day]');
+      if (day) {
+        var y = +day.getAttribute('data-y'), m = +day.getAttribute('data-m'), d = +day.getAttribute('data-d');
+        pickerState.sel = { y: y, m: m, d: d };
+        if (pickerState.mode === 'date') commitPicker(pickerText({ y: y, m: m, d: d }, 'date'), true);
+        else renderPicker();
+      }
+    });
+    box.addEventListener('change', function (e) {
+      if (e.target.matches('[data-sl-hh]')) pickerState.hh = +e.target.value;
+      if (e.target.matches('[data-sl-mm]')) pickerState.mm = +e.target.value;
+    });
+
+    var hh = box.querySelector('[data-sl-hh]');
+    var mm = box.querySelector('[data-sl-mm]');
+    for (var i = 0; i < 24; i += 1) {
+      var o = document.createElement('option'); o.value = pd2(i); o.textContent = pd2(i); hh.appendChild(o);
+    }
+    for (var j = 0; j < 60; j += 1) {
+      var o2 = document.createElement('option'); o2.value = pd2(j); o2.textContent = pd2(j); mm.appendChild(o2);
+    }
+
+    document.addEventListener('mousedown', function (e) {
+      if (!pickerState.input || box.hidden) return;
+      if (box.contains(e.target)) return;
+      if (e.target.closest && e.target.closest('.sl-date')) return;
+      closePicker();
+    });
+    window.addEventListener('resize', closePicker);
+    window.addEventListener('scroll', closePicker, true);
+  }
+
+  function shiftMonth(delta) {
+    var m = pickerState.viewM + delta, y = pickerState.viewY;
+    if (m < 0) { m = 11; y -= 1; }
+    if (m > 11) { m = 0; y += 1; }
+    pickerState.viewY = y;
+    pickerState.viewM = m;
+    renderPicker();
+  }
+
+  function renderPicker() {
+    var box = pickerState.box;
+    var zh = isZh();
+    box.querySelector('.sl-date-title').textContent = pickerState.viewY + ' / ' + pd2(pickerState.viewM + 1);
+    var week = box.querySelector('.sl-date-week');
+    var names = zh ? ['一', '二', '三', '四', '五', '六', '日'] : ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    week.innerHTML = names.map(function (w) { return '<span>' + w + '</span>'; }).join('');
+    var grid = box.querySelector('.sl-date-grid');
+    var first = new Date(pickerState.viewY, pickerState.viewM, 1);
+    var startIdx = (first.getDay() + 6) % 7;
+    var start = new Date(pickerState.viewY, pickerState.viewM, 1 - startIdx);
+    var today = new Date();
+    var html = '';
+    for (var i = 0; i < 42; i += 1) {
+      var d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+      var cls = 'sl-date-day';
+      if (d.getMonth() !== pickerState.viewM) cls += ' sl-out';
+      if (d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate()) cls += ' sl-today';
+      if (pickerState.sel && d.getFullYear() === pickerState.sel.y && d.getMonth() === pickerState.sel.m && d.getDate() === pickerState.sel.d) cls += ' sl-sel';
+      html += '<button type="button" class="' + cls + '" data-sl-day data-y="' + d.getFullYear() +
+        '" data-m="' + d.getMonth() + '" data-d="' + d.getDate() + '">' + d.getDate() + '</button>';
+    }
+    grid.innerHTML = html;
+    var timeRow = box.querySelector('.sl-date-time');
+    timeRow.hidden = pickerState.mode !== 'datetime';
+    if (pickerState.mode === 'datetime') {
+      box.querySelector('[data-sl-hh]').value = pd2(pickerState.hh);
+      box.querySelector('[data-sl-mm]').value = pd2(pickerState.mm);
+    }
+    box.querySelector('[data-sl-clear]').textContent = zh ? '清除' : 'Clear';
+    box.querySelector('[data-sl-ok]').textContent = zh ? '确定' : 'OK';
+  }
+
+  function openPicker(input) {
+    var mode = input.getAttribute('data-sl-mode') === 'datetime' ? 'datetime' : 'date';
+    var v = parsePickerVal(input.value, mode);
+    var now = new Date();
+    pickerState.input = input;
+    pickerState.mode = mode;
+    pickerState.sel = v ? { y: v.y, m: v.m, d: v.d } : null;
+    pickerState.hh = v ? v.hh : now.getHours();
+    pickerState.mm = v ? v.mm : now.getMinutes();
+    var view = v || { y: now.getFullYear(), m: now.getMonth(), d: now.getDate() };
+    pickerState.viewY = view.y;
+    pickerState.viewM = view.m;
+    renderPicker();
+    var box = pickerState.box;
+    box.hidden = false;
+    var rect = input.getBoundingClientRect();
+    var w = 252;
+    var left = Math.min(rect.left, window.innerWidth - w - 12);
+    var top = rect.bottom + 6;
+    if (top + 330 > window.innerHeight) top = Math.max(12, rect.top - 336);
+    box.style.left = Math.max(12, left) + 'px';
+    box.style.top = top + 'px';
+  }
+
+  function closePicker() {
+    if (!pickerState.box) return;
+    pickerState.box.hidden = true;
+    pickerState.input = null;
+  }
+
+  function commitPicker(text, close) {
+    var input = pickerState.input;
+    if (input) {
+      input.value = text;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    if (close) closePicker();
+  }
+
   // ── 同键校验（同层级同 ID）────────────────────────────
   function findSameLevelDup(product, level, id) {
     for (var i = 0; i < state.rows.length; i += 1) {
@@ -752,14 +909,6 @@
   }
 
   // ── 筛选 ──────────────────────────────────────────────
-  // 空日期框：隐藏原生 yyyy/mm/日 占位文字（聚焦或已有值时显示）
-  function syncEmptyDateMarks() {
-    [el.fStartFrom, el.fStartTo, el.fEndFrom, el.fEndTo].forEach(function (n) {
-      if (!n) return;
-      n.classList.toggle('sl-empty', !n.value);
-    });
-  }
-
   function readFilters() {
     return {
       tcid: el.fTcid.value.trim(),
@@ -786,7 +935,6 @@
   function resetFilters() {
     [el.fTcid, el.fOdid, el.fStartFrom, el.fStartTo, el.fEndFrom, el.fEndTo].forEach(function (n) { n.value = ''; });
     [el.fGroup, el.fLevel, el.fTag, el.fProduct, el.fSource, el.fStatus].forEach(function (n) { n.value = ''; });
-    syncEmptyDateMarks();
     state.filters = {};
     state.page = 1;
     renderList();
@@ -809,9 +957,8 @@
     el.singleGroup.value = '';
     el.singleRemark.value = '';
     var now = new Date();
-    el.singleStart.value = toInputVal(now);
-    el.singleStart.min = toInputVal(now);
-    el.singleEnd.value = toInputVal(new Date(now.getTime() + 180 * 86400000));
+    el.singleStart.value = fmtD(now).slice(0, 16);
+    el.singleEnd.value = fmtD(new Date(now.getTime() + 180 * 86400000)).slice(0, 16);
   }
 
   // ── 事件绑定 ──────────────────────────────────────────
@@ -853,11 +1000,24 @@
       });
     });
 
-    // 筛选：日期框占位态（空值不显示 yyyy/mm/日）
-    [el.fStartFrom, el.fStartTo, el.fEndFrom, el.fEndTo].forEach(function (n) {
-      if (n) n.addEventListener('input', syncEmptyDateMarks);
+    // 日期选择器：点击输入框或日历图标打开（自定义实现，跨浏览器一致）
+    buildPicker();
+    root.querySelectorAll('[data-sl-date-input]').forEach(function (n) {
+      n.addEventListener('click', function () { openPicker(n); });
+      n.addEventListener('focus', function () { openPicker(n); });
+      n.addEventListener('blur', function () {
+        var mode = n.getAttribute('data-sl-mode') === 'datetime' ? 'datetime' : 'date';
+        if (n.value.trim() && !parsePickerVal(n.value, mode)) n.value = '';
+      });
     });
-    syncEmptyDateMarks();
+    root.querySelectorAll('[data-sl-date-btn]').forEach(function (b) {
+      b.addEventListener('click', function (e) {
+        e.preventDefault();
+        var wrap = b.closest('.sl-date');
+        var input = wrap && wrap.querySelector('[data-sl-date-input]');
+        if (input) openPicker(input);
+      });
+    });
 
     // 分页
     el.pagerList.addEventListener('click', function (e) {
