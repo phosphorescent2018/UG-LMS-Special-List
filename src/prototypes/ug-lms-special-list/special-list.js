@@ -327,7 +327,9 @@
     var allBtn = root.querySelector('#sl-selbar-all');
     if (allBtn) {
       allBtn.hidden = state.allSelected;
-      allBtn.textContent = isZh() ? '全选当前筛选结果（' + fmt(visibleRows().length) + ' 条）' : 'Select all ' + fmt(visibleRows().length) + ' filtered records';
+      attr(allBtn,
+        'Select all ' + fmt(visibleRows().length) + ' filtered records',
+        '全选当前筛选结果（' + fmt(visibleRows().length) + ' 条）');
     }
   }
 
