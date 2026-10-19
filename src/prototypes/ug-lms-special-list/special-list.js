@@ -1508,6 +1508,25 @@
               toast('Records disabled', '已停用 ' + n + ' 条记录', 'ok');
             }
           });
+        } else if (action === 'enable') {
+          openConfirm({
+            titleEn: 'Enable selected records',
+            titleZh: '批量启用',
+            textEn: 'Enable ' + list.length + ' selected record(s)? They will resume participating in limit adjustment according to their validity windows.',
+            textZh: '确认启用所选 ' + list.length + ' 条记录？启用后按各自有效期窗口恢复参与调额匹配（已过期的仍为已失效）。',
+            danger: false,
+            onOk: function () {
+              var n = 0;
+              list.forEach(function (r) {
+                if (r.stopped) { r.stopped = false; r.updatedAt = nowText(); n += 1; }
+              });
+              state.selected = [];
+              state.allSelected = false;
+              logOp('批量启用', 'Bulk enable', list);
+              renderList();
+              toast('Records enabled', '已启用 ' + n + ' 条记录', 'ok');
+            }
+          });
         } else {
           openConfirm({
             titleEn: 'Delete selected records',
