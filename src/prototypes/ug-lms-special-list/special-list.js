@@ -28,6 +28,16 @@
     manual: { en: 'Manual', zh: '手工维护' }
   };
   var GROUPS = ['回捞组', '激进提额组', '降额实验组', '模型切换实验组', 'Staff组', '白名单组', '风险触发组', '人工降额名单组'];
+  var GROUP_CATALOG = {
+    '回捞组': { level: 'account', tag: 'no_adjust' },
+    '激进提额组': { level: 'account', tag: 'no_adjust' },
+    '降额实验组': { level: 'account', tag: 'no_adjust' },
+    '模型切换实验组': { level: 'account', tag: 'no_adjust' },
+    'Staff组': { level: 'user', tag: 'increase_only' },
+    '白名单组': { level: 'user', tag: 'increase_only' },
+    '风险触发组': { level: 'user', tag: 'decrease_only' },
+    '人工降额名单组': { level: 'user', tag: 'decrease_only' }
+  };
   var RECORD_STATUS = {
     active: { en: 'Active', zh: '生效中', badge: 'sl-badge-green' },
     upcoming: { en: 'Not started', zh: '未生效', badge: 'sl-badge-blue' },
@@ -670,7 +680,8 @@
       { en: 'invalid time format (expected YYYY-MM-DD HH:mm:ss)', zh: '时间格式非法（应为 YYYY-MM-DD HH:mm:ss）' },
       { en: 'start time must not be earlier than now', zh: '开始时间不得早于当前时间' },
       { en: 'end time must be later than start time', zh: '失效时间必须晚于生效时间' },
-      { en: 'detail_group is not in the preset list', zh: 'detail_group 不在预设八个组清单内' }
+      { en: 'detail_group is not in the preset list', zh: 'detail_group 不在预设八个组清单内' },
+      { en: 'detail_group conflicts with tag_level / pool_type', zh: '明细组与标签层级 / 执行标签不匹配（组目录交叉校验失败）' }
     ];
   }
 
@@ -688,7 +699,8 @@
       [cid, '', 'user', 'increase_only', 'Staff组', '2026/12/01 9:00', t2, ''],
       [cid, '', 'user', 'decrease_only', '人工降额名单组', '2026-01-01 10:00:00', t2, ''],
       [cid, '', 'user', 'increase_only', 'Staff组', '2027-05-01 09:00:00', '2026-12-01 09:00:00', ''],
-      [cid, '', 'user', 'decrease_only', '测试新组', t1, t2, '']
+      [cid, '', 'user', 'decrease_only', '测试新组', t1, t2, ''],
+      [cid, '', 'user', 'no_adjust', 'Staff组', t1, t2, '']
     ];
     return cases[i % cases.length];
   }
@@ -752,9 +764,12 @@
     el.singleTcid.value = '';
     el.singleOdid.value = '';
     el.singleLevel.value = 'user';
+    el.singleLevel.disabled = false;
     el.singleTcidField.hidden = false;
     el.singleOdidField.hidden = true;
     el.singleTag.value = 'no_adjust';
+    el.singleTag.disabled = false;
+    el.singleCascadeHint.hidden = true;
     el.singleGroup.value = '';
     el.singleRemark.value = '';
     var now = new Date();
@@ -977,10 +992,28 @@
     });
 
     // 单条新增：层级切换 → 只显示对应 ID 输入框
-    el.singleLevel.addEventListener('change', function () {
+    function syncSingleIdFields() {
       var isUser = el.singleLevel.value === 'user';
       el.singleTcidField.hidden = !isUser;
       el.singleOdidField.hidden = isUser;
+    }
+    el.singleLevel.addEventListener('change', syncSingleIdFields);
+
+    // 单条新增：明细组 → 层级/执行标签级联（选组自动带出并锁定；不指定则解锁）
+    el.singleGroup.addEventListener('change', function () {
+      var cat = GROUP_CATALOG[el.singleGroup.value];
+      if (cat) {
+        el.singleLevel.value = cat.level;
+        el.singleTag.value = cat.tag;
+        el.singleLevel.disabled = true;
+        el.singleTag.disabled = true;
+        el.singleCascadeHint.hidden = false;
+      } else {
+        el.singleLevel.disabled = false;
+        el.singleTag.disabled = false;
+        el.singleCascadeHint.hidden = true;
+      }
+      syncSingleIdFields();
     });
 
     // 单条新增：保存
@@ -1096,6 +1129,7 @@
   el.singleOdid = root.querySelector('#sl-single-odid');
   el.singleTag = root.querySelector('#sl-single-tag');
   el.singleGroup = root.querySelector('#sl-single-group');
+  el.singleCascadeHint = root.querySelector('#sl-single-cascade-hint');
   el.singleStart = root.querySelector('#sl-single-start');
   el.singleEnd = root.querySelector('#sl-single-end');
   el.singleRemark = root.querySelector('#sl-single-remark');
