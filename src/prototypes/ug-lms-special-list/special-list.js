@@ -816,17 +816,27 @@
     attr(el.bdStatus, st.en, st.zh);
     el.bdOperator.textContent = batch.operator;
     el.bdTime.textContent = batch.createdAt;
-    if (batch.status === 'failed' && batch.failReason) {
-      el.bdFail.textContent = batch.failReason;
+    var failText = batch.validationFail
+      ? (isZh()
+        ? '行校验失败：' + fmt(batch.failed || 0) + ' 行非法，整批未导入；可下载失败明细修正后重传。'
+        : (fmt(batch.failed || 0) + ' invalid rows — nothing imported. Download the failure details, fix and re-upload.'))
+      : batch.failReason;
+    if (batch.status === 'failed' && failText) {
+      el.bdFail.textContent = failText;
       el.bdFailRow.hidden = false;
     } else {
       el.bdFailRow.hidden = true;
+    }
+    if (el.bdFailDl) {
+      el.bdFailDl.hidden = !(batch.details && batch.details.length);
     }
 
     el.bdTbody.innerHTML = '';
     var note;
     if (batch.status === 'failed') {
-      note = isZh() ? '该批次处理失败，未写入名单。' : 'This import failed — nothing was written to the list.';
+      note = batch.validationFail
+        ? (isZh() ? '行校验失败，整批未导入（名单零变化）。' : 'Validation failed — nothing imported (no list changes).')
+        : (isZh() ? '该批次处理失败，未写入名单。' : 'This import failed — nothing was written to the list.');
     } else if (batch.status === 'processing') {
       note = isZh() ? '批次处理中，将自动生效。' : 'Processing — it will take effect shortly.';
     } else {
@@ -1181,26 +1191,35 @@
     return cases[i % cases.length];
   }
 
-  function downloadFailureDetails() {
-    var result = el.parseResult;
-    if (!result || !result.failed) return;
+  function buildFailureRows(details, total) {
     var cycle = failureCycle();
     var rows = [];
-    result.details.forEach(function (d, i) {
-      rows.push({ row: d.row, fields: mockBadRow(i % cycle.length, d.row), reason: d.zh });
+    details.forEach(function (d, i) {
+      rows.push({ row: d.row, fields: mockBadRow(i % cycle.length, d.row), reason: d.zh || d.reason || '' });
     });
-    for (var j = result.details.length; j < result.failed; j += 1) {
+    for (var j = details.length; j < (total || details.length); j += 1) {
       var rowNo = 60 + ((j * 7) % 40);
       rows.push({ row: rowNo, fields: mockBadRow(j % cycle.length, rowNo), reason: cycle[j % cycle.length].zh });
     }
+    return rows;
+  }
+
+  function downloadFailureCsv(details, total, baseName) {
+    var rows = buildFailureRows(details || [], total || (details || []).length);
     var header = '行号,' + CSV_HEADER + ',失败原因';
     var lines = rows.map(function (r) {
       return [String(r.row)].concat(r.fields).concat([r.reason]).map(csvEscape).join(',');
     });
-    var base = String(result.fileName || 'import').replace(/\.[^.]+$/, '');
+    var base = String(baseName || 'import').replace(/\.[^.]+$/, '');
     triggerDownload(new Blob(['\ufeff' + [header].concat(lines).join('\n') + '\n'],
       { type: 'text/csv;charset=utf-8' }), base + '_failures.csv');
     toast('Failure details downloaded', '已下载失败明细', 'ok');
+  }
+
+  function downloadFailureDetails() {
+    var result = el.parseResult;
+    if (!result || !result.failed) return;
+    downloadFailureCsv(result.details, result.failed, result.fileName);
   }
 
   // ── 筛选 ──────────────────────────────────────────────
@@ -1539,6 +1558,16 @@
       if (el.bdCurrent) downloadBatchFile(el.bdCurrent);
     });
 
+    if (el.bdFailDl) {
+      el.bdFailDl.addEventListener('click', function () {
+        var b = null;
+        state.batches.forEach(function (x) { if (x.no === el.bdCurrent) b = x; });
+        if (b && b.details && b.details.length) {
+          downloadFailureCsv(b.details, b.failed || b.details.length, b.no);
+        }
+      });
+    }
+
     // 上传弹窗：选择文件
     el.filePick.addEventListener('click', function () {
       el.fileInput.value = '';
@@ -1580,6 +1609,17 @@
         el.uploadDetail.hidden = false;
         el.uploadError.hidden = false;
         el.uploadConfirm.disabled = true;
+
+        // 行校验失败也留痕：生成一条「处理失败」的导入记录（名单零变化）
+        var failedBatch = {
+          no: nextBatchNo(), source: 'file', count: result.parsed,
+          added: 0, overwritten: 0, status: 'failed',
+          operator: 'baksun', createdAt: nowText(),
+          validationFail: true, failed: result.failed, details: result.details
+        };
+        if (file) failedBatch.file = file;
+        state.batches.unshift(failedBatch);
+        renderChanges();
       } else {
         el.uploadError.hidden = true;
         el.uploadDetail.hidden = true;
@@ -1808,6 +1848,7 @@
   el.bdTbody = root.querySelector('#sl-bd-tbody');
   el.bdNote = root.querySelector('#sl-bd-note');
   el.bdDownload = root.querySelector('#sl-bd-download');
+  el.bdFailDl = root.querySelector('#sl-bd-faildl');
   el.uploadDl = root.querySelector('#sl-upload-dl');
   el.fileInput = (function () {
     var input = document.createElement('input');
