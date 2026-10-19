@@ -352,22 +352,6 @@
   <!-- ── 名单 ── -->
   <section class="sl-panel" data-sl-panel="list">
     <div class="sl-card">
-      <div class="sl-toolbar">
-        <div class="sl-toolbar-left">
-          <button type="button" class="sl-btn sl-btn-primary" data-sl-action="upload">
-            <svg viewBox="0 0 1024 1024" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M512 128 320 320h128v256h128V320h128L512 128zM192 704h640v128H192z"/></svg>
-            <span data-en="Upload file" data-zh="上传文件">上传文件</span>
-          </button>
-          <button type="button" class="sl-btn" data-sl-action="single" data-en="Add one" data-zh="单条新增">单条新增</button>
-          <button type="button" class="sl-btn" data-sl-batch="stop" disabled data-en="Disable selected" data-zh="批量停用">批量停用</button>
-          <button type="button" class="sl-btn" data-sl-batch="del" disabled data-en="Delete selected" data-zh="批量删除">批量删除</button>
-        </div>
-        <div class="sl-toolbar-right">
-          <button type="button" class="sl-btn" data-sl-action="reset" data-en="Reset" data-zh="重置">重置</button>
-          <button type="button" class="sl-btn sl-btn-primary" data-sl-action="search" data-en="Query" data-zh="查询">查询</button>
-        </div>
-      </div>
-
       <div class="sl-filters">
         <div class="sl-filter">
           <label data-en="third_customer_id" data-zh="third_customer_id">third_customer_id</label>
@@ -443,7 +427,21 @@
         </div>
       </div>
 
+      <div class="sl-filter-actions">
+        <button type="button" class="sl-btn" data-sl-action="reset" data-en="Reset" data-zh="重置">重置</button>
+        <button type="button" class="sl-btn sl-btn-primary" data-sl-action="search" data-en="Query" data-zh="查询">查询</button>
+      </div>
+
       <div class="sl-table-tools">
+        <div class="sl-table-tools-left">
+          <button type="button" class="sl-btn sl-btn-primary" data-sl-action="upload">
+            <svg viewBox="0 0 1024 1024" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M512 128 320 320h128v256h128V320h128L512 128zM192 704h640v128H192z"/></svg>
+            <span data-en="Upload file" data-zh="上传文件">上传文件</span>
+          </button>
+          <button type="button" class="sl-btn" data-sl-action="single" data-en="Add one" data-zh="单条新增">单条新增</button>
+          <button type="button" class="sl-btn" data-sl-batch="stop" disabled data-en="Disable selected" data-zh="批量停用">批量停用</button>
+          <button type="button" class="sl-btn" data-sl-batch="del" disabled data-en="Delete selected" data-zh="批量删除">批量删除</button>
+        </div>
         <button type="button" class="sl-btn" data-sl-colbtn data-en="Columns" data-zh="列设置">列设置</button>
       </div>
 

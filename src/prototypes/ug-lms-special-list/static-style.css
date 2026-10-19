@@ -2926,7 +2926,9 @@ input.ant-input { width: 100%; }
 .ug-special-page .sl-pager { flex: 0 0 auto; }
 
 /* 表格上方工具栏 */
-.sl-table-tools { display: flex; justify-content: flex-end; padding: 0 24px 8px; }
+.sl-table-tools { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 0 24px 8px; }
+.sl-table-tools-left { display: flex; align-items: center; gap: 8px; }
+.sl-filter-actions { display: flex; justify-content: flex-end; gap: 8px; padding: 0 24px 12px; }
 
 /* 列设置下拉 */
 .sl-colpop {
