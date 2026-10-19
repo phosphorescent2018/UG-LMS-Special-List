@@ -359,6 +359,8 @@
             <span data-en="Upload file" data-zh="上传文件">上传文件</span>
           </button>
           <button type="button" class="sl-btn" data-sl-action="single" data-en="Add one" data-zh="单条新增">单条新增</button>
+          <button type="button" class="sl-btn" data-sl-batch="stop" disabled data-en="Disable selected" data-zh="批量停用">批量停用</button>
+          <button type="button" class="sl-btn" data-sl-batch="del" disabled data-en="Delete selected" data-zh="批量删除">批量删除</button>
         </div>
         <div class="sl-toolbar-right">
           <button type="button" class="sl-btn" data-sl-action="reset" data-en="Reset" data-zh="重置">重置</button>
@@ -452,6 +454,7 @@
         <table class="sl-table">
           <thead>
             <tr>
+              <th style="width:36px"><input type="checkbox" id="sl-pick-all" aria-label="select all"></th>
               <th style="width:200px" data-en="third_customer_id" data-zh="third_customer_id">third_customer_id</th>
               <th style="width:110px" data-en="overdraft_id" data-zh="overdraft_id">overdraft_id</th>
               <th style="width:96px" data-en="Level" data-zh="标签层级">标签层级</th>

@@ -224,6 +224,7 @@
       { no: 'SL20261012-001', source: 'file', count: 952, added: 952, overwritten: 0, status: 'processed', operator: 'jolie', createdAt: '2026-10-12 08:31:20' }
     ],
     filters: {},
+    selected: [],
     page: 1,
     pageSize: 10,
     processing: false
@@ -266,6 +267,11 @@
     });
   }
 
+  function updateBatchButtons() {
+    var n = state.selected.length;
+    root.querySelectorAll('[data-sl-batch]').forEach(function (b) { b.disabled = n === 0; });
+  }
+
   function renderMeta() {
     el.lastBatch.textContent = state.lastBatch;
     el.total.textContent = fmt(state.rows.length);
@@ -284,7 +290,7 @@
     if (!pageRows.length) {
       var tr = document.createElement('tr');
       var td = document.createElement('td');
-      td.colSpan = 11;
+      td.colSpan = 13;
       td.className = 'sl-empty';
       attr(td, 'No data', '暂无数据');
       tr.appendChild(td);
@@ -293,6 +299,16 @@
     pageRows.forEach(function (row) {
       var tr = document.createElement('tr');
       var ix = state.rows.indexOf(row);
+
+      var tdPick = document.createElement('td');
+      tdPick.className = 'sl-pick-cell';
+      var pick = document.createElement('input');
+      pick.type = 'checkbox';
+      pick.className = 'sl-pick';
+      pick.setAttribute('data-sl-pick', String(ix));
+      pick.checked = state.selected.indexOf(row) >= 0;
+      tdPick.appendChild(pick);
+      tr.appendChild(tdPick);
 
       var tdCid = document.createElement('td');
       if (row.level === 'user') {
@@ -390,6 +406,13 @@
       el.tbody.appendChild(tr);
     });
 
+    var pickAll = root.querySelector('#sl-pick-all');
+    if (pickAll) {
+      var picked = pageRows.filter(function (r) { return state.selected.indexOf(r) >= 0; }).length;
+      pickAll.checked = pageRows.length > 0 && picked === pageRows.length;
+      pickAll.indeterminate = picked > 0 && picked < pageRows.length;
+    }
+    updateBatchButtons();
     renderMeta();
     renderPager(rows.length, pageCount);
     if (window.__ugApplyLang) window.__ugApplyLang();
@@ -927,12 +950,14 @@
   }
 
   function applySearch() {
+    state.selected = [];
     state.filters = readFilters();
     state.page = 1;
     renderList();
   }
 
   function resetFilters() {
+    state.selected = [];
     [el.fTcid, el.fOdid, el.fStartFrom, el.fStartTo, el.fEndFrom, el.fEndTo].forEach(function (n) { n.value = ''; });
     [el.fGroup, el.fLevel, el.fTag, el.fProduct, el.fSource, el.fStatus].forEach(function (n) { n.value = ''; });
     state.filters = {};
@@ -1103,6 +1128,76 @@
       });
     });
 
+    // 名单：勾选 / 全选 / 批量停用·删除
+    el.tbody.addEventListener('change', function (e) {
+      var pick = e.target.closest('[data-sl-pick]');
+      if (!pick) return;
+      var ix = parseInt(pick.getAttribute('data-sl-pick'), 10);
+      var row = state.rows[ix];
+      if (!row) return;
+      var at = state.selected.indexOf(row);
+      if (pick.checked && at < 0) state.selected.push(row);
+      if (!pick.checked && at >= 0) state.selected.splice(at, 1);
+      renderList();
+    });
+
+    var pickAllEl = root.querySelector('#sl-pick-all');
+    if (pickAllEl) {
+      pickAllEl.addEventListener('change', function () {
+        var rows = visibleRows();
+        var pageCount = Math.max(1, Math.ceil(rows.length / state.pageSize));
+        if (state.page > pageCount) state.page = pageCount;
+        var from = (state.page - 1) * state.pageSize;
+        var pageRows = rows.slice(from, from + state.pageSize);
+        if (pickAllEl.checked) {
+          pageRows.forEach(function (r) { if (state.selected.indexOf(r) < 0) state.selected.push(r); });
+        } else {
+          state.selected = state.selected.filter(function (r) { return pageRows.indexOf(r) < 0; });
+        }
+        renderList();
+      });
+    }
+
+    root.querySelectorAll('[data-sl-batch]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var action = btn.getAttribute('data-sl-batch');
+        var list = state.selected.slice();
+        if (!list.length) return;
+        if (action === 'stop') {
+          openConfirm({
+            titleEn: 'Disable selected records',
+            titleZh: '批量停用',
+            textEn: 'Disable ' + list.length + ' selected record(s)? They will stop participating in limit adjustment immediately; you can enable them again later.',
+            textZh: '确认停用所选 ' + list.length + ' 条记录？停用后立即不再参与调额匹配，可随时启用。',
+            danger: false,
+            onOk: function () {
+              var n = 0;
+              list.forEach(function (r) {
+                if (!r.stopped) { r.stopped = true; r.updatedAt = nowText(); n += 1; }
+              });
+              state.selected = [];
+              renderList();
+              toast('Records disabled', '已停用 ' + n + ' 条记录', 'ok');
+            }
+          });
+        } else {
+          openConfirm({
+            titleEn: 'Delete selected records',
+            titleZh: '批量删除',
+            textEn: 'Delete ' + list.length + ' selected record(s)? They will stop participating immediately and cannot be restored (use Disable if you may need them back).',
+            textZh: '确认删除所选 ' + list.length + ' 条记录？删除后立即不再参与调额匹配，且不可恢复（如需保留请用「停用」）。',
+            danger: true,
+            onOk: function () {
+              state.rows = state.rows.filter(function (r) { return list.indexOf(r) < 0; });
+              state.selected = [];
+              renderList();
+              toast('Records deleted', '已删除 ' + list.length + ' 条记录', 'ok');
+            }
+          });
+        }
+      });
+    });
+
     // 批次：下载 / 详情
     el.batchTbody.addEventListener('click', function (e) {
       var dlBtn = e.target.closest('[data-sl-batch-dl]');
@@ -1200,6 +1295,7 @@
         state.processing = false;
         var newRows = genRows(no, result.added, createdAt, { fileOnly: true, noExpired: true });
         state.rows = newRows.concat(state.rows);
+        state.selected = [];
         renderBatches();
         renderList();
         toast('Imported ' + fmt(result.parsed) + ' rows (added ' + fmt(result.added) + ' / overwritten ' + fmt(result.overwritten) + ')',
