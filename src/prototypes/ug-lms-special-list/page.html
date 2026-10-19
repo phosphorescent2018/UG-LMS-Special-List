@@ -416,12 +416,19 @@
           </select>
         </div>
         <div class="sl-filter">
-          <label data-en="Status" data-zh="状态">状态</label>
-          <select class="sl-input" id="sl-f-status">
+          <label data-en="Effective status" data-zh="生效状态">生效状态</label>
+          <select class="sl-input" id="sl-f-eff">
             <option value="" data-en="All" data-zh="全部">全部</option>
-            <option value="active" data-en="Active" data-zh="生效中">生效中</option>
             <option value="upcoming" data-en="Not started" data-zh="未生效">未生效</option>
+            <option value="active" data-en="Active" data-zh="生效中">生效中</option>
             <option value="expired" data-en="Expired" data-zh="已失效">已失效</option>
+          </select>
+        </div>
+        <div class="sl-filter">
+          <label data-en="Enabled status" data-zh="启停状态">启停状态</label>
+          <select class="sl-input" id="sl-f-enable">
+            <option value="" data-en="All" data-zh="全部">全部</option>
+            <option value="enabled" data-en="Enabled" data-zh="启用">启用</option>
             <option value="disabled" data-en="Disabled" data-zh="已停用">已停用</option>
           </select>
         </div>
@@ -465,7 +472,8 @@
               <th style="width:120px" data-en="Group" data-zh="明细组">明细组</th>
               <th style="width:158px" data-en="Effective from" data-zh="生效时间">生效时间</th>
               <th style="width:158px" data-en="Effective to" data-zh="失效时间">失效时间</th>
-              <th style="width:88px" data-en="Status" data-zh="状态">状态</th>
+              <th style="width:92px" data-en="Effective status" data-zh="生效状态">生效状态</th>
+              <th style="width:92px" data-en="Enabled status" data-zh="启停状态">启停状态</th>
               <th style="width:96px" data-en="Source" data-zh="来源">来源</th>
               <th style="width:158px" data-en="Updated at" data-zh="更新时间">更新时间</th>
               <th style="width:110px" data-en="Action" data-zh="操作">操作</th>
@@ -498,13 +506,51 @@
   <!-- ── 变更记录 ── -->
   <section class="sl-panel" data-sl-panel="changes" hidden>
     <div class="sl-card">
-      <div class="sl-toolbar">
-        <div class="sl-toolbar-left">
-          <input type="text" class="sl-input" id="sl-change-q" style="width:280px" placeholder="third_customer_id / overdraft_id" data-en-placeholder="third_customer_id / overdraft_id" data-zh-placeholder="third_customer_id / overdraft_id">
-          <button type="button" class="sl-btn sl-btn-primary" id="sl-change-search" data-en="Query" data-zh="查询">查询</button>
-          <button type="button" class="sl-btn" id="sl-change-clear" data-en="Clear" data-zh="清除">清除</button>
+      <div class="sl-filters">
+        <div class="sl-filter">
+          <label data-en="Object ID" data-zh="对象 ID">对象 ID</label>
+          <input type="text" class="sl-input" id="sl-change-q" placeholder="third_customer_id / overdraft_id" data-en-placeholder="third_customer_id / overdraft_id" data-zh-placeholder="third_customer_id / overdraft_id">
         </div>
-
+        <div class="sl-filter">
+          <label data-en="Type" data-zh="类型">类型</label>
+          <select class="sl-input" id="sl-change-type">
+            <option value="" data-en="All" data-zh="全部">全部</option>
+            <option value="文件导入" data-en="File import" data-zh="文件导入">文件导入</option>
+            <option value="单条新增" data-en="Add one" data-zh="单条新增">单条新增</option>
+            <option value="单条删除" data-en="Delete" data-zh="单条删除">单条删除</option>
+            <option value="停用" data-en="Disable" data-zh="停用">停用</option>
+            <option value="启用" data-en="Enable" data-zh="启用">启用</option>
+            <option value="批量停用" data-en="Bulk disable" data-zh="批量停用">批量停用</option>
+            <option value="批量启用" data-en="Bulk enable" data-zh="批量启用">批量启用</option>
+            <option value="批量删除" data-en="Bulk delete" data-zh="批量删除">批量删除</option>
+          </select>
+        </div>
+        <div class="sl-filter">
+          <label data-en="Status" data-zh="状态">状态</label>
+          <select class="sl-input" id="sl-change-status">
+            <option value="" data-en="All" data-zh="全部">全部</option>
+            <option value="处理中" data-en="Processing" data-zh="处理中">处理中</option>
+            <option value="已处理" data-en="Processed" data-zh="已处理">已处理</option>
+            <option value="处理失败" data-en="Failed" data-zh="处理失败">处理失败</option>
+            <option value="已完成" data-en="Completed" data-zh="已完成">已完成</option>
+          </select>
+        </div>
+        <div class="sl-filter">
+          <label data-en="Operator" data-zh="操作人">操作人</label>
+          <input type="text" class="sl-input" id="sl-change-operator">
+        </div>
+        <div class="sl-filter">
+          <label data-en="Operation time" data-zh="操作时间">操作时间</label>
+          <div class="sl-range">
+            <div class="sl-date"><input type="text" class="sl-input sl-date-input" id="sl-change-from" autocomplete="off" data-sl-date-input data-sl-mode="date"><button type="button" class="sl-date-btn" data-sl-date-btn aria-label="calendar"><svg viewBox="0 0 1024 1024" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M853 128h-85V43h-86v85H341V43h-85v85h-85c-47 0-85 38-85 85v598c0 47 38 85 85 85h683c47 0 85-38 85-85V213c0-47-38-85-85-85zm0 683H171V384h682v427z"/></svg></button></div>
+            <span class="sl-range-sep">~</span>
+            <div class="sl-date"><input type="text" class="sl-input sl-date-input" id="sl-change-to" autocomplete="off" data-sl-date-input data-sl-mode="date"><button type="button" class="sl-date-btn" data-sl-date-btn aria-label="calendar"><svg viewBox="0 0 1024 1024" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M853 128h-85V43h-86v85H341V43h-85v85h-85c-47 0-85 38-85 85v598c0 47 38 85 85 85h683c47 0 85-38 85-85V213c0-47-38-85-85-85zm0 683H171V384h682v427z"/></svg></button></div>
+          </div>
+        </div>
+      </div>
+      <div class="sl-filter-actions">
+        <button type="button" class="sl-btn" id="sl-change-clear" data-en="Clear" data-zh="清除">清除</button>
+        <button type="button" class="sl-btn sl-btn-primary" id="sl-change-search" data-en="Query" data-zh="查询">查询</button>
       </div>
       <div class="sl-table-wrap">
         <table class="sl-table">
@@ -706,7 +752,8 @@
           <div class="sl-bd-item"><span class="sl-bd-k" data-en="Group" data-zh="明细组">明细组</span><b id="sl-rd-group">—</b></div>
           <div class="sl-bd-item"><span class="sl-bd-k" data-en="Effective from" data-zh="生效时间">生效时间</span><b class="sl-mono" id="sl-rd-start">—</b></div>
           <div class="sl-bd-item"><span class="sl-bd-k" data-en="Effective to" data-zh="失效时间">失效时间</span><b class="sl-mono" id="sl-rd-end">—</b></div>
-          <div class="sl-bd-item"><span class="sl-bd-k" data-en="Status" data-zh="状态">状态</span><b><span class="sl-badge" id="sl-rd-status">—</span></b></div>
+          <div class="sl-bd-item"><span class="sl-bd-k" data-en="Effective status" data-zh="生效状态">生效状态</span><b><span class="sl-badge" id="sl-rd-eff">—</span></b></div>
+          <div class="sl-bd-item"><span class="sl-bd-k" data-en="Enabled status" data-zh="启停状态">启停状态</span><b><span class="sl-badge" id="sl-rd-enable">—</span></b></div>
           <div class="sl-bd-item"><span class="sl-bd-k" data-en="Source" data-zh="来源">来源</span><b id="sl-rd-source">—</b></div>
           <div class="sl-bd-item"><span class="sl-bd-k" data-en="Updated at" data-zh="更新时间">更新时间</span><b class="sl-mono" id="sl-rd-updated">—</b></div>
         </div>

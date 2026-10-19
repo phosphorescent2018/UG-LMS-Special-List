@@ -49,6 +49,10 @@
     expired: { en: 'Expired', zh: '已失效', badge: 'sl-badge-gray' },
     disabled: { en: 'Disabled', zh: '已停用', badge: 'sl-badge-orange' }
   };
+  var ENABLE_STATUS = {
+    enabled: { en: 'Enabled', zh: '启用', badge: 'sl-badge-green' },
+    disabled: { en: 'Disabled', zh: '已停用', badge: 'sl-badge-orange' }
+  };
   var BATCH_STATUS = {
     processing: { en: 'Processing', zh: '处理中', badge: 'sl-badge-blue' },
     processed: { en: 'Processed', zh: '已处理', badge: 'sl-badge-green' },
@@ -222,7 +226,7 @@
     ],
     filters: {},
     selected: [],
-    changeQuery: '',
+    changeFilters: { q: '', type: '', status: '', operator: '', from: '', to: '' },
     allSelected: false,
     cols: { tcid: true, odid: true, level: true, tag: true, product: true, group: true, start: true, end: true, status: true, source: true, updated: true },
     opLogs: [],
@@ -232,23 +236,29 @@
   };
   state.rows = genRows('SL20261015-004', 1240, state.batches[0].createdAt);
   state.opLogs = [
-    { no: 'OP20261019-004', typeZh: '批量启用', typeEn: 'Bulk enable', count: 5, operator: 'jolie', time: '2026-10-19 12:05:33', rows: genRows('op-004', 5, '2026-10-19 12:05:33', { fileOnly: true }) },
-    { no: 'OP20261019-003', typeZh: '批量停用', typeEn: 'Bulk disable', count: 2, operator: 'baksun', time: '2026-10-19 11:52:10', rows: genRows('op-003', 2, '2026-10-19 11:52:10', { fileOnly: true }) },
-    { no: 'OP20261019-002', typeZh: '批量删除', typeEn: 'Bulk delete', count: 10, operator: 'jolie', time: '2026-10-19 10:31:02', rows: genRows('op-002', 10, '2026-10-19 10:31:02', { fileOnly: true }) },
-    { no: 'OP20261019-001', typeZh: '单条新增', typeEn: 'Add one', count: 1, operator: 'baksun', time: '2026-10-19 09:12:44', rows: genRows('op-001', 1, '2026-10-19 09:12:44', { fileOnly: true }) }
+    { no: 'OP20261019-007', typeZh: '批量删除', typeEn: 'Bulk delete', count: 10, operator: 'jolie', time: '2026-10-19 11:35:02', rows: genRows('op-007', 10, '2026-10-19 11:35:02', { fileOnly: true }) },
+    { no: 'OP20261019-006', typeZh: '批量启用', typeEn: 'Bulk enable', count: 5, operator: 'jolie', time: '2026-10-19 11:10:33', rows: genRows('op-006', 5, '2026-10-19 11:10:33', { fileOnly: true }) },
+    { no: 'OP20261019-005', typeZh: '批量停用', typeEn: 'Bulk disable', count: 2, operator: 'baksun', time: '2026-10-19 10:40:10', rows: genRows('op-005', 2, '2026-10-19 10:40:10', { fileOnly: true }) },
+    { no: 'OP20261019-004', typeZh: '启用', typeEn: 'Enable', count: 1, operator: 'baksun', time: '2026-10-19 10:05:44', rows: genRows('op-004', 1, '2026-10-19 10:05:44', { fileOnly: true }) },
+    { no: 'OP20261019-003', typeZh: '停用', typeEn: 'Disable', count: 1, operator: 'jolie', time: '2026-10-19 09:40:18', rows: genRows('op-003', 1, '2026-10-19 09:40:18', { fileOnly: true }) },
+    { no: 'OP20261019-002', typeZh: '单条删除', typeEn: 'Delete', count: 1, operator: 'baksun', time: '2026-10-19 09:20:05', rows: genRows('op-002', 1, '2026-10-19 09:20:05', { fileOnly: true }) },
+    { no: 'OP20261019-001', typeZh: '单条新增', typeEn: 'Add one', count: 1, operator: 'baksun', time: '2026-10-19 08:50:12', rows: genRows('op-001', 1, '2026-10-19 08:50:12', { fileOnly: true }) }
   ];
 
   var el = {};
 
   // ── 派生状态 ──────────────────────────────────────────
-  function rowStatus(r) {
-    if (r.stopped) return 'disabled';
+  function effStatus(r) {
     var now = new Date();
     var s = parseTime(r.start);
     var e = parseTime(r.end);
     if (s && now.getTime() < s.getTime()) return 'upcoming';
     if (e && now.getTime() >= e.getTime()) return 'expired';
     return 'active';
+  }
+
+  function rowStatus(r) {
+    return effStatus(r);
   }
 
   // ── 渲染：名单 ────────────────────────────────────────
@@ -265,7 +275,8 @@
       if (f.tag && r.tag !== f.tag) return false;
       if (f.group && r.group !== f.group) return false;
       if (f.source && r.source !== f.source) return false;
-      if (f.status && rowStatus(r) !== f.status) return false;
+      if (f.eff && effStatus(r) !== f.eff) return false;
+      if (f.enable && (r.stopped ? 'disabled' : 'enabled') !== f.enable) return false;
       if (f.startFrom && r.start < f.startFrom + ' 00:00:00') return false;
       if (f.startTo && r.start > f.startTo + ' 23:59:59') return false;
       if (f.endFrom && r.end < f.endFrom + ' 00:00:00') return false;
@@ -278,7 +289,7 @@
     var n = state.selected.length;
     var stoppedN = state.selected.filter(function (r) { return r.stopped; }).length;
     var stoppableN = state.selected.filter(function (r) {
-      return !r.stopped && rowStatus(r) !== 'expired';
+      return !r.stopped && effStatus(r) !== 'expired';
     }).length;
     root.querySelectorAll('[data-sl-batch]').forEach(function (b) {
       var kind = b.getAttribute('data-sl-batch');
@@ -315,7 +326,7 @@
       : (isZh() ? '已选择 ' + fmt(n) + ' 条' : fmt(n) + ' record(s) selected');
   }
 
-  var opSeq = 4;
+  var opSeq = 7;
   function nextOpNo() {
     opSeq += 1;
     var d = new Date();
@@ -453,7 +464,7 @@
     toast('Record list exported', '已导出操作清单', 'ok');
   }
 
-  var COL_KEYS = ['pick', 'tcid', 'odid', 'level', 'tag', 'product', 'group', 'start', 'end', 'status', 'source', 'updated', 'action'];
+  var COL_KEYS = ['pick', 'tcid', 'odid', 'level', 'tag', 'product', 'group', 'start', 'end', 'eff', 'enable', 'source', 'updated', 'action'];
   var COLS = [
     ['tcid', 'third_customer_id', 'third_customer_id'],
     ['odid', 'overdraft_id', 'overdraft_id'],
@@ -463,7 +474,8 @@
     ['group', '明细组', 'Group'],
     ['start', '生效时间', 'Effective from'],
     ['end', '失效时间', 'Effective to'],
-    ['status', '状态', 'Status'],
+    ['eff', '生效状态', 'Effective status'],
+    ['enable', '启停状态', 'Enabled status'],
     ['source', '来源', 'Source'],
     ['updated', '更新时间', 'Updated at']
   ];
@@ -540,9 +552,12 @@
     el.rdGroup.textContent = row.group || '—';
     el.rdStart.textContent = row.start;
     el.rdEnd.textContent = row.end;
-    var st = RECORD_STATUS[rowStatus(row)];
-    el.rdStatus.className = 'sl-badge ' + st.badge;
-    attr(el.rdStatus, st.en, st.zh);
+    var eff = RECORD_STATUS[effStatus(row)];
+    el.rdEff.className = 'sl-badge ' + eff.badge;
+    attr(el.rdEff, eff.en, eff.zh);
+    var en = ENABLE_STATUS[row.stopped ? 'disabled' : 'enabled'];
+    el.rdEnable.className = 'sl-badge ' + en.badge;
+    attr(el.rdEnable, en.en, en.zh);
     attr(el.rdSource, SOURCES[row.source].en, SOURCES[row.source].zh);
     el.rdUpdated.textContent = row.updatedAt;
 
@@ -591,7 +606,7 @@
     if (!pageRows.length) {
       var tr = document.createElement('tr');
       var td = document.createElement('td');
-      td.colSpan = 13;
+      td.colSpan = 14;
       td.className = 'sl-empty';
       attr(td, 'No data', '暂无数据');
       tr.appendChild(td);
@@ -661,13 +676,21 @@
       tdEnd.textContent = row.end;
       tr.appendChild(tdEnd);
 
-      var tdStatus = document.createElement('td');
-      var st = RECORD_STATUS[rowStatus(row)];
-      var badgeS = document.createElement('span');
-      badgeS.className = 'sl-badge ' + st.badge;
-      attr(badgeS, st.en, st.zh);
-      tdStatus.appendChild(badgeS);
-      tr.appendChild(tdStatus);
+      var tdEff = document.createElement('td');
+      var eff = RECORD_STATUS[effStatus(row)];
+      var badgeE = document.createElement('span');
+      badgeE.className = 'sl-badge ' + eff.badge;
+      attr(badgeE, eff.en, eff.zh);
+      tdEff.appendChild(badgeE);
+      tr.appendChild(tdEff);
+
+      var tdEnable = document.createElement('td');
+      var en = ENABLE_STATUS[row.stopped ? 'disabled' : 'enabled'];
+      var badgeEn = document.createElement('span');
+      badgeEn.className = 'sl-badge ' + en.badge;
+      attr(badgeEn, en.en, en.zh);
+      tdEnable.appendChild(badgeEn);
+      tr.appendChild(tdEnable);
 
       var tdSource = document.createElement('td');
       attr(tdSource, SOURCES[row.source].en, SOURCES[row.source].zh);
@@ -789,14 +812,28 @@
     state.opLogs.forEach(function (o) {
       items.push({ kind: 'op', ref: o, no: o.no, typeEn: o.typeEn, typeZh: o.typeZh, count: o.count, status: 'done', operator: o.operator, time: o.time });
     });
-    var q = (state.changeQuery || '').toLowerCase();
-    if (q) {
+    var cf = state.changeFilters || {};
+    if (cf.q) {
+      var q = cf.q.toLowerCase();
       items = items.filter(function (it) {
         return it.kind === 'op' && it.ref.rows.some(function (r) {
           return String(r.id).toLowerCase().indexOf(q) >= 0;
         });
       });
     }
+    if (cf.type) items = items.filter(function (it) { return it.typeZh === cf.type; });
+    if (cf.status) {
+      items = items.filter(function (it) {
+        var label = it.kind === 'import' ? BATCH_STATUS[it.status].zh : '已完成';
+        return label === cf.status;
+      });
+    }
+    if (cf.operator) {
+      var opq = cf.operator.toLowerCase();
+      items = items.filter(function (it) { return String(it.operator || '').toLowerCase().indexOf(opq) >= 0; });
+    }
+    if (cf.from) items = items.filter(function (it) { return it.time.slice(0, 10) >= cf.from; });
+    if (cf.to) items = items.filter(function (it) { return it.time.slice(0, 10) <= cf.to; });
     items.sort(function (a, b) { return a.time === b.time ? 0 : (a.time < b.time ? 1 : -1); });
 
     if (!items.length) {
@@ -1325,7 +1362,8 @@
       tag: el.fTag.value,
       product: el.fProduct.value,
       source: el.fSource.value,
-      status: el.fStatus.value
+      eff: el.fEff.value,
+      enable: el.fEnable.value
     };
   }
 
@@ -1341,7 +1379,7 @@
     state.selected = [];
     state.allSelected = false;
     [el.fTcid, el.fOdid, el.fStartFrom, el.fStartTo, el.fEndFrom, el.fEndTo].forEach(function (n) { n.value = ''; });
-    [el.fGroup, el.fLevel, el.fTag, el.fProduct, el.fSource, el.fStatus].forEach(function (n) { n.value = ''; });
+    [el.fGroup, el.fLevel, el.fTag, el.fProduct, el.fSource, el.fEff, el.fEnable].forEach(function (n) { n.value = ''; });
     state.filters = {};
     state.page = 1;
     renderList();
@@ -1485,24 +1523,30 @@
     });
 
     // 变更记录：按对象 ID 过滤
-    if (el.changeSearch) {
-      el.changeSearch.addEventListener('click', function () {
-        state.changeQuery = (el.changeQ && el.changeQ.value || '').trim();
-        renderChanges();
-      });
+    function readChangeFilters() {
+      return {
+        q: (el.changeQ && el.changeQ.value || '').trim(),
+        type: (el.changeType && el.changeType.value) || '',
+        status: (el.changeStatus && el.changeStatus.value) || '',
+        operator: (el.changeOperator && el.changeOperator.value || '').trim(),
+        from: (el.changeFrom && el.changeFrom.value || '').trim(),
+        to: (el.changeTo && el.changeTo.value || '').trim()
+      };
     }
-    if (el.changeQ) {
-      el.changeQ.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') {
-          state.changeQuery = el.changeQ.value.trim();
-          renderChanges();
-        }
-      });
+    function applyChangeFilters() {
+      state.changeFilters = readChangeFilters();
+      renderChanges();
     }
+    if (el.changeSearch) el.changeSearch.addEventListener('click', applyChangeFilters);
+    [el.changeQ, el.changeOperator, el.changeFrom, el.changeTo].forEach(function (n) {
+      if (n) n.addEventListener('keydown', function (e) { if (e.key === 'Enter') applyChangeFilters(); });
+    });
     if (el.changeClear) {
       el.changeClear.addEventListener('click', function () {
-        state.changeQuery = '';
-        if (el.changeQ) el.changeQ.value = '';
+        state.changeFilters = { q: '', type: '', status: '', operator: '', from: '', to: '' };
+        [el.changeQ, el.changeType, el.changeStatus, el.changeOperator, el.changeFrom, el.changeTo].forEach(function (n) {
+          if (n) n.value = '';
+        });
         renderChanges();
       });
     }
@@ -1607,7 +1651,7 @@
         var list = state.selected.slice();
         if (!list.length) return;
         if (action === 'stop') {
-          var stoppable = list.filter(function (r) { return !r.stopped && rowStatus(r) !== 'expired'; });
+          var stoppable = list.filter(function (r) { return !r.stopped && effStatus(r) !== 'expired'; });
           if (!stoppable.length) {
             toast('No records to disable', '所选记录均已停用或已失效，无需停用', '');
             return;
@@ -1639,7 +1683,7 @@
             toast('No disabled records selected', '所选记录均未停用，无需启用', '');
             return;
           }
-          var expiredN = stoppedList.filter(function (r) { return rowStatus(r) === 'expired'; }).length;
+          var expiredN = stoppedList.filter(function (r) { return effStatus(r) === 'expired'; }).length;
           openConfirm({
             titleEn: 'Enable selected records',
             titleZh: '批量启用',
@@ -1989,12 +2033,18 @@
   el.rdGroup = root.querySelector('#sl-rd-group');
   el.rdStart = root.querySelector('#sl-rd-start');
   el.rdEnd = root.querySelector('#sl-rd-end');
-  el.rdStatus = root.querySelector('#sl-rd-status');
+  el.rdEff = root.querySelector('#sl-rd-eff');
+  el.rdEnable = root.querySelector('#sl-rd-enable');
   el.rdSource = root.querySelector('#sl-rd-source');
   el.rdUpdated = root.querySelector('#sl-rd-updated');
   el.rdHistory = root.querySelector('#sl-rd-history');
   el.rdNote = root.querySelector('#sl-rd-note');
   el.changeQ = root.querySelector('#sl-change-q');
+  el.changeType = root.querySelector('#sl-change-type');
+  el.changeStatus = root.querySelector('#sl-change-status');
+  el.changeOperator = root.querySelector('#sl-change-operator');
+  el.changeFrom = root.querySelector('#sl-change-from');
+  el.changeTo = root.querySelector('#sl-change-to');
   el.changeSearch = root.querySelector('#sl-change-search');
   el.changeClear = root.querySelector('#sl-change-clear');
   el.oplogTbody = root.querySelector('#sl-oplog-tbody');
@@ -2007,7 +2057,8 @@
   el.opNote = root.querySelector('#sl-op-note');
   el.opExport = root.querySelector('#sl-op-export');
   el.fSource = root.querySelector('#sl-f-source');
-  el.fStatus = root.querySelector('#sl-f-status');
+  el.fEff = root.querySelector('#sl-f-eff');
+  el.fEnable = root.querySelector('#sl-f-enable');
   el.bdNo = root.querySelector('#sl-bd-no');
   el.bdSource = root.querySelector('#sl-bd-source');
   el.bdCount = root.querySelector('#sl-bd-count');
