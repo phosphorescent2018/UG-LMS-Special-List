@@ -1166,7 +1166,8 @@
       { en: 'end time must be later than start time', zh: '失效时间必须晚于生效时间' },
       { en: 'detail_group is not in the preset list', zh: 'detail_group 不在预设八个组清单内' },
       { en: 'detail_group conflicts with tag_level / pool_type', zh: '明细组与标签层级 / 执行标签不匹配（组目录交叉校验失败）' },
-      { en: 'product_code is invalid (OD only in this release)', zh: 'product_code 非法（本期仅允许 OD）' }
+      { en: 'product_code is invalid (OD only in this release)', zh: 'product_code 非法（本期仅允许 OD）' },
+      { en: 'overdraft_id is only allowed when product_code is OD', zh: 'overdraft_id 仅允许用于业务产品 OD（非 OD 产品该列必须为空）' }
     ];
   }
 
@@ -1717,6 +1718,10 @@
       }
       var idVal = level === 'user' ? tcid : odid;
       var product = 'OD';
+      if (level === 'account' && product !== 'OD') {
+        fail('overdraft_id is only allowed when product is OD', 'overdraft_id 仅允许在业务产品为 OD 时使用');
+        return;
+      }
       var dup = findSameLevelDup(product, level, idVal);
       if (dup) {
         fail('This ' + (level === 'user' ? 'third_customer_id' : 'overdraft_id') +
