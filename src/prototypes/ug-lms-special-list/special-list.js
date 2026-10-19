@@ -752,6 +752,14 @@
   }
 
   // ── 筛选 ──────────────────────────────────────────────
+  // 空日期框：隐藏原生 yyyy/mm/日 占位文字（聚焦或已有值时显示）
+  function syncEmptyDateMarks() {
+    [el.fStartFrom, el.fStartTo, el.fEndFrom, el.fEndTo].forEach(function (n) {
+      if (!n) return;
+      n.classList.toggle('sl-empty', !n.value);
+    });
+  }
+
   function readFilters() {
     return {
       tcid: el.fTcid.value.trim(),
@@ -778,6 +786,7 @@
   function resetFilters() {
     [el.fTcid, el.fOdid, el.fStartFrom, el.fStartTo, el.fEndFrom, el.fEndTo].forEach(function (n) { n.value = ''; });
     [el.fGroup, el.fLevel, el.fTag, el.fProduct, el.fSource, el.fStatus].forEach(function (n) { n.value = ''; });
+    syncEmptyDateMarks();
     state.filters = {};
     state.page = 1;
     renderList();
@@ -844,6 +853,12 @@
         if (e.key === 'Enter') applySearch();
       });
     });
+
+    // 筛选：日期框占位态（空值不显示 yyyy/mm/日）
+    [el.fStartFrom, el.fStartTo, el.fEndFrom, el.fEndTo].forEach(function (n) {
+      if (n) n.addEventListener('input', syncEmptyDateMarks);
+    });
+    syncEmptyDateMarks();
 
     // 分页
     el.pagerList.addEventListener('click', function (e) {

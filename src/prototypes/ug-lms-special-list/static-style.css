@@ -307,6 +307,11 @@ input.ant-input { width: 100%; }
 .sl-filter select.sl-input { padding: 0 8px; }
 .sl-range { display: flex; align-items: center; gap: 6px; }
 .sl-range .sl-input { flex: 1; min-width: 0; }
+
+/* 空日期框默认不显示 yyyy/mm/日 占位文字（聚焦或已填值时显示） */
+.sl-filters input[type="date"].sl-empty:not(:focus)::-webkit-datetime-edit {
+  color: transparent;
+}
 .sl-range-sep { color: rgb(152, 161, 184); font-size: 12px; }
 
 /* Row actions */
