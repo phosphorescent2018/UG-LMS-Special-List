@@ -2947,3 +2947,14 @@ input.ant-input { width: 100%; }
 .sl-colpop-list label { display: flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap; }
 .sl-colpop-foot { display: flex; justify-content: space-between; margin-top: 10px; }
 .sl-colpop-foot button { border: 0; background: transparent; color: rgb(80, 149, 255); cursor: pointer; font-size: 12px; padding: 0; }
+
+/* 明细组：自定义 */
+.sl-gnew { margin-top:8px; padding:10px 12px 8px; border:1px dashed rgb(205, 212, 224); border-radius:6px; background:rgb(248, 250, 253); }
+.sl-gnew-head { font-size:12px; font-weight:600; color:rgb(3, 25, 56); margin-bottom:8px; }
+.sl-gnew-field { margin-bottom:8px; }
+.sl-gnew-field .sl-label { font-size:12px; margin-bottom:4px; }
+.sl-gnew-grid { display:grid; grid-template-columns:1.5fr 0.9fr 1.1fr; gap:8px; }
+.sl-gnew-grid .sl-input { height:30px; font-size:12px; padding:0 8px; }
+.sl-gnew-grid .sl-label { font-size:12px; margin-bottom:4px; }
+.sl-gnew-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:6px; }
+.sl-btn-sm { height:28px; padding:0 12px; font-size:12px; }

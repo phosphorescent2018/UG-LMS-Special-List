@@ -657,17 +657,36 @@
         </div>
         <div class="sl-field">
           <label class="sl-label" data-en="Group" data-zh="明细组">明细组</label>
-          <select class="sl-input" id="sl-single-group">
-            <option value="" data-en="(Not specified)" data-zh="（不指定）">（不指定）</option>
-            <option value="回捞组" data-en="回捞组" data-zh="回捞组">回捞组</option>
-            <option value="激进提额组" data-en="激进提额组" data-zh="激进提额组">激进提额组</option>
-            <option value="降额实验组" data-en="降额实验组" data-zh="降额实验组">降额实验组</option>
-            <option value="模型切换实验组" data-en="模型切换实验组" data-zh="模型切换实验组">模型切换实验组</option>
-            <option value="Staff组" data-en="Staff组" data-zh="Staff组">Staff组</option>
-            <option value="白名单组" data-en="白名单组" data-zh="白名单组">白名单组</option>
-            <option value="风险触发组" data-en="风险触发组" data-zh="风险触发组">风险触发组</option>
-            <option value="人工降额名单组" data-en="人工降额名单组" data-zh="人工降额名单组">人工降额名单组</option>
-          </select>
+          <select class="sl-input" id="sl-single-group"></select>
+          <div class="sl-gnew" id="sl-gnew" hidden>
+            <div class="sl-gnew-head" data-en="New group" data-zh="新建明细组">新建明细组</div>
+            <div class="sl-gnew-grid">
+              <div class="sl-field sl-gnew-field">
+                <label class="sl-label"><i class="sl-req">*</i><span data-en="Group name" data-zh="组名称">组名称</span></label>
+                <input type="text" class="sl-input" id="sl-gnew-name" data-en-placeholder="e.g. Double 11 buyback" data-zh-placeholder="如：双十一回捞组">
+              </div>
+              <div class="sl-field sl-gnew-field">
+                <label class="sl-label"><i class="sl-req">*</i><span data-en="Level" data-zh="层级">层级</span></label>
+                <select class="sl-input" id="sl-gnew-level">
+                  <option value="user" data-en="User" data-zh="用户级">用户级</option>
+                  <option value="account" data-en="Account" data-zh="账户级">账户级</option>
+                </select>
+              </div>
+              <div class="sl-field sl-gnew-field">
+                <label class="sl-label"><i class="sl-req">*</i><span data-en="Tag" data-zh="执行标签">执行标签</span></label>
+                <select class="sl-input" id="sl-gnew-tag">
+                  <option value="no_adjust" data-en="No adjustment" data-zh="不参与调额">不参与调额</option>
+                  <option value="increase_only" data-en="Only increase" data-zh="仅参与提额">仅参与提额</option>
+                  <option value="decrease_only" data-en="Only decrease" data-zh="仅参与降额">仅参与降额</option>
+                </select>
+              </div>
+            </div>
+            <div class="sl-gnew-actions">
+              <button type="button" class="sl-btn sl-btn-sm" id="sl-gnew-cancel" data-en="Cancel" data-zh="取消">取消</button>
+              <button type="button" class="sl-btn sl-btn-sm sl-btn-primary" id="sl-gnew-create" data-en="Create and select" data-zh="创建并选中">创建并选中</button>
+            </div>
+            <div class="sl-error" id="sl-gnew-error" hidden></div>
+          </div>
           <div class="sl-hint" id="sl-single-cascade-hint" hidden data-en="Level and execution tag are determined by the detail group (locked)." data-zh="标签层级与执行标签由明细组决定（已锁定）">标签层级与执行标签由明细组决定（已锁定）</div>
         </div>
         <div class="sl-field">

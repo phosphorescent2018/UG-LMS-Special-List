@@ -43,6 +43,27 @@
     '风险触发组': { level: 'user', tag: 'decrease_only' },
     '人工降额名单组': { level: 'user', tag: 'decrease_only' }
   };
+  var CUSTOM_GROUPS = [
+    { name: '国庆回捞组', level: 'account', tag: 'no_adjust', custom: true, createdAt: '2026-10-01 09:12:00' },
+    { name: 'VIP 白名单', level: 'user', tag: 'increase_only', custom: true, createdAt: '2026-09-18 14:30:00' }
+  ];
+  var TAG_TEXT = { no_adjust: '不参与调额', increase_only: '仅参与提额', decrease_only: '仅参与降额' };
+
+  function groupEntries() {
+    var out = GROUPS.map(function (n) {
+      return { name: n, level: GROUP_CATALOG[n].level, tag: GROUP_CATALOG[n].tag, custom: false };
+    });
+    return out.concat(CUSTOM_GROUPS);
+  }
+  function groupInfo(name) {
+    var list = groupEntries();
+    for (var i = 0; i < list.length; i += 1) if (list[i].name === name) return list[i];
+    return null;
+  }
+  function groupUsage(name) {
+    return state.rows.filter(function (r) { return r.group === name; }).length;
+  }
+
   var RECORD_STATUS = {
     active: { en: 'Active', zh: '生效中', badge: 'sl-badge-green' },
     upcoming: { en: 'Not started', zh: '未生效', badge: 'sl-badge-blue' },
@@ -599,6 +620,53 @@
       : (isZh() ? '暂无页面操作记录' : 'No page operation records yet.');
     openModal('record');
     if (window.__ugApplyLang) window.__ugApplyLang();
+  }
+
+  function option(parent, value, label) {
+    var o = document.createElement('option');
+    o.value = value;
+    o.textContent = label;
+    parent.appendChild(o);
+    return o;
+  }
+
+  function refreshGroupOptions() {
+    if (!el.singleGroup) return;
+    var cur = el.singleGroup.value;
+    el.singleGroup.innerHTML = '';
+    option(el.singleGroup, '', '（不指定）');
+    var preset = document.createElement('optgroup');
+    preset.label = '预设组';
+    GROUPS.forEach(function (n) { option(preset, n, n); });
+    el.singleGroup.appendChild(preset);
+    if (CUSTOM_GROUPS.length) {
+      var custom = document.createElement('optgroup');
+      custom.label = '自定义组';
+      CUSTOM_GROUPS.forEach(function (g) {
+        option(custom, g.name, g.name + '（' + (g.level === 'user' ? '用户级' : '账户级') + ' · ' + TAG_TEXT[g.tag] + ' · 已用 ' + groupUsage(g.name) + ' 条）');
+      });
+      el.singleGroup.appendChild(custom);
+    }
+    option(el.singleGroup, '__new__', '＋ 新建明细组…');
+    el.singleGroup.value = (cur && (cur === '__new__' || groupInfo(cur))) ? cur : '';
+  }
+
+  function refreshFilterGroups() {
+    if (!el.fGroup) return;
+    var cur = el.fGroup.value;
+    el.fGroup.innerHTML = '';
+    option(el.fGroup, '', '全部');
+    var preset = document.createElement('optgroup');
+    preset.label = '预设组';
+    GROUPS.forEach(function (n) { option(preset, n, n); });
+    el.fGroup.appendChild(preset);
+    if (CUSTOM_GROUPS.length) {
+      var custom = document.createElement('optgroup');
+      custom.label = '自定义组';
+      CUSTOM_GROUPS.forEach(function (g) { option(custom, g.name, g.name); });
+      el.fGroup.appendChild(custom);
+    }
+    el.fGroup.value = (cur && groupInfo(cur)) ? cur : '';
   }
 
   function renderList() {
@@ -1409,6 +1477,9 @@
     el.singleProduct.disabled = false;
     el.singleCascadeHint.hidden = true;
     el.singleGroup.value = '';
+    el.gnew.hidden = true;
+    el.gnewError.hidden = true;
+    el.singleCascadeHint.hidden = true;
     el.singleRemark.value = '';
     var now = new Date();
     el.singleStart.value = fmtD(now).slice(0, 16);
@@ -1888,8 +1959,8 @@
     el.singleLevel.addEventListener('change', syncSingleIdFields);
 
     // 单条新增：明细组 → 层级/执行标签级联（选组自动带出并锁定；不指定则解锁）
-    el.singleGroup.addEventListener('change', function () {
-      var cat = GROUP_CATALOG[el.singleGroup.value];
+    function applyGroupCascade(name) {
+      var cat = groupInfo(name);
       if (cat) {
         el.singleLevel.value = cat.level;
         el.singleTag.value = cat.tag;
@@ -1902,10 +1973,59 @@
         el.singleCascadeHint.hidden = true;
       }
       syncSingleIdFields();
+    }
+
+    el.singleGroup.addEventListener('change', function () {
+      if (el.singleGroup.value === '__new__') {
+        el.gnew.hidden = false;
+        el.gnewName.value = '';
+        el.gnewError.hidden = true;
+        el.singleLevel.disabled = false;
+        el.singleTag.disabled = false;
+        el.singleCascadeHint.hidden = true;
+        el.gnewName.focus();
+        return;
+      }
+      el.gnew.hidden = true;
+      applyGroupCascade(el.singleGroup.value);
+    });
+
+    el.gnewCancel.addEventListener('click', function () {
+      el.gnew.hidden = true;
+      el.singleGroup.value = '';
+      applyGroupCascade('');
+    });
+
+    el.gnewCreate.addEventListener('click', function () {
+      var name = el.gnewName.value.trim();
+      function gfail(en, zh) {
+        el.gnewError.hidden = false;
+        attr(el.gnewError, en, zh);
+        if (window.__ugApplyLang) window.__ugApplyLang();
+      }
+      if (!name) { gfail('Group name is required', '请输入组名称'); return; }
+      if (groupInfo(name)) { gfail('This group already exists', '该明细组已存在'); return; }
+      CUSTOM_GROUPS.push({
+        name: name, level: el.gnewLevel.value, tag: el.gnewTag.value,
+        custom: true, createdAt: nowText()
+      });
+      el.gnewError.hidden = true;
+      el.gnew.hidden = true;
+      refreshGroupOptions();
+      refreshFilterGroups();
+      el.singleGroup.value = name;
+      applyGroupCascade(name);
+      toast('Group created', '已创建明细组「' + name + '」', 'ok');
     });
 
     // 单条新增：保存
     el.singleConfirm.addEventListener('click', function () {
+      if (el.singleGroup.value === '__new__') {
+        el.singleError.hidden = false;
+        attr(el.singleError, 'Create the group first', '请先创建明细组');
+        if (window.__ugApplyLang) window.__ugApplyLang();
+        return;
+      }
       var level = el.singleLevel.value;
       var tcid = el.singleTcid.value.trim();
       var odid = el.singleOdid.value.trim();
@@ -2022,6 +2142,13 @@
   el.singleTag = root.querySelector('#sl-single-tag');
   el.singleGroup = root.querySelector('#sl-single-group');
   el.singleCascadeHint = root.querySelector('#sl-single-cascade-hint');
+  el.gnew = root.querySelector('#sl-gnew');
+  el.gnewName = root.querySelector('#sl-gnew-name');
+  el.gnewLevel = root.querySelector('#sl-gnew-level');
+  el.gnewTag = root.querySelector('#sl-gnew-tag');
+  el.gnewCreate = root.querySelector('#sl-gnew-create');
+  el.gnewCancel = root.querySelector('#sl-gnew-cancel');
+  el.gnewError = root.querySelector('#sl-gnew-error');
   el.singleProduct = root.querySelector('#sl-single-product');
   el.singleStart = root.querySelector('#sl-single-start');
   el.singleEnd = root.querySelector('#sl-single-end');
@@ -2098,6 +2225,8 @@
   })();
 
   bind();
+  refreshGroupOptions();
+  refreshFilterGroups();
   renderList();
   renderChanges();
   if (window.__ugApplyLang) window.__ugApplyLang();
